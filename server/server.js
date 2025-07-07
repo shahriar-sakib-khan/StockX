@@ -2,9 +2,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import mongoose from "mongoose";
 
 import User from "./models/userModel.js";
+import connectDB from "./config/db.js";
 
 const app = express();
 
@@ -26,14 +26,19 @@ app.post("/api/v1/register", async (req, res) => {
   }
 });
 
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => {
-    console.log("db connected");
-    app.listen(5100, () => {
-      console.log("server is live!");
+// <============================> Server starts here! <============================>
+
+const PORT = process.env.PORT || 5100
+const startServer = async () => {
+  try {
+    await connectDB(); // configured in config/db.js
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error("MongoDB connection failed:", err.message);
-  });
+  } catch (err) {
+    console.error("❌ Failed to start server:", err.message);
+    process.exit(1);
+  }
+};
+
+startServer();
