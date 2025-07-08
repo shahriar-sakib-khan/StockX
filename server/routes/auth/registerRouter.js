@@ -6,14 +6,12 @@ import { hashPassword } from "../../utils/passwords/index.js";
 
 router.post("/", async (req, res) => {
   try {
-    console.log("tried to register");
-
     const hashedPassword = await hashPassword(req.body.password);
     req.body.password = hashedPassword;
 
     const user = await User.create(req.body);
 
-    res.status(201).json({ register: user });
+    res.status(201).json({ msg: "user registered", register: user });
   } catch (err) {
     console.error("Registration failed:", err.message);
     res.status(500).json({ error: err.message });

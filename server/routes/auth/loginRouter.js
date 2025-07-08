@@ -23,9 +23,9 @@ router.post("/", async (req, res) => {
         expires: new Date(Date.now() + oneDay),
         secure: process.env.NODE_ENV === "production",
       });
-      return res.status(200).json({ login: "login successful" });
+      return res.status(200).json({ msg: "login successful" });
     } else {
-      return res.status(401).json({ login: "Invalid credentials" });
+      return res.status(401).json({ msg: "Invalid credentials" });
     }
   } catch (error) {
     console.error("Login error:", error);
