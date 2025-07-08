@@ -1,21 +1,9 @@
 import { Router } from "express";
 const router = Router();
 
-import User from "../../models/userModel.js";
-import { hashPassword } from "../../utils/passwords/index.js";
+// controller is added here
+import { register } from "../../controllers/authControllers/index.js";
 
-router.post("/", async (req, res) => {
-  try {
-    const hashedPassword = await hashPassword(req.body.password);
-    req.body.password = hashedPassword;
-
-    const user = await User.create(req.body);
-
-    res.status(201).json({ msg: "user registered", register: user });
-  } catch (err) {
-    console.error("Registration failed:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post("/", register);
 
 export default router;

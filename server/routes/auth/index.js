@@ -1,14 +1,13 @@
 import { Router } from "express";
-
 const router = Router();
 
-import loginRouter from "./loginRouter.js";
-import registerRouter from "./registerRouter.js";
-import logoutRouter from "./logoutRouter.js";
+import login from "./loginRouter.js";
+import register from "./registerRouter.js";
+import logout from "./logoutRouter.js";
 
-router.use("/login", loginRouter);
-router.use("/register", registerRouter);
-router.use("/logout", logoutRouter);
+router.use("/login", login);
+router.use("/register", register);
+router.use("/logout", logout);
 
 export default router;
 

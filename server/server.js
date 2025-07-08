@@ -4,6 +4,8 @@ dotenv.config();
 import express from "express";
 const app = express();
 
+// <============================> INTERNAL IMPORTS <============================>
+  
 import connectDB from "./config/db.js";
 import router from "./routes/index.js";
 
