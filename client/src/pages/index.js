@@ -1,6 +1,6 @@
 // auth pages
-export { default as LoginPage } from "./auth_pages/LoginPage";
-export { default as SignupPage } from "./auth_pages/SignupPage";
+export { default as LoginPage } from "./authentication/LoginPage";
+export { default as SignupPage } from "./authentication/SignupPage";
 
 // general pages
 export { default as ErrorPage } from "./ErrorPage";
