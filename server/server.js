@@ -2,17 +2,21 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-const app = express();
+import { Router } from "express";
 
 // <============================> INTERNAL IMPORTS <============================>
 
 import connectDB from "./config/db.js";
-import router from "./routes/index.js";
+import { v1Router } from "./routes/index.js";
 
 // <============================> IMPORTS END HERE  <============================>
 
+const app = express();
+const router = Router();
+
 app.use(express.json());
-app.use("/api/v1", router);
+
+router.use("/api/v1", v1Router);
 
 // <============================> SERVER STARTS HERE! <============================>
 

@@ -1,12 +1,21 @@
-# React + Vite
+### JSDoc-style comments snippet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```json
+{
+  "JSDoc Function Template": {
+    "prefix": "jsdocfn",
+    "body": [
+      "/**",
+      " * ${1:Function description}",
+      " *",
+      " * @param {${2:string}} ${3:paramName} - ${4:Parameter description}",
+      " * @returns {${5:void}} - ${6:Return description}",
+      " */",
+      "export const ${7:functionName} = (${3}) => {",
+      "  $0",
+      "};"
+    ],
+    "description": "Create a function with JSDoc-style comment"
+  }
+}
+```
