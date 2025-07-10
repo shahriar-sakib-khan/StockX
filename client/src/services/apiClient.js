@@ -1,16 +1,21 @@
-import axios from "axios";
+import axios from 'axios';
 
-// url from env variables
 const API_URL = import.meta.env.VITE_API_URL;
 
-// axios instance options
 const options = {
   baseURL: API_URL,
   withCredentials: true,
 };
 
-// axios api instance
 const API = axios.create(options);
 
-// export the api instance
+// axios intercepter for only accessing relevant response data
+API.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    const { status, data } = error.response;
+    return Promise.reject({ status, ...data });
+  }
+);
+
 export default API;

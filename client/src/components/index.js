@@ -1,8 +1,8 @@
 // layouts
-export { default as Layout } from "./layouts/Layout";
+export { default as Layout } from './layouts/Layout';
 
 // form
-export { default as FormInput } from "./form/FormInput";
+export { default as FormInput } from './form/FormInputField';
 
-// common
-export { default as Button } from "./ui/Button";
+// ui
+export { default as Button } from './ui/Button';

@@ -1,1 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* custom utility classes  */
+@layer utilities {
+  .wrapper {
+    @apply mx-auto w-full max-w-[1280px] px-4;
+  }
+}

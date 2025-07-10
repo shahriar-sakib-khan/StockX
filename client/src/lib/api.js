@@ -1,5 +1,4 @@
-import API from "../services/apiClient";
+import API from '../services/apiClient';
 
-export const login = async ({ email, password }) => {
-  API.post("/auth/login", { email, password });
-};
+export const login = async (data) => API.post('/auth/login', data);
+export const register = async (data) => API.post('/auth/register', data);
