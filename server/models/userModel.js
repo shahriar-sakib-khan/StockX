@@ -5,10 +5,15 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Name is required"],
+      default: "Name",
     },
     lastName: {
       type: String,
       default: "lastName",
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
     },
     email: {
       type: String,
@@ -19,6 +24,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
+      default: "pass123",
     },
     location: {
       type: String,

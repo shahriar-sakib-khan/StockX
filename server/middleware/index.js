@@ -1,4 +1,2 @@
-export {
-  validateRegistrationInput,
-  validateLoginInput,
-} from "./validation/authValidationMiddleware.js";
+export * from "../error/errorHandlerMiddleware.js"
+export * from "./validators/authValidation.js"

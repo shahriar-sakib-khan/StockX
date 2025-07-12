@@ -1,2 +1,2 @@
-export { compareHashedPassword, hashPassword } from "./passwordUtils.js";
-export { createJWT, verifyJWT } from "./jwtUtils.js";
+export * from "./jwt.js";
+export * from "./passwords.js";
