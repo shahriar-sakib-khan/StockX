@@ -1,4 +1,5 @@
 import { body, validationResult } from "express-validator";
+
 import {
   BadRequestError,
   NotFoundError,
@@ -7,8 +8,8 @@ import {
 } from "../../error/customErrors.js";
 
 const errorMap = {
-  NotFoundError,
   BadRequestError,
+  NotFoundError,
   UnauthenticatedError,
   UnauthorizedError,
 };
@@ -26,9 +27,10 @@ const withValidationErrors = (validator) => {
       );
 
       const firstType = rawErrors[0]?.msg?.type;
-      const ErrorClass = typeof firstType === "string" && errorMap[firstType]
-        ? errorMap[firstType]
-        : BadRequestError;
+      const ErrorClass =
+        typeof firstType === "string" && errorMap[firstType]
+          ? errorMap[firstType]
+          : BadRequestError;
 
       throw new ErrorClass(messages);
     },

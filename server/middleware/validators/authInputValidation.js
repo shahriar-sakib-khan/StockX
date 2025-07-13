@@ -4,14 +4,13 @@ import withValidationErrors from "./withValidationErrors.js";
 import { User } from "../../models/index.js";
 import { BadRequestError } from "../../error/customErrors.js";
 
-
 /**
  * Registration input validation
  */
 export const validateRegistrationInput = withValidationErrors([
-  body("name")
+  body("firstName")
     .notEmpty()
-    .withMessage({ type: "BadRequestError", message: "Name is required" })
+    .withMessage({ type: "BadRequestError", message: "First name is required" })
     .matches(/^[A-Za-z\s]+$/)
     .withMessage({
       type: "BadRequestError",

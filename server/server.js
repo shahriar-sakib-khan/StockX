@@ -1,23 +1,26 @@
+import "express-async-errors";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cookieParser from "cookie-parser";
 
 // <============================> INTERNAL IMPORTS <============================>
 
 import connectDB from "./config/db.js";
 import { v1Router } from "./routes/index.js";
-import { errorHandlerMiddleware } from "./middleware/index.js";
+import errorHandler from "./error/errorHandlerMiddleware.js";
 
 // <============================> IMPORTS END HERE  <============================>
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/v1", v1Router);
 
-app.use(errorHandlerMiddleware); // All uncaught errors
+app.use(errorHandler); // All uncaught errors
 
 // <============================> SERVER STARTS HERE! <============================>
 

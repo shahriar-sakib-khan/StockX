@@ -15,17 +15,17 @@ import {
  * Register Controller
  */
 export const register = async (req, res) => {
-  const { name, lastName, username, email, password, location } = req.body;
+  const { firstName, lastName, username, email, password, location } = req.body;
 
-  if (!name || !username || !email || !password || !location) {
+  if (!firstName || !username || !email || !password || !location) {
     throw new BadRequestError(
-      "Name, email, password and location are required"
+      "First name, email, password and location are required"
     );
   }
 
   const hashedPassword = await hashPassword(password);
   const user = await User.create({
-    name,
+    firstName,
     lastName,
     username,
     email,
@@ -51,7 +51,7 @@ export const login = async (req, res) => {
 
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier);
   const user = await User.findOne(
-    isEmail ? { email: loginIdentifier } : { name: loginIdentifier }
+    isEmail ? { email: loginIdentifier } : { username: loginIdentifier }
   );
 
   const isValid =
@@ -61,8 +61,8 @@ export const login = async (req, res) => {
     throw new UnauthenticatedError("Invalid credentials");
   }
 
-  const token = createJWT({ userID: user._id, role: user.role });
-  const oneDay = 1000 * 60 * 60 * 24 ** 1;
+  const token = createJWT({ userId: user._id, role: user.role });
+  const oneDay = 1000 * 60 * 60 * 24 * 1;
 
   res.cookie("token", token, {
     httpOnly: true,
