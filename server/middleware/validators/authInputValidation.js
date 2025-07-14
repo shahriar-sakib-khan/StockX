@@ -2,7 +2,6 @@ import { body } from "express-validator";
 
 import withValidationErrors from "./withValidationErrors.js";
 import { User } from "../../models/index.js";
-import { BadRequestError } from "../../error/customErrors.js";
 
 /**
  * Registration input validation
@@ -55,8 +54,9 @@ export const validateRegistrationInput = withValidationErrors([
     .withMessage({ type: "BadRequestError", message: "Invalid email format" })
     .custom(async (email) => {
       const user = await User.findOne({ email });
-      if (user) throw new BadRequestError("Email already exists");
-    }),
+      return !user;
+    })
+    .withMessage({ type: "BadRequestError", message: "Email already exists" }),
 
   body("password")
     .notEmpty()

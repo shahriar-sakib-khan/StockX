@@ -2,7 +2,6 @@ import { body } from "express-validator";
 
 import withValidationErrors from "./withValidationErrors.js";
 import { User } from "../../models/index.js";
-import { BadRequestError, UnauthorizedError } from "../../error/customErrors.js";
 
 /**
  * Update-user input validation
@@ -68,8 +67,9 @@ export const validateUpdateUserInput = withValidationErrors([
     })
     .custom(async (email) => {
       const user = await User.findOne({ email });
-      if (user) throw new BadRequestError("Email already exists");
-    }),
+      return !user;
+    })
+    .withMessage({ type: "BadRequestError", message: "Email already exists" }),
 
   body("location").optional().notEmpty().withMessage({
     type: "BadRequestError",
@@ -79,17 +79,18 @@ export const validateUpdateUserInput = withValidationErrors([
   body("role")
     .optional()
     .custom((value, { req }) => {
-      if (!req.user || req.user.role !== "admin") {
-        throw new UnauthorizedError("Only admins can update roles");
-      }
-
-      const allowedRoles = ["user", "admin", "moderator"];
-      if (!allowedRoles.includes(value)) {
-        throw new BadRequestError(
-          `Role must be one of: ${allowedRoles.join(", ")}`
-        );
-      }
-
-      return true;
+      return req.user && req.user.role === "admin";
+    })
+    .withMessage({
+      type: "UnauthorizedError",
+      message: "Only admins can update roles",
+    })
+    .custom((value) => {
+      const allowedRoles = ["user", "moderator", "admin"];
+      return allowedRoles.includes(value);
+    })
+    .withMessage({
+      type: "BadRequestError",
+      message: "Invalid role input",
     }),
 ]);
