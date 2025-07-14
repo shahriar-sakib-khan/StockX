@@ -1,19 +1,23 @@
-export default function FormInputField({
-  id = '',
-  label,
-  type = 'text', // text - email - password
-  placeholder,
-  value,
+import React from "react";
+
+const FormInputField = React.forwardRef(function FormInputField(
+  {
+    id = "",
+    label,
+    type = "text", // text - email - password
+    placeholder,
+    value,
+    autoComplete = "off", // on - off
+    onChange,
+    onKeyDown,
+    className = "",
+  },
   ref,
-  autocomplete = 'off',
-  onChange,
-  onKeyDown,
-  className = '',
-}) {
+) {
   return (
-    <div className={['flex flex-col gap-1 min-w-60', className].join(' ')}>
+    <div className={["flex w-full flex-col gap-1"].join(" ")}>
       {label && (
-        <label htmlFor={id} className="text-md text-gray-700 pl-0.5">
+        <label htmlFor={id} className="text-md pl-0.5 text-gray-700">
           {label}
         </label>
       )}
@@ -22,12 +26,17 @@ export default function FormInputField({
         ref={ref}
         type={type}
         placeholder={placeholder}
-        autoComplete={autocomplete}
+        autoComplete={autoComplete}
         value={value}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        className="bg-gray-100 transition-outline border-0 px-[0.5em] py-[0.05em] text-gray-700 duration-[50ms] placeholder:text-gray-500 focus:outline-2 focus:outline-gray-300"
+        className={[
+          className,
+          "transition-outline border-0 bg-gray-50 px-[0.5em] py-[0.05em] text-gray-700 outline-1 outline-gray-300 placeholder:text-gray-500 focus:bg-white focus:outline-1 focus:outline-blue-300",
+        ].join(" ")}
       />
     </div>
   );
-}
+});
+
+export default FormInputField;

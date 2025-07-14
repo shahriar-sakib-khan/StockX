@@ -1,16 +1,23 @@
 // import { useRef } from 'react';
-import { Button, FormInput } from '../../../components';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { login } from '../../../lib/api';
+import { Button, FormInputField } from "../../../components";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { login } from "../services/authServices";
 // import { useEffect } from 'react';
+import useInput from "../../../hooks/useInput";
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [loginIdentifier, resetLoginIdentifier, loginIdentifierObj] = useInput(
+    "loginIdentifier",
+    "",
+  ); // email or username
+  const [password, resetPassword, passwordObj] = useInput("loginPassword", "");
 
-  const [password, setPassword] = useState('');
+  const resetValues = () => {
+    resetLoginIdentifier();
+    resetPassword();
+  };
 
   const {
     mutate: signIn,
@@ -19,47 +26,53 @@ export default function LoginForm() {
   } = useMutation({
     mutationFn: login,
     onSuccess: () => {
-      navigate('/', {
+      navigate("/dashboard", {
         replace: true,
       });
+      resetValues();
     },
   });
 
+  const handleSubmit = () => {
+    signIn({ loginIdentifier, password });
+  };
+
   return (
-    <section className="flex flex-col gap-2 border-1 border-gray-300 rounded-lg p-4">
-      <FormInput
+    <section className="flex flex-col gap-2 rounded-lg border-1 border-gray-300 p-4">
+      <FormInputField
         id="email"
         type="email"
-        label="Email"
-        placeholder="Enter email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        label="Email or Username"
+        placeholder="Enter email or username"
+        {...loginIdentifierObj}
       />
-      <FormInput
+      <FormInputField
         id="password"
         type="password"
         label="Password"
         placeholder="Enter password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && signIn({ email, password })}
+        {...passwordObj}
+        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         className="mt-2"
       />
       {isError && (
-        <span className="text-md text-red-400 text-center">
+        <span className="text-md text-center text-red-400">
           Invalid email or password
         </span>
       )}
       <Button
         label="Log in"
         className="mt-2"
-        disabled={!email || password.length < 3}
+        disabled={!loginIdentifier || password.length < 3}
         isLoading={isPending}
-        onClick={() => signIn({ email, password })}
+        onClick={handleSubmit}
       />
-      <div className="flex gap-2 text-sm mt-1 self-center">
+      <div className="mt-1 flex gap-2 self-center text-sm">
         <span>Don't have an account? </span>
-        <NavLink to="/signup" className="text-blue-500 hover:underline">
+        <NavLink
+          to="/signup"
+          className="font-semibold text-blue-500 hover:underline"
+        >
           Sign up
         </NavLink>
       </div>

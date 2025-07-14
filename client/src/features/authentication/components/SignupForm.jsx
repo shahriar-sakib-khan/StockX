@@ -1,81 +1,136 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Button, FormInput } from '../../../components';
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { register } from '../../../lib/api';
+import { NavLink, useNavigate } from "react-router-dom";
+import { Button, FormInputField } from "../../../components";
+import { useMutation } from "@tanstack/react-query";
+import { register } from "../services/authServices";
+import useInput from "../../../hooks/useInput";
 
 export default function SignupForm() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [firstname, resetFirstname, firstnameObj] = useInput("firstname", "");
+  const [lastname, resetLastname, lastnameObj] = useInput("lastname", "");
+
+  const [username, resetUsername, usernameObj] = useInput("username", "");
+  const [email, resetEmail, emailObj] = useInput("email", "");
+
+  const [address, resetAddress, addressObj] = useInput("address", "");
+
+  const [password, resetPassword, passwordObj] = useInput("password", "");
+  const [confirmPassword, resetConfirmPassword, confirmPasswordObj] = useInput(
+    "confirmPassword",
+    "",
+  );
+
+  const resetValues = () => {
+    resetFirstname();
+    resetLastname();
+    resetEmail();
+    resetUsername();
+    resetAddress();
+    resetPassword();
+    resetConfirmPassword();
+  };
 
   const {
     mutate: createAccount,
     isPending,
     isError,
+    error,
   } = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      navigate('/', {
+      navigate("/login", {
         replace: true,
       });
+      resetValues();
     },
   });
 
+  const handleSubmit = () => {
+    createAccount({
+      firstname,
+      lastname,
+      username,
+      email,
+      password,
+      location: address,
+    });
+  };
+
   return (
-    <section className="flex flex-col gap-2 border-1 border-gray-300 rounded-lg p-4">
-      <FormInput
+    <section className="flex flex-col gap-2 rounded-lg border-1 border-gray-300 p-4">
+      <div className="flex gap-2">
+        <FormInputField
+          id="firstname"
+          type="text"
+          placeholder="Enter first name"
+          label="First Name"
+          {...firstnameObj}
+          className="w-40"
+        />
+        <FormInputField
+          id="lastname"
+          type="text"
+          placeholder="Enter last name"
+          label="Last Name"
+          {...lastnameObj}
+          className="w-40"
+        />
+      </div>
+      <FormInputField
         id="username"
         type="text"
         placeholder="Username"
         label="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        {...usernameObj}
       />
-      <FormInput
+      <FormInputField
         id="email"
         type="email"
         placeholder="Enter email"
         label="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        {...emailObj}
       />
-      <FormInput
+      <FormInputField
+        id="address"
+        type="text"
+        placeholder="Enter your address"
+        label="Address"
+        {...addressObj}
+      />
+      <FormInputField
         id="password"
         type="password"
         placeholder="Enter password"
         label="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        {...passwordObj}
       />
-      <FormInput
+      <FormInputField
         id="confirmPassword"
         type="password"
         placeholder="Confirm password"
-        label="Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        onKeyDown={(e) =>
-          e.key === 'Enter' && createAccount({ username, email, password })
-        }
+        label="Confirm Password"
+        {...confirmPasswordObj}
+        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
       />
       {isError && (
-        <span className="text-md text-red-400 text-center">
-          Account creation failed
+        <span className="text-md text-center text-red-400">
+          {error?.message || "Account creation failed"}
         </span>
       )}
       <Button
         label="Sign up"
         className="mt-2"
-        onClick={() => createAccount({ username, email, password })}
+        onClick={handleSubmit}
         isLoading={isPending}
         disabled={!email || password.length < 3 || password !== confirmPassword}
       />
-      <div className="flex gap-2 text-sm mt-1 self-center">
+      <div className="mt-1 flex gap-2 self-center text-sm">
         <span>Already have an account? </span>
-        <NavLink to="/login" className="text-blue-500 hover:underline">
+        <NavLink
+          to="/login"
+          className="font-semibold text-blue-500 hover:underline"
+        >
           Log in
         </NavLink>
       </div>
