@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 
 // <============================> INTERNAL IMPORTS <============================>
@@ -15,6 +16,7 @@ import errorHandler from "./error/errorHandlerMiddleware.js";
 
 const app = express();
 
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
