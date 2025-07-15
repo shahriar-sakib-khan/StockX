@@ -13,7 +13,7 @@ export const validateRegistrationInput = withValidationErrors([
     .matches(/^[A-Za-z\s]+$/)
     .withMessage({
       type: "BadRequestError",
-      message: "Name must contain only letters and spaces",
+      message: "First name must contain only letters and spaces",
     })
     .trim(),
 
@@ -22,7 +22,7 @@ export const validateRegistrationInput = withValidationErrors([
     .matches(/^[A-Za-z\s]+$/)
     .withMessage({
       type: "BadRequestError",
-      message: "Name must contain only letters and spaces",
+      message: "Last name must contain only letters and spaces",
     })
     .trim(),
 
@@ -121,9 +121,7 @@ export const validateLoginInput = withValidationErrors([
     })
     .custom((value) => {
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      const isUsername = /^(?!_)(?!.*__)(?!.*_$)[a-zA-Z0-9_]{3,30}$/.test(
-        value
-      );
+      const isUsername = /^[a-zA-Z0-9_]{3,30}$/.test(value);
       return isEmail || isUsername;
     })
     .withMessage({

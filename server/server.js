@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 
 // <============================> INTERNAL IMPORTS <============================>
 
-import connectDB from "./config/db.js";
+import connectDB from "./config/db.config.js";
 import { v1Router } from "./routes/index.js";
 import errorHandler from "./error/errorHandlerMiddleware.js";
 

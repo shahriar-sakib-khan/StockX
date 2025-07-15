@@ -1,2 +1,2 @@
-export * from "./jwt.js";
-export * from "./passwords.js";
+export * from "./jwtTokenUtils.js";
+export * from "./passwordUtils.js";

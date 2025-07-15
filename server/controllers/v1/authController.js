@@ -1,65 +1,23 @@
 import { StatusCodes } from "http-status-codes";
 
-import { User } from "../../models/index.js";
-import {
-  hashPassword,
-  compareHashedPassword,
-  createJWT,
-} from "../../utils/index.js";
-import {
-  BadRequestError,
-  UnauthenticatedError,
-} from "../../error/customErrors.js";
+import { authService } from "../../services/v1/index.js";
+import { createJWT } from "../../utils/index.js";
 
 /**
  * Register Controller
  */
 export const register = async (req, res) => {
-  const { firstName, lastName, username, email, password, location } = req.body;
-
-  if (!firstName || !username || !email || !password || !location) {
-    throw new BadRequestError(
-      "First name, email, password and location are required"
-    );
-  }
-
-  const hashedPassword = await hashPassword(password);
-  const user = await User.create({
-    firstName,
-    lastName,
-    username,
-    email,
-    password: hashedPassword,
-    location,
-  });
-
-  res.status(StatusCodes.CREATED).json({
-    message: "User registered successfully",
-    user,
-  });
+  const user = await authService.registerUser(req.body);
+  res
+    .status(StatusCodes.CREATED)
+    .json({ message: "User registered successfully", user });
 };
 
 /**
  * Login Controller
  */
 export const login = async (req, res) => {
-  const { loginIdentifier, password } = req.body;
-
-  if (!loginIdentifier || !password) {
-    throw new BadRequestError("Username/email and password are required");
-  }
-
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier);
-  const user = await User.findOne(
-    isEmail ? { email: loginIdentifier } : { username: loginIdentifier }
-  );
-
-  const isValid =
-    user && (await compareHashedPassword(password, user.password));
-
-  if (!isValid) {
-    throw new UnauthenticatedError("Invalid credentials");
-  }
+  const user = await authService.loginUser(req.body);
 
   const token = createJWT({ userId: user._id, role: user.role });
   const oneDay = 1000 * 60 * 60 * 24 * 1;
@@ -70,7 +28,6 @@ export const login = async (req, res) => {
     expires: new Date(Date.now() + oneDay),
     sameSite: "Strict",
   });
-
   res.status(StatusCodes.OK).json({
     message: "Login successful",
     user,
@@ -86,6 +43,5 @@ export const logout = async (req, res) => {
     expires: new Date(Date.now()),
     sameSite: "Strict",
   });
-
   res.status(StatusCodes.OK).json({ message: "User logged out" });
 };
