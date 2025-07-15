@@ -72,9 +72,9 @@ export const validateUpdateUserInput = withValidationErrors([
     })
     .withMessage({ type: "BadRequestError", message: "Email already exists" }),
 
-  body("location").optional().notEmpty().withMessage({
+  body("address").optional().notEmpty().withMessage({
     type: "BadRequestError",
-    message: "Location cannot be empty",
+    message: "Address cannot be empty",
   }),
 
   body("role")

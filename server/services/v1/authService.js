@@ -6,9 +6,25 @@ import { UnauthenticatedError } from "../../error/customErrors.js";
  * Register User
  */
 export const registerUser = async (userData) => {
+  const allowedFields = [
+    "firstName",
+    "lastName",
+    "username",
+    "email",
+    "address",
+  ];
+  const sanitizedUserData = {};
+
+  allowedFields.forEach((field) => {
+    if (userData[field] !== undefined)
+      sanitizedUserData[field] = userData[field];
+  });
   const hashedPassword = await hashPassword(userData.password);
 
-  const user = User.create({ ...userData, password: hashedPassword });
+  const user = await User.create({
+    ...sanitizedUserData,
+    password: hashedPassword,
+  });
 
   return user;
 };
@@ -29,4 +45,3 @@ export const loginUser = async ({ loginIdentifier, password }) => {
 
   return user;
 };
-

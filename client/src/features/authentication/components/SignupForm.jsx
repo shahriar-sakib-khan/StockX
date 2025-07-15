@@ -7,8 +7,8 @@ import useInput from "../../../hooks/useInput";
 export default function SignupForm() {
   const navigate = useNavigate();
 
-  const [firstname, resetFirstname, firstnameObj] = useInput("firstname", "");
-  const [lastname, resetLastname, lastnameObj] = useInput("lastname", "");
+  const [firstName, resetFirstName, firstNameObj] = useInput("firstName", "");
+  const [lastName, resetLastName, lastNameObj] = useInput("lastName", "");
 
   const [username, resetUsername, usernameObj] = useInput("username", "");
   const [email, resetEmail, emailObj] = useInput("email", "");
@@ -22,8 +22,8 @@ export default function SignupForm() {
   );
 
   const resetValues = () => {
-    resetFirstname();
-    resetLastname();
+    resetFirstName();
+    resetLastName();
     resetEmail();
     resetUsername();
     resetAddress();
@@ -48,12 +48,12 @@ export default function SignupForm() {
 
   const handleSubmit = () => {
     createAccount({
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       username,
       email,
       password,
-      location: address,
+      address,
     });
   };
 
@@ -61,19 +61,19 @@ export default function SignupForm() {
     <section className="flex flex-col gap-2 rounded-lg border-1 border-gray-300 p-4">
       <div className="flex gap-2">
         <FormInputField
-          id="firstname"
+          id="firstName"
           type="text"
           placeholder="Enter first name"
           label="First Name"
-          {...firstnameObj}
+          {...firstNameObj}
           className="w-40"
         />
         <FormInputField
-          id="lastname"
+          id="lastName"
           type="text"
           placeholder="Enter last name"
           label="Last Name"
-          {...lastnameObj}
+          {...lastNameObj}
           className="w-40"
         />
       </div>

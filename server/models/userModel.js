@@ -26,9 +26,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
     },
-    location: {
+    address: {
       type: String,
-      default: "my city",
+      required: [true, "Address is required"],
     },
     role: {
       type: String,

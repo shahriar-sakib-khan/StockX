@@ -103,9 +103,9 @@ export const validateRegistrationInput = withValidationErrors([
       message: "Password must include at least one number",
     }),
 
-  body("location")
+  body("address")
     .notEmpty()
-    .withMessage({ type: "BadRequestError", message: "Location is required" }),
+    .withMessage({ type: "BadRequestError", message: "Address is required" }),
 ]);
 
 /**

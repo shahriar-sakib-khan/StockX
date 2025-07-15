@@ -21,7 +21,7 @@ export const updateUserService = async (userId, reqBody) => {
     "lastName",
     "username",
     "email",
-    "location",
+    "address",
   ];
   const updates = {};
 
@@ -84,18 +84,18 @@ export const getSingleUserService = async (id) => {
 /**
  * Update any User
  */
-export const adminUpdateUserService = async (id, reqBody) => {
+export const adminUpdateUserService = async (id, userData) => {
   const allowedFields = [
     "firstName",
     "lastName",
     "username",
     "email",
-    "location",
+    "address",
   ];
   const updates = {};
 
   allowedFields.forEach((field) => {
-    if (reqBody[field] !== undefined) updates[field] = reqBody[field];
+    if (userData[field] !== undefined) updates[field] = userData[field];
   });
 
   if (Object.keys(updates).length === 0) {
