@@ -1,19 +1,20 @@
 import mongoose from "mongoose";
+import { ROLES } from "../config/roles.config.js";
 
 const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: [true, "Name is required"],
-      default: "firstName",
+      required: [true, "First name is required"],
     },
     lastName: {
       type: String,
-      default: "lastName",
+      default: "",
     },
     username: {
       type: String,
       required: [true, "Username is required"],
+      unique: true,
     },
     email: {
       type: String,
@@ -24,17 +25,21 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      default: "pass123",
     },
     location: {
       type: String,
       default: "my city",
     },
+    role: {
+      type: String,
+      enum: ROLES,
+      default: "user",
+    },
   },
   { timestamps: true }
 );
 
-// Remove password from response before sending
+// Removes password before sending response
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;

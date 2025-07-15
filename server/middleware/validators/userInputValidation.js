@@ -2,6 +2,7 @@ import { body } from "express-validator";
 
 import withValidationErrors from "./withValidationErrors.js";
 import { User } from "../../models/index.js";
+import { ROLES } from "../../config/roles.config.js";
 
 /**
  * Update-user input validation
@@ -86,7 +87,7 @@ export const validateUpdateUserInput = withValidationErrors([
       message: "Only admins can update roles",
     })
     .custom((value) => {
-      const allowedRoles = ["user", "moderator", "admin"];
+      const allowedRoles = ROLES;
       return allowedRoles.includes(value);
     })
     .withMessage({
