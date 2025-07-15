@@ -19,7 +19,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const user = await authService.loginUser(req.body);
 
-  const token = createJWT({ userId: user._id, role: user.role });
+  const token = createJWT({ userId: user._id, roles: user.roles });
   const oneDay = 1000 * 60 * 60 * 24 * 1;
 
   res.cookie("token", token, {

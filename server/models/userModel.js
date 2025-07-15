@@ -30,10 +30,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Address is required"],
     },
-    role: {
-      type: String,
+    roles: {
+      type: [String],
       enum: ROLES,
-      default: "user",
+      default: ["user"],
     },
   },
   { timestamps: true }

@@ -5,9 +5,9 @@ export const authenticateUser = (req, res, next) => {
   const { token } = req.cookies;
   if (!token) throw new UnauthenticatedError("Authentication required");
 
-  const { userId, role } = verifyJWT(token);
+  const { userId, roles } = verifyJWT(token);
 
-  req.user = { userId, role };
+  req.user = { userId, roles };
 
   next();
 };

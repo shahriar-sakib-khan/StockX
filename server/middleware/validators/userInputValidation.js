@@ -77,21 +77,29 @@ export const validateUpdateUserInput = withValidationErrors([
     message: "Address cannot be empty",
   }),
 
-  body("role")
+  body("roles")
     .optional()
     .custom((value, { req }) => {
-      return req.user && req.user.role === "admin";
+      return req.user && req.user.roles && req.user.roles.includes("admin");
     })
     .withMessage({
       type: "UnauthorizedError",
       message: "Only admins can update roles",
     })
     .custom((value) => {
-      const allowedRoles = ROLES;
-      return allowedRoles.includes(value);
+      return Array.isArray(value);
     })
     .withMessage({
       type: "BadRequestError",
-      message: "Invalid role input",
+      message: "Invalid input format",
+    })
+    .custom((value) => {
+      // value is an array, check every role is allowed
+      const invalidRoles = value.filter((role) => !ROLES.includes(role));
+      return invalidRoles.length == 0;
+    })
+    .withMessage({
+      type: "BadRequestError",
+      message: "Invalid role",
     }),
 ]);

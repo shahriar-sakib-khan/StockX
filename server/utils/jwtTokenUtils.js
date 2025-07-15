@@ -7,8 +7,7 @@ import { UnauthorizedError } from "../error/customErrors.js";
 export const createJWT = (payload) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
-      algorithm: "HS256",
-
+    algorithm: "HS256",
   });
   return token;
 };
@@ -18,8 +17,8 @@ export const createJWT = (payload) => {
  */
 export const verifyJWT = (token) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const { userId, role } = decoded;
+  const { userId, roles } = decoded;
 
-  if (!userId || !role) throw new UnauthorizedError("Invalid token");
-  return { userId, role };
+  if (!userId || !roles) throw new UnauthorizedError("Invalid token");
+  return { userId, roles };
 };

@@ -91,6 +91,7 @@ export const adminUpdateUserService = async (id, userData) => {
     "username",
     "email",
     "address",
+    "roles",
   ];
   const updates = {};
 
