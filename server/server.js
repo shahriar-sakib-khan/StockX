@@ -16,6 +16,7 @@ import errorHandler from "./error/errorHandlerMiddleware.js";
 
 const app = express();
 
+app.use(express.urlencoded({ extended: true })); // for form-urlencoded (IPN)
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());

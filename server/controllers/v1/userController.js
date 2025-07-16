@@ -19,6 +19,7 @@ export const updateUser = async (req, res) => {
     req.user.userId,
     req.body
   );
+
   res.status(StatusCodes.OK).json({ msg: "User updated", user: updatedUser });
 };
 
@@ -29,6 +30,7 @@ export const updateUser = async (req, res) => {
  */
 export const getApplicationStats = async (req, res) => {
   const stats = await userService.getApplicationStatsService();
+
   res.status(StatusCodes.OK).json({ stats });
 };
 
@@ -42,6 +44,7 @@ export const getAllUsers = async (req, res) => {
     page,
     limit
   );
+
   res.status(StatusCodes.OK).json({ page, limit, totalUsers, users });
 };
 
@@ -50,6 +53,7 @@ export const getAllUsers = async (req, res) => {
  */
 export const getSingleUser = async (req, res) => {
   const user = await userService.getSingleUserService(req.params.id);
+
   res.status(StatusCodes.OK).json({ user });
 };
 
@@ -63,6 +67,7 @@ export const adminUpdateUser = async (req, res) => {
     req.params.id,
     req.body
   );
+
   res.status(StatusCodes.OK).json({ msg: "User updated", user: updatedUser });
 };
 
@@ -74,6 +79,7 @@ export const adminDeleteUser = async (req, res) => {
     req.user.userId,
     req.params.id
   );
+
   res.status(StatusCodes.OK).json({
     msg: `Deleted user with id ${req.params.id}`,
     user: { id, username, email },

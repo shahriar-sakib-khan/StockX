@@ -34,3 +34,9 @@ export class UnauthorizedError extends BaseError {
     super(message, StatusCodes.FORBIDDEN);
   }
 }
+
+export class ServerError extends BaseError {
+  constructor(message) {
+    super(message, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
