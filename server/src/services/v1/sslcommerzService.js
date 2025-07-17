@@ -130,7 +130,7 @@ export const handleIPNService = async (ipnData) => {
   );
 
   if (!user) throw new NotFoundError("User not found after payment");
-  
+
   console.log(`✅ Payment Success: ${tran_id}, Role upgraded`);
   return user;
 };

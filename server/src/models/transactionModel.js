@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-import { PAYMENT_GATEWAY, TRANSACTION_STATUS } from "../config/payment.config.js";
+import {
+  PAYMENT_GATEWAY,
+  TRANSACTION_STATUS,
+} from "../config/payment.config.js";
 
 /**
  * Transaction Schema — Clean, Audit-Proof
@@ -37,7 +40,6 @@ const transactionSchema = new Schema(
     // Raw Payment Gateway Response for forensic audits
     gateway: { type: String, enum: PAYMENT_GATEWAY, default: "SSLCOMMERZ" },
     raw_payload: { type: Schema.Types.Mixed },
-
   },
   { timestamps: true }
 );
