@@ -15,6 +15,7 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name) response.errorType = err.name;
   if (!isProduction && err.stack) response.stack = err.stack;
+  console.log(err);
 
   return res.status(statusCode).json(response);
 };

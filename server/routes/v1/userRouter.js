@@ -7,6 +7,7 @@ import {
   getApplicationStats,
   getCurrentUser,
   getSingleUser,
+  getUserTransactionHistory,
   updateUser,
 } from "../../controllers/v1/index.js";
 
@@ -23,6 +24,7 @@ const router = Router();
  */
 router.get("/me", getCurrentUser);
 router.patch("/me", validateUpdateUserInput, updateUser);
+router.get("/transactions", getUserTransactionHistory);
 
 /**
  * Moderator Routes
@@ -51,5 +53,10 @@ router.patch(
   adminUpdateUser
 );
 router.delete("/admin/users/:id", authorizeRoles("admin"), adminDeleteUser);
+router.get(
+  "/admin/:id/transactions",
+  authorizeRoles("admin"),
+  getUserTransactionHistory
+);
 
 export default router;

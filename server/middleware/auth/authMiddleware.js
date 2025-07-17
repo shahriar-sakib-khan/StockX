@@ -3,7 +3,7 @@ import { verifyJWT } from "../../utils/jwtTokenUtils.js";
 
 export const authenticateUser = (req, res, next) => {
   const { token } = req.cookies;
-  if (!token) throw new UnauthenticatedError("Authentication required");
+  if (!token) throw new UnauthenticatedError("Authentication token required");
 
   const { userId, roles } = verifyJWT(token);
 

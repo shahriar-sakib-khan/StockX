@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
+const { Schema } = mongoose;
+
 import { ROLES } from "../config/roles.config.js";
 
-const userSchema = new mongoose.Schema(
+/**
+ * User Schema — Clean, Audit-Proof
+ */
+const userSchema = new Schema(
   {
     firstName: {
       type: String,

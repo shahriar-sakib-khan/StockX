@@ -40,3 +40,13 @@
   }
 }
 ```
+
+### Starting the ngrok server (for publicizing local host URL)
+cmd
+> F:
+> cd Dev-tools\ngrok-v3-stable-windows-amd64
+# or in one line
+> cd /d F:\Dev-tools\ngrok-v3-stable-windows-amd64
+# fo ngrok url
+> ngrok http 5100
+

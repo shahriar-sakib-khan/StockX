@@ -129,5 +129,5 @@ export const adminDeleteUserService = async (adminUserId, id) => {
   const user = await User.findByIdAndDelete(id);
   if (!user) throw new NotFoundError(`No user found with id ${id}`);
 
-  return { id, username, email };
+  return user;
 };
