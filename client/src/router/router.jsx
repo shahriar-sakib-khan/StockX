@@ -5,9 +5,11 @@ import {
   SignupPage,
   ErrorPage,
   Dashboard,
+  SettingsPage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
+import ProfilePage from "../pages/ProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -20,13 +22,27 @@ const router = createBrowserRouter([
       { path: "signup", element: <SignupPage /> },
       {
         path: "dashboard",
-        element: <AppContainer />,
-        children: [
-          {
-            index: true,
-            element: <Dashboard />,
-          },
-        ],
+        element: (
+          <AppContainer>
+            <Dashboard />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <AppContainer>
+            <ProfilePage />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <AppContainer>
+            <SettingsPage />
+          </AppContainer>
+        ),
       },
     ],
   },

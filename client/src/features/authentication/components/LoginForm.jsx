@@ -23,6 +23,7 @@ export default function LoginForm() {
     mutate: signIn,
     isPending,
     isError,
+    error,
   } = useMutation({
     mutationFn: login,
     onSuccess: () => {
@@ -57,7 +58,7 @@ export default function LoginForm() {
       />
       {isError && (
         <span className="text-md text-center text-red-400">
-          Invalid email or password
+          {error?.message || "Invalid email or password"}
         </span>
       )}
       <Button

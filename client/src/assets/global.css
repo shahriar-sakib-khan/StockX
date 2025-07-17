@@ -1,8 +1,28 @@
 @import "tailwindcss";
 
+/* custom variables - colors */
+@theme {
+  --color-primary: hsl(0, 0%, 100%); /* white */
+  --color-secondary: hsl(217, 21%, 27%); /* dark gray */
+  --color-accent: hsl(216, 100%, 58%); /* blue */
+}
+
+/* custom variables - sizes */
+@theme {
+  --navbar-height: 3rem;
+  --height-with-nav: calc(100dvh - var(--navbar-height));
+
+  --sidebar-width: 14rem;
+  --width-with-sidebar: calc(100dvw - var(--sidebar-width));
+}
+
 /* custom utility classes  */
 @layer utilities {
   .wrapper {
     @apply mx-auto w-full max-w-[1280px] px-8;
   }
+}
+
+:root {
+  --color: hsl(0, 0%, 0%);
 }

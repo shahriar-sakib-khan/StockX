@@ -6,3 +6,4 @@ export { default as SignupPage } from "./authentication/SignupPage";
 export { default as ErrorPage } from "./ErrorPage";
 export { default as LandingPage } from "./LandingPage";
 export { default as Dashboard } from "./Dashboard";
+export { default as SettingsPage } from "./SettingsPage";
