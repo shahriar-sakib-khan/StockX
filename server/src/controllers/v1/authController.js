@@ -1,16 +1,14 @@
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from 'http-status-codes';
 
-import { authService } from "../../services/v1/index.js";
-import { createJWT } from "../../utils/index.js";
+import { authService } from '../../services/v1/index.js';
+import { Tokens } from '../../utils/index.js';
 
 /**
  * Register Controller
  */
 export const register = async (req, res) => {
   const user = await authService.registerUser(req.body);
-  res
-    .status(StatusCodes.CREATED)
-    .json({ message: "User registered successfully", user });
+  res.status(StatusCodes.CREATED).json({ message: 'User registered successfully', user });
 };
 
 /**
@@ -19,17 +17,17 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const user = await authService.loginUser(req.body);
 
-  const token = createJWT({ userId: user._id, roles: user.roles });
+  const token = Tokens.createJWT({ userId: user._id, roles: user.roles });
   const oneDay = 1000 * 60 * 60 * 24 * 1;
 
-  res.cookie("token", token, {
+  res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === 'production',
     expires: new Date(Date.now() + oneDay),
-    sameSite: "Strict",
+    sameSite: 'Strict',
   });
   res.status(StatusCodes.OK).json({
-    message: "Login successful",
+    message: 'Login successful',
     user,
   });
 };
@@ -38,10 +36,10 @@ export const login = async (req, res) => {
  * Logout Controller
  */
 export const logout = async (req, res) => {
-  res.cookie("token", "logout", {
+  res.cookie('token', 'logout', {
     httpOnly: true,
     expires: new Date(Date.now()),
-    sameSite: "Strict",
+    sameSite: 'Strict',
   });
-  res.status(StatusCodes.OK).json({ message: "User logged out" });
+  res.status(StatusCodes.OK).json({ message: 'User logged out' });
 };

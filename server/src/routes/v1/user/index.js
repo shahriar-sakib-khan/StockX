@@ -9,12 +9,12 @@ import {
   getSingleUser,
   getUserTransactionHistory,
   updateUser,
-} from "../../controllers/v1/index.js";
+} from "@/controllers/v1/index.js";
 
 import {
   authorizeRoles,
   validateUpdateUserInput,
-} from "../../middleware/index.js";
+} from "@/middlewares/index.js";
 
 const router = Router();
 

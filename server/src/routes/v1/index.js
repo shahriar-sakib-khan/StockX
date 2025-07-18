@@ -1,15 +1,15 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import authRouter from "./authRouter.js";
-import userRouter from "./userRouter.js";
-import paymentRouter from "./paymentRoutes.js";
+import authRouter from './auth/index.js';
+import userRouter from './user/index.js';
+import paymentRouter from './payment/index.js';
 
-import { authenticateUser } from "../../middleware/index.js";
+import { authenticateUser } from '@/middlewares/index.js';
 
 const router = Router();
 
-router.use("/auth", authRouter);
-router.use("/user", authenticateUser, userRouter);
-router.use("/payment", paymentRouter);
+router.use('/auth', authRouter);
+router.use('/user', authenticateUser, userRouter);
+router.use('/payment', paymentRouter);
 
 export default router;

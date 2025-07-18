@@ -2,7 +2,7 @@ import { body } from "express-validator";
 
 import withValidationErrors from "./withValidationErrors.js";
 import { User } from "../../models/index.js";
-import { ROLES } from "../../config/roles.config.js";
+import { SUPER_ROLES } from "../../config/roles.config.js";
 
 /**
  * Update-user input validation
@@ -95,7 +95,7 @@ export const validateUpdateUserInput = withValidationErrors([
     })
     .custom((value) => {
       // value is an array, check every role is allowed
-      const invalidRoles = value.filter((role) => !ROLES.includes(role));
+      const invalidRoles = value.filter((role) => !SUPER_ROLES.includes(role));
       return invalidRoles.length == 0;
     })
     .withMessage({
