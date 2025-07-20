@@ -1,6 +1,8 @@
-import { User } from '@/models/index.js';
-import { Passwords } from '@/utils/index.js';
-import { Errors } from '@/error/index.js';
+import { HydratedDocument } from 'mongoose';
+import { User, IUser } from '@/models';
+import { Passwords } from '@/utils';
+import { Errors } from '@/error';
+import { RegisterInput, LoginInput } from '@/validations/auth.validation';
 
 /**
  * Register a new user.
@@ -10,18 +12,27 @@ import { Errors } from '@/error/index.js';
  * @returns {Promise<User>} - Newly created user document.
  * @throws {Errors.ValidationError} - If required fields missing or invalid (optional to add).
  */
-export const registerUser = async userData => {
-  const allowedFields = ['firstName', 'lastName', 'username', 'email', 'address'];
+export const registerUser = async (userData: RegisterInput): Promise<HydratedDocument<IUser>> => {
+  const { firstName, lastName, username, email, password, address } = userData;
 
-  const sanitizedUserData = {};
-  allowedFields.forEach(field => {
-    if (userData[field] !== undefined) sanitizedUserData[field] = userData[field];
-  });
+  const existingUsers = await User.find({
+    $or: [{ email }, { username }],
+  }).select('email username');
 
-  const hashedPassword = await Passwords.hashPassword(userData.password);
+  if (existingUsers.length) {
+    if (existingUsers.some(u => u.email === email))
+      throw new Errors.BadRequestError('Email already exists');
+    if (existingUsers.some(u => u.username === username))
+      throw new Errors.BadRequestError('Username already exists');
+  }
 
+  const hashedPassword = await Passwords.hashPassword(password);
   const user = await User.create({
-    ...sanitizedUserData,
+    firstName,
+    lastName,
+    username,
+    email,
+    address,
     password: hashedPassword,
   });
 
@@ -37,12 +48,16 @@ export const registerUser = async userData => {
  * @returns {Promise<User>} - Authenticated user document.
  * @throws {Errors.UnauthenticatedError} - If user not found or password invalid.
  */
-export const loginUser = async ({ loginIdentifier, password }) => {
+export const loginUser = async ({
+  loginIdentifier,
+  password,
+}: LoginInput): Promise<HydratedDocument<IUser>> => {
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier);
 
   const user = await User.findOne(
     isEmail ? { email: loginIdentifier } : { username: loginIdentifier }
-  );
+  ).select('+password');
+
   if (!user) throw new Errors.UnauthenticatedError('Invalid credentials');
 
   const isValid = await Passwords.compareHashedPassword(password, user.password);

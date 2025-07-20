@@ -1,6 +1,7 @@
 ### Guide for commit messages
 
 # Format
+
 <type>(optional-scope): <short summary (in imperative tone)>
 
 (optional longer description explaining the change)
@@ -17,7 +18,6 @@
 | `test`      | ✅ **Tests**: adds or fixes tests                        |
 | `chore`     | 🔧 **Chores**: maintenance tasks (build, CI config)      |
 | `revert`    | ⏪ **Revert**: reverts a previous commit                 |
-
 
 ### JSDoc-style comments snippet
 
@@ -42,11 +42,16 @@
 ```
 
 ### Starting the ngrok server (for publicizing local host URL)
+
 cmd
+
 > F:
 > cd Dev-tools\ngrok-v3-stable-windows-amd64
-# or in one line
-> cd /d F:\Dev-tools\ngrok-v3-stable-windows-amd64
-# fo ngrok url
-> ngrok http 5100
 
+# or in one line
+
+> cd /d F:\Dev-tools\ngrok-v3-stable-windows-amd64
+
+# fo ngrok url
+
+> ngrok http 5100

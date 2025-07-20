@@ -13,7 +13,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   address: string;
-  role: (typeof SUPER_ROLES)[number]; // restrict role to values in SUPER_ROLES
+  role: (typeof SUPER_ROLES)[number];
 }
 
 /**
