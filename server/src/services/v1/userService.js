@@ -1,13 +1,13 @@
-import { User } from "../../models/index.js";
-import { BadRequestError, NotFoundError } from "../../error/customErrors.js";
+import { User } from '../../models/index.js';
+import { BadRequestError, NotFoundError } from '../../error/customErrors.js';
 
 /**
  * Get Current User
  */
-export const getCurrentUserService = async (userId) => {
-  const user = await User.findById(userId).select("-password");
+export const getCurrentUser = async userId => {
+  const user = await User.findById(userId).select('-password');
 
-  if (!user) throw new NotFoundError("User not found");
+  if (!user) throw new NotFoundError('User not found');
 
   return user;
 };
@@ -15,37 +15,31 @@ export const getCurrentUserService = async (userId) => {
 /**
  * Update Current User
  */
-export const updateUserService = async (userId, userData) => {
-  const allowedFields = [
-    "firstName",
-    "lastName",
-    "username",
-    "email",
-    "address",
-  ];
+export const updateUser = async (userId, userData) => {
+  const allowedFields = ['firstName', 'lastName', 'username', 'email', 'address'];
   const updates = {};
 
-  allowedFields.forEach((field) => {
+  allowedFields.forEach(field => {
     if (userData[field] !== undefined) updates[field] = userData[field];
   });
 
   if (Object.keys(updates).length === 0) {
-    throw new BadRequestError("No valid fields provided for update");
+    throw new BadRequestError('No valid fields provided for update');
   }
 
   if (updates.email) {
     const existingUser = await User.findOne({ email: updates.email });
     if (existingUser && existingUser._id.toString() !== userId) {
-      throw new BadRequestError("Email already exists");
+      throw new BadRequestError('Email already exists');
     }
   }
 
   const updatedUser = await User.findByIdAndUpdate(userId, updates, {
     new: true,
     runValidators: true,
-  }).select("-password");
+  }).select('-password');
 
-  if (!updatedUser) throw new NotFoundError("User not found");
+  if (!updatedUser) throw new NotFoundError('User not found');
 
   return updatedUser;
 };
@@ -55,7 +49,7 @@ export const updateUserService = async (userId, userData) => {
 /**
  * Get Stats
  */
-export const getApplicationStatsService = async () => {
+export const getApplicationStats = async () => {
   const totalUsers = await User.countDocuments();
   return { totalUsers };
 };
@@ -63,9 +57,9 @@ export const getApplicationStatsService = async () => {
 /**
  * Get All Users
  */
-export const getAllUsersService = async (page, limit) => {
+export const getAllUsers = async (page, limit) => {
   const skip = (page - 1) * limit;
-  const users = await User.find().skip(skip).limit(limit).select("-password");
+  const users = await User.find().skip(skip).limit(limit).select('-password');
   const totalUsers = await User.countDocuments();
   return { users, totalUsers };
 };
@@ -73,9 +67,9 @@ export const getAllUsersService = async (page, limit) => {
 /**
  * Get Single User
  */
-export const getSingleUserService = async (id) => {
-  const user = await User.findById(id).select("-password");
-  if (!user) throw new NotFoundError("User not found");
+export const getSingleUser = async id => {
+  const user = await User.findById(id).select('-password');
+  if (!user) throw new NotFoundError('User not found');
   return user;
 };
 
@@ -84,38 +78,31 @@ export const getSingleUserService = async (id) => {
 /**
  * Update any User
  */
-export const adminUpdateUserService = async (id, userData) => {
-  const allowedFields = [
-    "firstName",
-    "lastName",
-    "username",
-    "email",
-    "address",
-    "roles",
-  ];
+export const adminUpdateUser = async (id, userData) => {
+  const allowedFields = ['firstName', 'lastName', 'username', 'email', 'address', 'roles'];
   const updates = {};
 
-  allowedFields.forEach((field) => {
+  allowedFields.forEach(field => {
     if (userData[field] !== undefined) updates[field] = userData[field];
   });
 
   if (Object.keys(updates).length === 0) {
-    throw new BadRequestError("No valid fields provided for update");
+    throw new BadRequestError('No valid fields provided for update');
   }
 
   if (updates.email) {
     const existingUser = await User.findOne({ email: updates.email });
     if (existingUser && existingUser._id.toString() !== id) {
-      throw new BadRequestError("Email already exists");
+      throw new BadRequestError('Email already exists');
     }
   }
 
   const updatedUser = await User.findByIdAndUpdate(id, updates, {
     new: true,
     runValidators: true,
-  }).select("-password");
+  }).select('-password');
 
-  if (!updatedUser) throw new NotFoundError("User not found");
+  if (!updatedUser) throw new NotFoundError('User not found');
 
   return updatedUser;
 };
@@ -123,7 +110,7 @@ export const adminUpdateUserService = async (id, userData) => {
 /**
  * Delete any User
  */
-export const adminDeleteUserService = async (adminUserId, id) => {
+export const adminDeleteUser = async (adminUserId, id) => {
   if (adminUserId === id) throw new BadRequestError("That's YOUR ID man!");
 
   const user = await User.findByIdAndDelete(id);

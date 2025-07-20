@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import authRouter from './auth/index.js';
+import authRouter from './auth/router.js';
 import userRouter from './user/index.js';
 import paymentRouter from './payment/index.js';
 
