@@ -24,6 +24,8 @@ const router = Router();
  */
 router.get("/me", getCurrentUser);
 router.patch("/me", validateUpdateUserInput, updateUser);
+
+
 router.get("/transactions", getUserTransactionHistory);
 
 /**

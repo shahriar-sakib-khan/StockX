@@ -1,11 +1,11 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-import { TENANT_STATUS } from '@/config/roles.config';
+import { WORKSPACE_STATUS } from '@/config/roles.config';
 
 export interface IMembership extends Document {
   user: mongoose.Types.ObjectId;
   workspace: mongoose.Types.ObjectId;
-  tenantRoles: string[];
+  workspaceRoles: string[];
   status: 'active' | 'invited';
   invitedBy?: mongoose.Types.ObjectId;
 }
@@ -22,16 +22,15 @@ const membershipSchema: Schema<IMembership> = new Schema(
       ref: 'Workspace',
       required: true,
     },
-    tenantRoles: [{ type: String }],
+    workspaceRoles: [{ type: String }],
     status: {
       type: String,
-      enum: TENANT_STATUS,
+      enum: WORKSPACE_STATUS,
       default: 'active',
     },
     invitedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
   },
   { timestamps: true }
@@ -41,7 +40,7 @@ const membershipSchema: Schema<IMembership> = new Schema(
 membershipSchema.index({ user: 1, workspace: 1 }, { unique: true });
 
 membershipSchema.pre('save', function (next) {
-  this.tenantRoles = Array.from(new Set(this.tenantRoles)); // deduplicate roles
+  this.workspaceRoles = [...new Set(this.workspaceRoles)]; // deduplicate roles
   next();
 });
 

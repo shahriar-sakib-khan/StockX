@@ -25,7 +25,7 @@ export const createRefreshToken = payload => {
  * Verify **Access Token**
  */
 export const verifyAccessToken = token => {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
   const { userId, role } = decoded;
   if (!userId || !role) throw new Errors.UnauthorizedError('Invalid token');
   return { userId, role };

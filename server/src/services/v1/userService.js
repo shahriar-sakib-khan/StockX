@@ -5,7 +5,7 @@ import { BadRequestError, NotFoundError } from '../../error/customErrors.js';
  * Get Current User
  */
 export const getCurrentUser = async userId => {
-  const user = await User.findById(userId).select('-password');
+  const user = await User.findById(userId);
 
   if (!user) throw new NotFoundError('User not found');
 

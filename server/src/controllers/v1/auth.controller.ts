@@ -14,6 +14,7 @@ import { Request, Response } from 'express';
 
 import { authService } from '@/services/v1/index.js';
 import { Tokens } from '@/utils/index.js';
+import { assertAuth } from '@/common/assertions';
 
 /**
  * @function register
@@ -79,11 +80,8 @@ export const logout = (req: Request, res: Response): void => {
  * @route POST /api/v1/auth/refresh-token
  * @access Private
  */
-export const refreshAccessToken = async (req: RequestWithUser, res: Response): Promise<void> => {
-  // req.user is set in validateRefreshToken middleware after verifying refresh token
-  const { userId, role } = req.user;
-
-  const accessToken = Tokens.createAccessToken({ userId, role });
+export const refreshAccessToken = async (req: Request, res: Response): Promise<void> => {
+  const accessToken = await authService.refreshAccessToken(req.cookies.refreshToken);
 
   res.status(StatusCodes.OK).json({ accessToken });
 };

@@ -1,6 +1,7 @@
 import { HydratedDocument } from 'mongoose';
+
 import { User, IUser } from '@/models';
-import { Passwords } from '@/utils';
+import { Passwords, Tokens } from '@/utils';
 import { Errors } from '@/error';
 import { RegisterInput, LoginInput } from '@/validations/auth.validation';
 
@@ -64,4 +65,27 @@ export const loginUser = async ({
   if (!isValid) throw new Errors.UnauthenticatedError('Invalid credentials');
 
   return user;
+};
+
+/**
+ * Generates a new access token using a valid refresh token.
+ *
+ * @param {string} refreshToken - Incoming user data from req.user.
+ * @returns {string} - Generated access token.
+ * @throws {Errors.UnauthenticatedError} - If user object is not found on request.
+ */
+export const refreshAccessToken = async (refreshToken: string): Promise<string> => {
+  if (!refreshToken) throw new Errors.UnauthenticatedError('Refresh token missing');
+
+  const { userId } = Tokens.verifyRefreshToken(refreshToken);
+
+  const user = await User.findById(userId);
+  if (!user) throw new Errors.NotFoundError('User not found');
+
+  const accessToken = Tokens.createAccessToken({
+    userId,
+    role: user.role,
+  });
+
+  return accessToken;
 };

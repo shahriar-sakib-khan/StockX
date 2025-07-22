@@ -13,8 +13,8 @@ export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number]; // "user" | "moder
 /**
  * Workspace status — scoped per workspace instance
  */
-export const TENANT_STATUS = ['active', 'invited'] as const;
-export type TenantStatus = (typeof TENANT_STATUS)[number]; // "active" | "invited" | "pending"
+export const WORKSPACE_STATUS = ['active', 'invited'] as const;
+export type WorkspaceStatus = (typeof WORKSPACE_STATUS)[number]; // "active" | "invited" | "pending"
 
 /**
  * Permissions map per workspace role
