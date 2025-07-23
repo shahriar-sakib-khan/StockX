@@ -14,6 +14,8 @@ export default function UserMenu({ className = "" }) {
   const { data } = useAuth();
   const { username, firstName, lastName } = data?.user || {};
 
+  const fullName = firstName + " " + lastName;
+
   const { mutate: signOut } = useMutation({
     mutationFn: logout,
     onSettled: () => {
@@ -50,14 +52,14 @@ export default function UserMenu({ className = "" }) {
         </svg>
       </button>
       {open && (
-        <div className="absolute right-2 z-100 mt-2 min-w-40 rounded-md bg-white p-2 shadow-lg ring-1 ring-gray-300">
+        <div className="absolute right-2 z-100 mt-2 min-w-40 rounded-md bg-white p-2 text-nowrap shadow-lg ring-1 ring-gray-300">
           <section className="mb-2 flex gap-2 border-b-1 border-gray-300 pb-2">
-            <div>
-              <img src={pfp} alt="Logo" className="w-10 rounded-full" />
+            <div className="size-10">
+              <img src={pfp} alt="Logo" className="rounded-full" />
             </div>
             <div className="flex flex-col gap-0">
-              <span className="text-sm font-semibold text-gray-600">
-                {firstName + " " + lastName}
+              <span className="text-lg font-semibold text-gray-600">
+                {fullName}
               </span>
               <span className="text-[0.8rem] text-gray-500">{username}</span>
             </div>

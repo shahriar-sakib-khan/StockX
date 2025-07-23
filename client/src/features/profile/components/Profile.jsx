@@ -3,6 +3,8 @@ import pfp from "../../../assets/images/user_icon.jpeg";
 export default function Profile({ data, toggleEditOpen = () => {} }) {
   const { username, firstName, lastName, email, address } = data?.user || {};
 
+  const fullName = firstName + " " + lastName;
+
   return (
     <section className="flex min-w-150 gap-8 rounded-lg border-1 border-gray-300 p-4 text-gray-700">
       <div className="text-center">
@@ -25,7 +27,7 @@ export default function Profile({ data, toggleEditOpen = () => {} }) {
         </h2>
         <div className="mt-4">
           <span className="text-gray-500">Name: </span>
-          <span className="font-semibold">{firstName + " " + lastName}</span>
+          <span className="font-semibold">{fullName}</span>
         </div>
         <div className="mt-1">
           <span className="text-gray-500">Email: </span>

@@ -2,6 +2,7 @@ import useInput from "../../../hooks/useInput";
 import { useMutation } from "@tanstack/react-query";
 import { updateUser } from "../../authentication/services/authServices";
 import { FormInputField } from "../../../components";
+import { useEffect } from "react";
 
 export default function UpdateProfileForm({
   data,
@@ -39,7 +40,10 @@ export default function UpdateProfileForm({
     resetUsername();
     resetAddress();
   };
-  resetValues;
+
+  useEffect(() => {
+    resetValues();
+  }, resetValues);
 
   const {
     mutate: updateInfo,

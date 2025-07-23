@@ -25,10 +25,10 @@ export default function AppContainer({ children }) {
   }
 
   return (
-    <div className="flex w-full">
-      {/* <Sidebar /> */}
-      <div className="flex grow-1 flex-col">
-        <Navbar userMenu />
+    <div className="grid h-full w-full">
+      <Navbar userMenu />
+      <div className="grid grid-cols-[auto_1fr]">
+        <Sidebar />
         <main>{children}</main>
       </div>
     </div>
