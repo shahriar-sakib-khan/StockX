@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Membership } from '@/models';
+import { Membership, Workspace } from '@/models';
 import { assertAuth } from '@/common/assertions.js';
 import { StatusCodes } from 'http-status-codes';
 
@@ -9,6 +9,9 @@ const workspaceScope =
     assertAuth(req);
     const { userId, role } = req.user;
     const { workspaceId } = req.params;
+
+    const workspace = await Workspace.findById(workspaceId).lean();
+    if (!workspace) return res.status(StatusCodes.NOT_FOUND).json({ message: 'Workspace not found' });
 
     // SuperAdmin override (ostad)
     if (role === 'ostad') return next();
@@ -25,7 +28,8 @@ const workspaceScope =
     }
 
     req.membership = membership;
-
+    console.log(req.membership);
+    
     if (allowedRoles.length > 0) {
       const hasWorkspaceRoles = membership.workspaceRoles.some(
         workspaceRoles =>

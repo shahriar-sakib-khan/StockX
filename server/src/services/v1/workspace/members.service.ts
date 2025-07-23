@@ -26,3 +26,5 @@ export const getWorkspaceMembers = async (
 
   return members;
 };
+
+export default { getWorkspaceMembers };

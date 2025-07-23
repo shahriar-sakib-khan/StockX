@@ -122,3 +122,5 @@ export const deleteWorkspace = async (
 
   return workspace;
 };
+
+export default { createWorkspace, getAllWorkspaces, getSingleWorkspace, updateWorkspace, deleteWorkspace };

@@ -8,36 +8,46 @@ const router = Router();
 
 router.use('/', authenticateUser);
 
-/**
- * General workspace routes
- */
+// <============================> General Routes <============================>
+
 router.post('/', validateRequest(workspace.workspaceSchema), workspaceController.createWorkspace);
 router.get('/mine', workspaceController.myWorkspaces);
-router.get('/:workspaceId', workspaceScope(['admin']), workspaceController.singleWorkspace);
+
+router.get('/:workspaceId/admin', workspaceScope(['admin']), workspaceController.singleWorkspace);
 router.put(
-  '/:workspaceId',
+  '/:workspaceId/admin',
   validateRequest(workspace.workspaceSchema),
   workspaceScope(['admin']),
   workspaceController.updateWorkspace
 );
-router.delete('/:workspaceId', workspaceScope(['admin']), workspaceController.deleteWorkspace);
+router.delete(
+  '/:workspaceId/admin',
+  workspaceScope(['admin']),
+  workspaceController.deleteWorkspace
+);
 
-/**
- * Invites routes
- */
-// router.get('/:workspaceId/invites', workspaceScope(['admin']), workspaceController.invites);
-// router.post('/:workspaceId/invites/accept', workspaceScope(['admin']), workspaceController.acceptInvite);
-// router.post('/:workspaceId/invites/decline', workspaceScope(['admin']), workspaceController.declineInvite);
+// <============================> Invite Routes <============================>
 
-/**
- * Members routes
- */
-router.get('/:workspaceId/members', workspaceController.members);
-router.post('/:workspaceId/members', workspaceScope(['admin']), workspaceController.members);
+router.post(
+  '/:workspaceId/invites/send',
+  workspaceScope(['admin']),
+  workspaceController.sendInvite
+);
+router.get('/:workspaceId/invites', workspaceScope(['admin']), workspaceController.allInvites);
+router.put('/:workspaceId/invites/:token/accept', workspaceController.acceptInvite);
+router.put('/:workspaceId/invites/:token/decline', workspaceController.declineInvite);
+router.delete(
+  '/:workspaceId/invites/:token',
+  workspaceScope(['admin']),
+  workspaceController.deleteInvite
+);
 
-/**
- * Roles routes
- */
+// <============================> Member Routes <============================>
+
+router.get('/:workspaceId/members', workspaceController.allMembers);
+
+// <============================> Role Routes <============================>
+
 router.get('/:workspaceId/roles', workspaceScope(['admin']), workspaceController.roles);
 // router.put('/:workspaceId/roles', workspaceScope(['admin']), workspaceController.roles);
 

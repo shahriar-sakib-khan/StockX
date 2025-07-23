@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 import { Errors } from '../../error';
-import { Tokens } from '@/utils/index.js';
+import { JWTs } from '@/utils/index.js';
 import { assertAuth } from '@/common/assertions';
 
 /**
@@ -30,7 +30,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
 
   if (!accessToken) throw new Errors.UnauthenticatedError('Authentication token required');
 
-  const { userId, role } = Tokens.verifyAccessToken(accessToken);
+  const { userId, role } = JWTs.verifyAccessToken(accessToken);
 
   req.user = {
     userId,

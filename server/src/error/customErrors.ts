@@ -48,6 +48,12 @@ export class UnauthorizedError extends BaseError {
   }
 }
 
+export class ConflictError extends BaseError {
+  constructor(message = 'Conflict') {
+    super(message, StatusCodes.CONFLICT);
+  }
+}
+
 export class ServerError extends BaseError {
   constructor(message = 'Internal Server Error') {
     super(message, StatusCodes.INTERNAL_SERVER_ERROR);

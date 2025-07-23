@@ -1,7 +1,7 @@
 import { HydratedDocument } from 'mongoose';
 
 import { User, IUser } from '@/models';
-import { Passwords, Tokens } from '@/utils';
+import { JWTs, Passwords } from '@/utils';
 import { Errors } from '@/error';
 import { RegisterInput, LoginInput } from '@/validations/auth.validation';
 
@@ -77,15 +77,17 @@ export const loginUser = async ({
 export const refreshAccessToken = async (refreshToken: string): Promise<string> => {
   if (!refreshToken) throw new Errors.UnauthenticatedError('Refresh token missing');
 
-  const { userId } = Tokens.verifyRefreshToken(refreshToken);
+  const { userId } = JWTs.verifyRefreshToken(refreshToken);
 
   const user = await User.findById(userId);
   if (!user) throw new Errors.NotFoundError('User not found');
 
-  const accessToken = Tokens.createAccessToken({
+  const accessToken = JWTs.createAccessToken({
     userId,
     role: user.role,
   });
 
   return accessToken;
 };
+
+export default { registerUser, loginUser, refreshAccessToken };

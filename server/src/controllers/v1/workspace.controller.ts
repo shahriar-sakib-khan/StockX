@@ -30,8 +30,14 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { workspaceService } from '@/services/v1/index.js';
+import {
+  workspaceService,
+  membersService,
+  rolesService,
+  invitesService,
+} from '@/services/v1/index';
 import { assertAuth } from '@/common/assertions';
+import { inviteSchema } from '@/validations/workspace.validation';
 
 // <============================> WORKSPACE CONTROLLER <============================>
 
@@ -44,9 +50,11 @@ export const createWorkspace = async (req: Request, res: Response) => {
 
 export const myWorkspaces = async (req: Request, res: Response) => {
   assertAuth(req);
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 20;
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
   const workspaces = await workspaceService.getAllWorkspaces(req.user.userId, page, limit);
+
   const totalWorkspaces = workspaces.length;
 
   res.status(StatusCodes.OK).json({ totalWorkspaces, page, limit, workspaces });
@@ -70,12 +78,60 @@ export const deleteWorkspace = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ message: 'Workspace deleted successfully', workspace });
 };
 
+// <============================> INVITES CONTROLLER <============================>
+
+export const sendInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const invite = await invitesService.sendWorkspaceInvite(
+    req.body,
+    req.user.userId,
+    req.membership.workspace
+  );
+
+  res.status(StatusCodes.OK).json({ message: 'Invite sent successfully', invite });
+};
+
+export const acceptInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const invite = await invitesService.acceptWorkspaceInvite(req.params.token, req.user.userId);
+
+  res.status(StatusCodes.OK).json({ message: 'Invite accepted successfully', invite });
+};
+
+export const declineInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const invite = await invitesService.declineWorkspaceInvite(req.params.token, req.user.userId);
+
+  res.status(StatusCodes.OK).json({ message: 'Invite declined successfully', invite });
+};
+
+export const allInvites = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+  const allInvites = await invitesService.getAllInvites(req.membership.workspace, page, limit);
+
+  const totalInvites = allInvites.length;
+
+  res.status(StatusCodes.OK).json({ totalInvites, page, limit, allInvites });
+};
+
+export const deleteInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const invite = await invitesService.deleteWorkspaceInvite(req.params.token);
+
+  res.status(StatusCodes.OK).json({ message: 'Invitation deleted successfully', invite });
+}
+
 // <============================> WORKSPACE MEMBERS CONTROLLER <============================>
 
-export const members = async (req: Request, res: Response) => {
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 20;
-  const members = await workspaceService.getWorkspaceMembers(req.params.workspaceId, page, limit);
+export const allMembers = async (req: Request, res: Response) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+  const members = await membersService.getWorkspaceMembers(req.params.workspaceId, page, limit);
+
   const totalMembers = members.length;
 
   res.status(StatusCodes.OK).json({ totalMembers, page, limit, members });
@@ -84,8 +140,27 @@ export const members = async (req: Request, res: Response) => {
 // <============================> WORKSPACE ROLES CONTROLLER <============================>
 
 export const roles = async (req: Request, res: Response) => {
-  const roles = await workspaceService.getWorkspaceRoles(req.params.workspaceId);
+  const roles = await rolesService.getWorkspaceRoles(req.params.workspaceId);
   const totalRoles = roles.length;
 
   res.status(StatusCodes.OK).json({ totalRoles, roles });
+};
+
+// <============================> Exports <============================>
+
+export default {
+  createWorkspace,
+  myWorkspaces,
+  singleWorkspace,
+  updateWorkspace,
+  deleteWorkspace,
+
+  sendInvite,
+  acceptInvite,
+  declineInvite,
+  allInvites,
+  deleteInvite,
+
+  allMembers,
+  roles,
 };

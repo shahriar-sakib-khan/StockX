@@ -13,8 +13,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 
 import { authService } from '@/services/v1/index.js';
-import { Tokens } from '@/utils/index.js';
-import { assertAuth } from '@/common/assertions';
+import { JWTs } from '@/utils/index.js';
 
 /**
  * @function register
@@ -39,8 +38,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
   const user = await authService.loginUser(req.body);
 
-  const accessToken = Tokens.createAccessToken({ userId: user._id, role: user.role });
-  const refreshToken = Tokens.createRefreshToken({ userId: user._id });
+  const accessToken = JWTs.createAccessToken({ userId: user._id, role: user.role });
+  const refreshToken = JWTs.createRefreshToken({ userId: user._id });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
@@ -85,3 +84,5 @@ export const refreshAccessToken = async (req: Request, res: Response): Promise<v
 
   res.status(StatusCodes.OK).json({ accessToken });
 };
+
+export default { register, login, logout, refreshAccessToken };
