@@ -6,7 +6,7 @@ export interface IDivision extends Document {
   workspace: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   defaultRoles: { name: string; permissions: string[] }[];
-  customRoles: { name: string; permissions: string[] }[];
+  customRoles?: { name: string; permissions: string[] }[] | null;
 }
 
 const divisionSchema: Schema<IDivision> = new Schema(

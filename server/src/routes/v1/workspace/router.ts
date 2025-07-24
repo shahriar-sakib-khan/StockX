@@ -1,12 +1,11 @@
 import { Router } from 'express';
 
-import { authenticateUser, workspaceScope, validateRequest } from '@/middlewares';
+import { workspaceScope, validateRequest } from '@/middlewares';
 import { workspaceController } from '@/controllers/v1';
 import { workspace } from '@/validations';
+import divisionRouter from './division.router';
 
 const router = Router();
-
-router.use('/', authenticateUser);
 
 // <============================> General Routes <============================>
 
@@ -50,5 +49,9 @@ router.get('/:workspaceId/members', workspaceController.allMembers);
 
 router.get('/:workspaceId/roles', workspaceScope(['admin']), workspaceController.roles);
 // router.put('/:workspaceId/roles', workspaceScope(['admin']), workspaceController.roles);
+
+// <============================> Division Routes <============================>
+
+router.use('/:workspaceId/divisions', workspaceScope(), divisionRouter);
 
 export default router;

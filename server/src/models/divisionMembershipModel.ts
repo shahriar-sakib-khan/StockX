@@ -6,7 +6,7 @@ export interface IDivisionMembership extends Document {
   division: mongoose.Types.ObjectId;
   divisionRoles: string[];
   status: 'active' | 'invited';
-  invitedBy: mongoose.Types.ObjectId;
+  invitedBy?: mongoose.Types.ObjectId | null;
 }
 
 const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
@@ -35,7 +35,6 @@ const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
     invitedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
   },
   { timestamps: true }

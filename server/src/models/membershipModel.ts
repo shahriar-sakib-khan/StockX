@@ -22,7 +22,10 @@ const membershipSchema: Schema<IMembership> = new Schema(
       ref: 'Workspace',
       required: true,
     },
-    workspaceRoles: [{ type: String }],
+    workspaceRoles: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
       enum: WORKSPACE_STATUS,

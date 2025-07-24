@@ -162,5 +162,6 @@ export default {
   deleteInvite,
 
   allMembers,
+  
   roles,
 };

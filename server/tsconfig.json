@@ -29,6 +29,6 @@
       "@/config/*": ["config/*"]
     }
   },
-  "include": ["src", "src/@types"],
+  "include": ["src", "src/types"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,4 +1,4 @@
-export { default as  User} from './userModel';
+export { default as User } from './userModel';
 export type { IUser } from './userModel';
 
 export { default as Transaction } from './transactionModel.js';
@@ -14,3 +14,6 @@ export type { IDivision } from './divisionModel.js';
 
 export { default as Invite } from './inviteModel.js';
 export type { IInvite } from './inviteModel.js';
+
+export { default as DivisionMembership } from './divisionMembershipModel.js';
+export type { IDivisionMembership } from './divisionMembershipModel.js';

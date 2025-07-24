@@ -4,7 +4,6 @@ import { IInvite, Invite, Membership, User, IMembership } from '@/models';
 import { Errors } from '@/error';
 import { InviteInput } from '@/validations/workspace.validation';
 import { Tokens } from '@/utils';
-import de from 'zod/v4/locales/de.cjs';
 
 /**
  * @function sendWorkspaceInvite

@@ -17,6 +17,6 @@ declare module 'express-serve-static-core' {
     };
 
     membership?: IMembership;
-    divisionMembership?: IDivisionMembership;
+    divMembership?: IDivisionMembership;
   }
 }

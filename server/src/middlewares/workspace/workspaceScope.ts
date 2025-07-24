@@ -10,12 +10,14 @@ const workspaceScope =
     const { userId, role } = req.user;
     const { workspaceId } = req.params;
 
+    // Workspace check 
     const workspace = await Workspace.findById(workspaceId).lean();
     if (!workspace) return res.status(StatusCodes.NOT_FOUND).json({ message: 'Workspace not found' });
 
     // SuperAdmin override (ostad)
     if (role === 'ostad') return next();
 
+    // Membership check
     const membership = await Membership.findOne({
       user: userId,
       workspace: workspaceId,
@@ -27,9 +29,10 @@ const workspaceScope =
         .json({ message: 'Access denied: Not a workspace member' });
     }
 
+    // Assign membership to request object
     req.membership = membership;
-    console.log(req.membership);
     
+    // Role validation
     if (allowedRoles.length > 0) {
       const hasWorkspaceRoles = membership.workspaceRoles.some(
         workspaceRoles =>

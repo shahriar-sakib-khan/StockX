@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import validateRequest from '@/middlewares/validateRequest';
+import validateRequest from '@/middlewares/validators/validateRequest';
 import { auth } from '@/validations';
 import { authController } from '@/controllers/v1';
 import { authenticateUser } from '@/middlewares';

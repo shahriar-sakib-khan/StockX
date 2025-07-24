@@ -43,7 +43,6 @@ export const createWorkspace = async (
     status: 'active',
   });
 
-
   return workspace;
 };
 
@@ -58,7 +57,7 @@ export const getAllWorkspaces = async (
   userId: string,
   page: number,
   limit: number
-): Promise<Array<HydratedDocument<IWorkspace>>> => {
+): Promise<HydratedDocument<IWorkspace>[]> => {
   const skip: number = (page - 1) * limit;
   const memberships = await Membership.find({ user: userId, status: 'active' })
     .skip(skip)
@@ -79,7 +78,7 @@ export const getAllWorkspaces = async (
  * @throws {Errors.NotFoundError} If workspace not found.
  */
 export const getSingleWorkspace = async (
-  workspaceId: string,
+  workspaceId: string
 ): Promise<HydratedDocument<IWorkspace>> => {
   const workspace = await Workspace.findById(workspaceId);
 
@@ -97,9 +96,12 @@ export const getSingleWorkspace = async (
  * @returns {Promise<HydratedDocument<IWorkspace>>} Updated workspace document.
  * @throws {Errors.NotFoundError} If workspace not found.
  */
-export const updateWorkspace = async (workspaceData: WorkspaceInput, workspaceId: string): Promise<HydratedDocument<IWorkspace>> => {
+export const updateWorkspace = async (
+  workspaceData: WorkspaceInput,
+  workspaceId: string
+): Promise<HydratedDocument<IWorkspace>> => {
   const workspace = await Workspace.findByIdAndUpdate(workspaceId, workspaceData, { new: true });
-  
+
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
   return workspace;
@@ -123,4 +125,10 @@ export const deleteWorkspace = async (
   return workspace;
 };
 
-export default { createWorkspace, getAllWorkspaces, getSingleWorkspace, updateWorkspace, deleteWorkspace };
+export default {
+  createWorkspace,
+  getAllWorkspaces,
+  getSingleWorkspace,
+  updateWorkspace,
+  deleteWorkspace,
+};
