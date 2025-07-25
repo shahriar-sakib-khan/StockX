@@ -12,15 +12,15 @@ const router = Router();
 router.post('/', validateRequest(workspace.workspaceSchema), workspaceController.createWorkspace);
 router.get('/mine', workspaceController.myWorkspaces);
 
-router.get('/:workspaceId/admin', workspaceScope(['admin']), workspaceController.singleWorkspace);
+router.get('/:workspaceId', workspaceScope(['admin']), workspaceController.singleWorkspace);
 router.put(
-  '/:workspaceId/admin',
+  '/:workspaceId',
   validateRequest(workspace.workspaceSchema),
   workspaceScope(['admin']),
   workspaceController.updateWorkspace
 );
 router.delete(
-  '/:workspaceId/admin',
+  '/:workspaceId',
   workspaceScope(['admin']),
   workspaceController.deleteWorkspace
 );

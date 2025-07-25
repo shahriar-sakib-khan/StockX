@@ -5,8 +5,7 @@ export interface IDivision extends Document {
   description?: string;
   workspace: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
-  defaultRoles: { name: string; permissions: string[] }[];
-  customRoles?: { name: string; permissions: string[] }[] | null;
+  divisionRoles: { name: string; permissions: string[]; _id?: mongoose.Types.ObjectId }[];
 }
 
 const divisionSchema: Schema<IDivision> = new Schema(
@@ -30,13 +29,7 @@ const divisionSchema: Schema<IDivision> = new Schema(
       ref: 'User',
       required: true,
     },
-    defaultRoles: [
-      {
-        name: { type: String, required: true },
-        permissions: [{ type: String }],
-      },
-    ],
-    customRoles: [
+    divisionRoles: [
       {
         name: { type: String, required: true },
         permissions: [{ type: String }],
@@ -47,8 +40,8 @@ const divisionSchema: Schema<IDivision> = new Schema(
 );
 
 divisionSchema.pre('save', function (next) {
-  if (!this.defaultRoles || this.defaultRoles.length === 0) {
-    this.defaultRoles = [
+  if (!this.divisionRoles || this.divisionRoles.length === 0) {
+    this.divisionRoles = [
       { name: 'division_admin', permissions: ['manage_division', 'assign_roles'] },
       { name: 'division_member', permissions: [] },
     ];

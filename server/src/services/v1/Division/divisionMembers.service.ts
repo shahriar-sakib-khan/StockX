@@ -8,16 +8,29 @@ import { HydratedDocument } from 'mongoose';
  * @description Get all members of a division.
  *
  * @param {string} divisionId - The ID of the division to retrieve members for.
+ * @param {string} workspaceId - The ID of the workspace the division is in.
+ * @param {number} page - The page number for pagination.
+ * @param {number} limit - The number of members to retrieve per page.
  * @returns {Promise<HydratedDocument<IUser>[]>} An array of user documents.
  */
 export const getDivisionMembers = async (
   divisionId: string,
+  workspaceId: string,
   page: number,
   limit: number
 ): Promise<HydratedDocument<IUser>[]> => {
+  // Check if division exists
+  const divisionExist = await Division.findOne({
+    _id: divisionId,
+    workspace: workspaceId,
+  }).select('_id');
+  if (!divisionExist) throw new Errors.NotFoundError('Division not found');
+
+  // Get all members of the division
   const skip: number = (page - 1) * limit;
   const divisionMemberships = await DivisionMembership.find({
     division: divisionId,
+    workspace: workspaceId,
     status: 'active',
   })
     .skip(skip)
@@ -58,15 +71,15 @@ export const addMemberToDivision = async (
     _id: divisionId,
     workspace: workspaceId,
   }).select('_id');
-  if (!divisionExist) throw new Errors.BadRequestError('Division does not exist in this workspace');
+  if (!divisionExist) throw new Errors.BadRequestError('Division does not exist.');
 
   // Check if user is already a member of the division
   const existingMembership = await DivisionMembership.findOne({
     user: memberId,
     workspace: workspaceId,
     division: divisionId,
-  }).select('_id');
-  if (existingMembership)
+  }).select('status');
+  if (existingMembership && existingMembership.status === 'active')
     throw new Errors.BadRequestError('User already a member of this division');
 
   const divisionMembership = await DivisionMembership.create({
@@ -81,16 +94,33 @@ export const addMemberToDivision = async (
   return divisionMembership;
 };
 
+/**
+ * @function removeMemberFromDivision
+ * @description Remove a member from a division.
+ *
+ * @param {string} memberId - The ID of the user to remove from the division.
+ * @param {string} workspaceId - The ID of the workspace the division is in.
+ * @param {string} divisionId - The ID of the division to remove the user from.
+ * @returns {Promise<HydratedDocument<IDivisionMembership>>} The removed division membership document.
+ */
 export const removeMemberFromDivision = async (
   memberId: string,
   workspaceId: string,
-  divisionId: string
+  divisionId: string,
+  userId: string
 ): Promise<HydratedDocument<IDivisionMembership>> => {
-  const divisionMembership = await DivisionMembership.findOneAndDelete({
-    user: memberId,
-    workspace: workspaceId,
-    division: divisionId,
-  });
+  const divisionMembership = await DivisionMembership.findOneAndUpdate(
+    {
+      user: memberId,
+      workspace: workspaceId,
+      division: divisionId,
+    },
+    {
+      status: 'removed',
+      removedBy: userId,
+    },
+    { new: true }
+  );
   if (!divisionMembership)
     throw new Errors.BadRequestError('User is not a member of this division');
 

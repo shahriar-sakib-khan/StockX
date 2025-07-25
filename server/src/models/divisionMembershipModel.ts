@@ -5,8 +5,9 @@ export interface IDivisionMembership extends Document {
   workspace: mongoose.Types.ObjectId;
   division: mongoose.Types.ObjectId;
   divisionRoles: string[];
-  status: 'active' | 'invited';
+  status: 'active' | 'invited' | 'removed';
   invitedBy?: mongoose.Types.ObjectId | null;
+  removedBy?: mongoose.Types.ObjectId | null;
 }
 
 const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
@@ -26,7 +27,10 @@ const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
       ref: 'Division',
       required: true,
     },
-    divisionRoles: [{ type: String }],
+    divisionRoles: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
       enum: ['active', 'invited'],
@@ -40,11 +44,8 @@ const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
   { timestamps: true }
 );
 
-// Prevent duplicates within same division
-divisionMembershipSchema.index({ user: 1, division: 1 }, { unique: true });
-
 divisionMembershipSchema.pre('save', function (next) {
-  this.divisionRoles = [...new Set(this.divisionRoles)];
+  this.divisionRoles = [...new Set(this.divisionRoles)]; // deduplicate roles
   next();
 });
 

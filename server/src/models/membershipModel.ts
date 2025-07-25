@@ -39,9 +39,6 @@ const membershipSchema: Schema<IMembership> = new Schema(
   { timestamps: true }
 );
 
-// Compound index for quick queries and avoiding duplicates
-// membershipSchema.index({ user: 1, workspace: 1 }, { unique: true });
-
 membershipSchema.pre('save', function (next) {
   this.workspaceRoles = [...new Set(this.workspaceRoles)]; // deduplicate roles
   next();

@@ -20,6 +20,10 @@
  * - Add a role to a division
  * - Remove a role from a division
  * - Update a role in a division
+ *
+ * Role Assignments controller:
+ * - Assign a role to a member
+ * - Remove a role from a member
  */
 
 import { Request, Response } from 'express';
@@ -79,6 +83,7 @@ export const getMembers = async (req: Request, res: Response) => {
 
   const members = await divisionMembersService.getDivisionMembers(
     req.params.divisionId,
+    req.params.workspaceId,
     page,
     limit
   );
@@ -105,7 +110,8 @@ export const removeMember = async (req: Request, res: Response) => {
   const member = await divisionMembersService.removeMemberFromDivision(
     req.body.memberId,
     req.params.workspaceId,
-    req.params.divisionId
+    req.params.divisionId,
+    req.user.userId
   );
 
   res.status(StatusCodes.OK).json({ message: 'Member removed successfully', member });
@@ -114,14 +120,92 @@ export const removeMember = async (req: Request, res: Response) => {
 // <============================> Division Roles Controllers <============================>
 
 export const getRoles = async (req: Request, res: Response) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-
-  const roles = await divisionRolesService.getDivisionRoles(req.params.divisionId, page, limit);
+  const roles = await divisionRolesService.getDivisionRoles(req.params.divisionId);
 
   const totalRoles = roles.length;
 
-  res.status(StatusCodes.OK).json({ totalRoles, page, limit, roles });
+  res.status(StatusCodes.OK).json({ totalRoles, roles });
+};
+
+export const addRole = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const divisionRoles = await divisionRolesService.addRoleToDivision(
+    req.body,
+    req.params.workspaceId,
+    req.params.divisionId
+  );
+
+  const totalDivisionRoles = divisionRoles.length;
+
+  res
+    .status(StatusCodes.CREATED)
+    .json({ message: 'Role added successfully', totalDivisionRoles, divisionRoles });
+};
+
+export const updateRole = async (req: Request, res: Response) => {
+  const { roleId, workspaceId, divisionId } = req.params;
+  const { roleToUpdate, divisionRoles } = await divisionRolesService.updateRoleInDivision(
+    req.body,
+    roleId,
+    divisionId,
+    workspaceId
+  );
+
+  const totalDivisionRoles = divisionRoles.length;
+
+  res.status(StatusCodes.OK).json({
+    message: `Role '${roleToUpdate.name}' was updated successfully`,
+    totalDivisionRoles,
+    divisionRoles,
+  });
+};
+
+export const removeRole = async (req: Request, res: Response) => {
+  const { roleId, workspaceId, divisionId } = req.params;
+  const { roleToRemove, divisionRoles } = await divisionRolesService.removeRoleFromDivision(
+    roleId,
+    divisionId,
+    workspaceId
+  );
+
+  const totalDivisionRoles = divisionRoles.length;
+
+  res.status(StatusCodes.OK).json({
+    message: `Role '${roleToRemove.name}' was removed successfully`,
+    totalDivisionRoles,
+    divisionRoles,
+  });
+};
+
+// <============================> Role Assignment Controllers <============================>
+
+export const assignRole = async (req: Request, res: Response) => {
+  const { roleId } = req.body;
+  const { userId, workspaceId, divisionId } = req.params;
+
+  const divisionMembership = await divisionRolesService.assignRoleToUser(
+    roleId,
+    userId,
+    divisionId,
+    workspaceId
+  );
+
+  res
+    .status(StatusCodes.CREATED)
+    .json({ message: 'Role assigned successfully', divisionMembership });
+};
+
+export const unassignRole = async (req: Request, res: Response) => {
+  const { roleId, userId, workspaceId, divisionId } = req.params;
+
+  const divisionMembership = await divisionRolesService.unassignRoleFromUser(
+    roleId,
+    userId,
+    divisionId,
+    workspaceId
+  );
+
+  res.status(StatusCodes.OK).json({ message: 'Role unassigned successfully', divisionMembership });
 };
 
 // <============================> Default Export <============================>
@@ -138,4 +222,10 @@ export default {
   removeMember,
 
   getRoles,
+  addRole,
+  updateRole,
+  removeRole,
+
+  assignRole,
+  unassignRole,
 };
