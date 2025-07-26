@@ -59,3 +59,13 @@ export class ServerError extends BaseError {
     super(message, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
+
+export default {
+  BaseError,
+  NotFoundError,
+  BadRequestError,
+  UnauthenticatedError,
+  UnauthorizedError,
+  ConflictError,
+  ServerError,
+};

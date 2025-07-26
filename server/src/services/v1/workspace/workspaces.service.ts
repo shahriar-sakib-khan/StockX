@@ -9,41 +9,48 @@ import { HydratedDocument, Types } from 'mongoose';
 import { IWorkspace, Membership, Workspace } from '@/models';
 import { WorkspaceInput } from '@/validations/workspace.validation';
 import { Errors } from '@/error';
+import { Sanitizers } from '@/utils';
 
 /**
  * @function createWorkspace
  * @description Creates a new workspace for the given user.
- * Throws error if workspace with the same name exists for this user.
+ * Returns only sanitized workspace fields.
  *
  * @param {WorkspaceInput} userData - Workspace creation data.
  * @param {string} userId - The creator's user ID.
- * @returns {Promise<HydratedDocument<IWorkspace>>} The newly created workspace document.
+ * @returns {Promise<SanitizedWorkspace>} The sanitized workspace object.
  * @throws {Errors.BadRequestError} If workspace name already exists.
  */
+
 export const createWorkspace = async (
   userData: WorkspaceInput,
   userId: string
-): Promise<HydratedDocument<IWorkspace>> => {
+): Promise<Sanitizers.SanitizedWorkspace> => {
   const { name, description } = userData;
 
-  const existingWorkspace = await Workspace.findOne({ name, createdBy: userId });
-  if (existingWorkspace) throw new Errors.BadRequestError('Workspace name already exists');
+  // Prevent duplicate workspaces for the same user
+  const existingWorkspace = await Workspace.exists({ name, createdBy: userId });
+  if (existingWorkspace) {
+    throw new Errors.BadRequestError('Workspace name already exists');
+  }
 
+  // Create workspace
   const workspace = await Workspace.create({
     name,
     description,
     createdBy: new Types.ObjectId(userId),
   });
 
-  // Creator becomes Admin via Membership
-  const membership = await Membership.create({
+  // Automatically assign creator as admin
+  await Membership.create({
     user: new Types.ObjectId(userId),
     workspace: workspace._id,
     workspaceRoles: ['admin'],
     status: 'active',
   });
 
-  return workspace;
+  // Return only the relevant, sanitized fields
+  return Sanitizers.workspaceSanitizer(workspace);
 };
 
 /**
@@ -51,22 +58,27 @@ export const createWorkspace = async (
  * @description Retrieves all active workspaces for a given user by querying memberships.
  *
  * @param {string} userId - User's ID.
- * @returns {Promise<HydratedDocument<IWorkspace>[]>} List of active workspaces.
+ * @returns {Promise<SanitizedAllWorkspaces & { total: number }>} List of active workspaces with count.
  */
 export const getAllWorkspaces = async (
   userId: string,
   page: number,
   limit: number
-): Promise<HydratedDocument<IWorkspace>[]> => {
+): Promise<Sanitizers.SanitizedWorkspaces & { total: number }> => {
   const skip: number = (page - 1) * limit;
   const memberships = await Membership.find({ user: userId, status: 'active' })
     .skip(skip)
     .limit(limit)
-    .populate('workspace');
+    .populate<{ workspace: HydratedDocument<IWorkspace> }>('workspace');
 
-  const workspaces = memberships.map(m => m.workspace as unknown as HydratedDocument<IWorkspace>);
+  const workspaces = memberships.map(m => m.workspace as HydratedDocument<IWorkspace>);
 
-  return workspaces;
+  const total: number = await Membership.countDocuments({ user: userId, status: 'active' });
+
+  return {
+    workspaces: Sanitizers.allWorkspaceSanitizer(workspaces).workspaces,
+    total,
+  };
 };
 
 /**
@@ -74,37 +86,44 @@ export const getAllWorkspaces = async (
  * Finds a workspace by its unique _id.
  *
  * @param {string} workspaceId - Workspace name.
- * @returns {Promise<HydratedDocument<IWorkspace>>} Workspace document.
+ * @returns {Promise<SanitizedWorkspace>} Workspace document.
  * @throws {Errors.NotFoundError} If workspace not found.
  */
 export const getSingleWorkspace = async (
   workspaceId: string
-): Promise<HydratedDocument<IWorkspace>> => {
-  const workspace = await Workspace.findById(workspaceId);
+): Promise<Sanitizers.SanitizedWorkspace> => {
+  const workspace = await Workspace.findById(workspaceId).lean();
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return workspace;
+  return Sanitizers.workspaceSanitizer(workspace);
 };
 
 /**
  * @function updateWorkspace
  * Updates the user's workspace.
  *
- * @param {WorkspaceInput} workspaceData - Workspace update data.
+ * @param {WorkspaceInput} userData - Workspace update data.
  * @param {string} workspaceId - Workspace ID.
- * @returns {Promise<HydratedDocument<IWorkspace>>} Updated workspace document.
+ * @returns {Promise<SanitizedWorkspace>} Updated workspace document.
  * @throws {Errors.NotFoundError} If workspace not found.
  */
 export const updateWorkspace = async (
-  workspaceData: WorkspaceInput,
+  userData: WorkspaceInput,
   workspaceId: string
-): Promise<HydratedDocument<IWorkspace>> => {
-  const workspace = await Workspace.findByIdAndUpdate(workspaceId, workspaceData, { new: true });
+): Promise<Sanitizers.SanitizedWorkspace> => {
+  const { name, description } = userData;
+  const workspace = await Workspace.findByIdAndUpdate(
+    workspaceId,
+    { name, description },
+    { new: true }
+  )
+    .select('name description')
+    .lean();
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return workspace;
+  return Sanitizers.workspaceSanitizer(workspace);
 };
 
 /**
@@ -112,17 +131,42 @@ export const updateWorkspace = async (
  * Deletes the user's workspace.
  *
  * @param {string} workspaceId - Workspace ID.
- * @returns {Promise<HydratedDocument<IWorkspace>>} Deleted workspace document.
+ * @returns {Promise<SanitizedAllWorkspaces>} Deleted workspace document.
  * @throws {Errors.NotFoundError} If workspace not found.
  */
 export const deleteWorkspace = async (
   workspaceId: string
-): Promise<HydratedDocument<IWorkspace>> => {
-  const workspace = await Workspace.findByIdAndDelete(workspaceId);
+): Promise<Sanitizers.SanitizedWorkspace> => {
+  const workspace = await Workspace.findByIdAndDelete(workspaceId)
+    .select('name description')
+    .lean();
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return workspace;
+  return Sanitizers.workspaceSanitizer(workspace);
+};
+
+/**
+ * @function getMyWorkspaceProfile
+ * Retrieves the user's workspace profile.
+ *
+ * @param {string} userId - User's ID.
+ * @param {string} workspaceId - Workspace ID.
+ * @returns {Promise<SanitizedMembership>} User's workspace profile.
+ * @throws {Errors.NotFoundError} If user is not a member of the workspace.
+ */
+export const getMyWorkspaceProfile = async (
+  userId: string,
+  workspaceId: string
+): Promise<Sanitizers.SanitizedMembership> => {
+  const membership = await Membership.findOne({ user: userId, workspace: workspaceId })
+    .populate('workspace', 'name')
+    .populate('user', 'username email')
+    .lean();
+
+  if (!membership) throw new Errors.NotFoundError('Not a member of the workspace');
+
+  return Sanitizers.membershipSanitizer(membership);
 };
 
 export default {
@@ -131,4 +175,6 @@ export default {
   getSingleWorkspace,
   updateWorkspace,
   deleteWorkspace,
+
+  getMyWorkspaceProfile,
 };

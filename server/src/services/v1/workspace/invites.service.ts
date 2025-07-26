@@ -1,9 +1,9 @@
 import { HydratedDocument, Types } from 'mongoose';
 
-import { IInvite, Invite, Membership, User, IMembership } from '@/models';
+import { IInvite, Invite, Membership, User } from '@/models';
 import { Errors } from '@/error';
 import { InviteInput } from '@/validations/workspace.validation';
-import { Tokens } from '@/utils';
+import { Sanitizers, Tokens } from '@/utils';
 
 /**
  * @function sendWorkspaceInvite
@@ -19,7 +19,7 @@ export const sendWorkspaceInvite = async (
   userId: string,
   workspaceId: string
 ): Promise<HydratedDocument<IInvite>> => {
-  const { email, role } = userData;
+  const { email } = userData;
 
   const existingUser = await User.findOne({ email }).select('_id');
   if (existingUser) {
@@ -37,12 +37,12 @@ export const sendWorkspaceInvite = async (
   });
   if (existingInvite) await existingInvite.deleteOne();
 
-  const token = Tokens.generateToken();
+  const token = Tokens.generateCryptoToken();
 
   const invite = await Invite.create({
     user: existingUser?._id || null,
     email,
-    role,
+    role: 'user', // By default assign user role
     token,
     workspace: new Types.ObjectId(workspaceId),
     invitedBy: new Types.ObjectId(userId),
@@ -59,16 +59,15 @@ export const sendWorkspaceInvite = async (
  *
  * @param {string} token - Invite token.
  * @param {string} userId - User ID.
- * @returns {Promise<HydratedDocument<IInvite>>} Invite document.
+ * @returns {Promise<SanitizedWorkspaceInvite>} Invite document.
  */
 export const acceptWorkspaceInvite = async (
   token: string,
   userId: string
-): Promise<HydratedDocument<IInvite>> => {
+): Promise<Sanitizers.SanitizedWorkspaceInvite> => {
   const invite = await Invite.findOne({ token });
 
   if (!invite) throw new Errors.BadRequestError('Invalid invitation');
-
   if (invite.user?.toString() !== userId) throw new Errors.BadRequestError('Invalid invite.');
 
   if (invite.expiresAt < new Date()) throw new Errors.BadRequestError('Invitation expired');
@@ -87,7 +86,7 @@ export const acceptWorkspaceInvite = async (
   invite.status = 'accepted';
   await invite.save();
 
-  return invite;
+  return Sanitizers.workspaceInviteSanitizer(invite);
 };
 
 /**
@@ -96,12 +95,12 @@ export const acceptWorkspaceInvite = async (
  *
  * @param {string} token - Invite token.
  * @param {string} userId - User ID.
- * @returns {Promise<HydratedDocument<IInvite>>} Invite document.
+ * @returns {Promise<SanitizedWorkspaceInvite>} Invite document.
  */
 export const declineWorkspaceInvite = async (
   token: string,
   userId: string
-): Promise<HydratedDocument<IInvite>> => {
+): Promise<Sanitizers.SanitizedWorkspaceInvite> => {
   const invite = await Invite.findOne({ token });
 
   if (!invite) throw new Errors.BadRequestError('Invalid invitation');
@@ -116,82 +115,48 @@ export const declineWorkspaceInvite = async (
   invite.status = 'declined';
   await invite.save();
 
-  return invite;
-};
-
-/**
- * @function getEmailInvites
- * Gets all email invites for a workspace.
- *
- * @param {string} workspaceId - Workspace ID.
- * @param {number} page - Page number.
- * @param {number} limit - Number of items per page.
- * @returns {Promise<HydratedDocument<IInvite>[]>} Array of invite documents.
- */
-export const getEmailInvites = async (
-  workspaceId: string,
-  page: number,
-  limit: number
-): Promise<HydratedDocument<IInvite>[]> => {
-  const emailInvites = await Invite.find({ workspace: workspaceId, status: 'pending' })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .populate('workspace', 'name')
-    .populate('invitedBy', 'email firstName lastName');
-
-  return emailInvites;
-};
-
-/**
- * @function getRegisteredUserInvites
- * Gets all registered user invites for a workspace.
- *
- * @param {string} workspaceId - Workspace ID.
- * @param {number} page - Page number.
- * @param {number} limit - Number of items per page.
- * @returns {Promise<HydratedDocument<IMembership>[]>} Array of invite documents.
- */
-export const getRegisteredUserInvites = async (
-  workspaceId: string,
-  page: number,
-  limit: number
-): Promise<HydratedDocument<IMembership>[]> => {
-  const registeredUserInvites = await Membership.find({ workspace: workspaceId, status: 'invited' })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .populate('user', 'email firstName lastName');
-
-  return registeredUserInvites;
+  return Sanitizers.workspaceInviteSanitizer(invite);
 };
 
 /**
  * @function getAllInvites
  * Gets all invites for a workspace.
  *
- * @param {string} workspaceId - Workspace ID.
+ * @param {string} workspace - Workspace ID.
  * @param {number} page - Page number.
  * @param {number} limit - Number of items per page.
- * @returns {Promise<HydratedDocument<IInvite>[]>} Array of invite documents.
+ * @returns {Promise<SanitizedWorkspaceInvite[]>} Array of invite documents.
  */
 export const getAllInvites = async (
   workspace: string,
   page: number,
   limit: number
-): Promise<HydratedDocument<IInvite>[]> => {
+): Promise<{ SanitizedWorkspaceInvites: Sanitizers.SanitizedWorkspaceInvite[]; total: number }> => {
   const skip: number = (page - 1) * limit;
-
   const allInvites = await Invite.find({ workspace }).skip(skip).limit(limit);
+  const SanitizedWorkspaceInvites = allInvites.map(i => Sanitizers.workspaceInviteSanitizer(i));
 
-  return allInvites;
+  const total: number = await Invite.countDocuments({ workspace });
+
+  return { SanitizedWorkspaceInvites, total };
 };
 
-export const deleteWorkspaceInvite = async (token: string): Promise<HydratedDocument<IInvite>> => {
+/**
+ * @function deleteWorkspaceInvite
+ * Deletes an invite to join a workspace.
+ *
+ * @param {string} token - Invite token.
+ * @returns {Promise<SanitizedWorkspaceInvite>} Invite document.
+ */
+export const deleteWorkspaceInvite = async (
+  token: string
+): Promise<Sanitizers.SanitizedWorkspaceInvite> => {
   const invite = await Invite.findOne({ token });
   if (!invite) throw new Errors.BadRequestError('Invalid invite.');
 
   await invite.deleteOne();
 
-  return invite;
+  return Sanitizers.workspaceInviteSanitizer(invite);
 };
 
 export default {

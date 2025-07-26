@@ -44,5 +44,12 @@ membershipSchema.pre('save', function (next) {
   next();
 });
 
+membershipSchema.methods.toJSON = function (): Partial<IMembership> {
+  const obj = this.toObject();
+  delete obj.__v;
+
+  return obj as Partial<IMembership>;
+};
+
 const Membership: Model<IMembership> = mongoose.model<IMembership>('Membership', membershipSchema);
 export default Membership;

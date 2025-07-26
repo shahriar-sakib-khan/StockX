@@ -30,36 +30,40 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { assertAuth } from '@/common/assertions';
-import { divisionService, divisionMembersService, divisionRolesService } from '@/services/v1/index';
+import { divisionService, divisionMembersService, divisionRolesService } from '@/services/v1';
 
 // <============================> General Division Controllers <============================>
 
 export const createDivision = async (req: Request, res: Response) => {
   assertAuth(req);
-  const division = await divisionService.createDivision(
-    req.body,
-    req.params.workspaceId,
-    req.user.userId
-  );
+  const { userId } = req.user;
+  const { workspaceId } = req.params;
+
+  const division = await divisionService.createDivision(req.body, userId, workspaceId);
 
   res.status(StatusCodes.CREATED).json({ message: 'Division created successfully', division });
 };
 
 export const singleDivision = async (req: Request, res: Response) => {
   const { workspaceId, divisionId } = req.params;
+
   const division = await divisionService.getSingleDivision(workspaceId, divisionId);
 
   res.status(StatusCodes.OK).json({ division });
 };
 
 export const updateDivision = async (req: Request, res: Response) => {
-  const division = await divisionService.updateDivision(req.body, req.params.divisionId);
+  const { divisionId } = req.params;
+
+  const division = await divisionService.updateDivision(req.body, divisionId);
 
   res.status(StatusCodes.OK).json({ message: 'Division updated successfully', division });
 };
 
 export const deleteDivision = async (req: Request, res: Response) => {
-  const division = await divisionService.deleteDivision(req.params.divisionId);
+  const { divisionId } = req.params;
+
+  const division = await divisionService.deleteDivision(divisionId);
 
   res.status(StatusCodes.OK).json({ message: 'Division deleted successfully', division });
 };
@@ -67,51 +71,81 @@ export const deleteDivision = async (req: Request, res: Response) => {
 export const allDivisions = async (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const { workspaceId } = req.params;
 
-  const divisions = await divisionService.getAllDivisions(req.params.workspaceId, page, limit);
+  const { divisions, total } = await divisionService.getAllDivisions(workspaceId, page, limit);
 
-  const totalDivisions = divisions.length;
+  res.status(StatusCodes.OK).json({ total, page, limit, divisions });
+};
 
-  res.status(StatusCodes.OK).json({ totalDivisions, page, limit, divisions });
+export const myDivisionProfile = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { workspaceId, divisionId } = req.params;
+
+  const divisionProfile = await divisionService.getMyDivisionProfile(
+    userId,
+    divisionId,
+    workspaceId
+  );
+
+  res.status(StatusCodes.OK).json({ divisionProfile });
 };
 
 // <============================> Division Members Controllers <============================>
 
-export const getMembers = async (req: Request, res: Response) => {
+export const allMembers = async (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const { divisionId, workspaceId } = req.params;
 
-  const members = await divisionMembersService.getDivisionMembers(
-    req.params.divisionId,
-    req.params.workspaceId,
+  const { members, total } = await divisionMembersService.getAllDivisionMembers(
+    divisionId,
+    workspaceId,
     page,
     limit
   );
 
-  const totalMembers = members.length;
+  res.status(StatusCodes.OK).json({ total, page, limit, members });
+};
 
-  res.status(StatusCodes.OK).json({ totalMembers, page, limit, members });
+export const getMember = async (req: Request, res: Response) => {
+  const { memberId, divisionId, workspaceId } = req.params;
+
+  const member = await divisionMembersService.getSingleDivisionMember(
+    memberId,
+    divisionId,
+    workspaceId
+  );
+
+  res.status(StatusCodes.OK).json({ member });
 };
 
 export const addMember = async (req: Request, res: Response) => {
   assertAuth(req);
+
+  const { userId } = req.user;
+  const { workspaceId, divisionId } = req.params;
+  const { memberIdentifier } = req.body;
+
   const member = await divisionMembersService.addMemberToDivision(
-    req.body.memberId,
-    req.params.workspaceId,
-    req.params.divisionId,
-    req.user.userId
+    memberIdentifier,
+    workspaceId,
+    divisionId,
+    userId
   );
 
   res.status(StatusCodes.CREATED).json({ message: 'Member added successfully', member });
 };
 
 export const removeMember = async (req: Request, res: Response) => {
-  assertAuth(req);
+  const { workspaceId, divisionId } = req.params;
+  const { memberIdentifier } = req.body;
+
   const member = await divisionMembersService.removeMemberFromDivision(
-    req.body.memberId,
-    req.params.workspaceId,
-    req.params.divisionId,
-    req.user.userId
+    memberIdentifier,
+    workspaceId,
+    divisionId
   );
 
   res.status(StatusCodes.OK).json({ message: 'Member removed successfully', member });
@@ -120,52 +154,49 @@ export const removeMember = async (req: Request, res: Response) => {
 // <============================> Division Roles Controllers <============================>
 
 export const getRoles = async (req: Request, res: Response) => {
-  const roles = await divisionRolesService.getDivisionRoles(req.params.divisionId);
+  const { divisionId } = req.params;
 
-  const totalRoles = roles.length;
+  const roles = await divisionRolesService.getDivisionRoles(divisionId);
 
-  res.status(StatusCodes.OK).json({ totalRoles, roles });
+  const total = roles.length;
+
+  res.status(StatusCodes.OK).json({ total, roles });
 };
 
 export const addRole = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const divisionRoles = await divisionRolesService.addRoleToDivision(
-    req.body,
-    req.params.workspaceId,
-    req.params.divisionId
-  );
+  const { divisionId } = req.params;
 
-  const totalDivisionRoles = divisionRoles.length;
+  const divisionRoles = await divisionRolesService.addRoleToDivision(req.body, divisionId);
+
+  const total = divisionRoles.length;
 
   res
     .status(StatusCodes.CREATED)
-    .json({ message: 'Role added successfully', totalDivisionRoles, divisionRoles });
+    .json({ message: 'Role added successfully', total, divisionRoles });
 };
 
 export const updateRole = async (req: Request, res: Response) => {
-  const { roleId, workspaceId, divisionId } = req.params;
+  const { roleId, divisionId } = req.params;
   const { roleToUpdate, divisionRoles } = await divisionRolesService.updateRoleInDivision(
     req.body,
     roleId,
-    divisionId,
-    workspaceId
+    divisionId
   );
 
-  const totalDivisionRoles = divisionRoles.length;
+  const total = divisionRoles.length;
 
   res.status(StatusCodes.OK).json({
     message: `Role '${roleToUpdate.name}' was updated successfully`,
-    totalDivisionRoles,
+    total,
     divisionRoles,
   });
 };
 
 export const removeRole = async (req: Request, res: Response) => {
-  const { roleId, workspaceId, divisionId } = req.params;
+  const { roleId, divisionId } = req.params;
   const { roleToRemove, divisionRoles } = await divisionRolesService.removeRoleFromDivision(
     roleId,
-    divisionId,
-    workspaceId
+    divisionId
   );
 
   const totalDivisionRoles = divisionRoles.length;
@@ -180,32 +211,29 @@ export const removeRole = async (req: Request, res: Response) => {
 // <============================> Role Assignment Controllers <============================>
 
 export const assignRole = async (req: Request, res: Response) => {
-  const { roleId } = req.body;
-  const { userId, workspaceId, divisionId } = req.params;
+  const { roleId, userId, workspaceId, divisionId } = req.params;
 
-  const divisionMembership = await divisionRolesService.assignRoleToUser(
+  const divisionMember = await divisionRolesService.assignRoleToUser(
     roleId,
     userId,
     divisionId,
     workspaceId
   );
 
-  res
-    .status(StatusCodes.CREATED)
-    .json({ message: 'Role assigned successfully', divisionMembership });
+  res.status(StatusCodes.CREATED).json({ message: 'Role assigned successfully', divisionMember });
 };
 
 export const unassignRole = async (req: Request, res: Response) => {
   const { roleId, userId, workspaceId, divisionId } = req.params;
 
-  const divisionMembership = await divisionRolesService.unassignRoleFromUser(
+  const divisionMember = await divisionRolesService.unassignRoleFromUser(
     roleId,
     userId,
     divisionId,
     workspaceId
   );
 
-  res.status(StatusCodes.OK).json({ message: 'Role unassigned successfully', divisionMembership });
+  res.status(StatusCodes.OK).json({ message: 'Role unassigned successfully', divisionMember });
 };
 
 // <============================> Default Export <============================>
@@ -216,8 +244,10 @@ export default {
   updateDivision,
   deleteDivision,
   allDivisions,
+  myDivisionProfile,
 
-  getMembers,
+  allMembers,
+  getMember,
   addMember,
   removeMember,
 

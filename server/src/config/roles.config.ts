@@ -5,10 +5,10 @@ export const SUPER_ROLES = ['user', 'staff', 'ostad'] as const;
 export type SuperRole = (typeof SUPER_ROLES)[number]; // "user" | "staff" | "ostad"
 
 /**
- * Workspace roles — scoped per workspace instance
+ * Default workspace roles — scoped per workspace instance
  */
-export const WORKSPACE_ROLES = ['user', 'moderator', 'manager', 'admin'] as const;
-export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number]; // "user" | "moderator" | "manager" | "admin"
+export const DEFAULT_WORKSPACE_ROLES = ['user', 'moderator', 'manager', 'admin'] as const;
+export type DefaultWorkspaceRole = (typeof DEFAULT_WORKSPACE_ROLES)[number]; // "user" | "moderator" | "manager" | "admin"
 
 /**
  * Workspace status — scoped per workspace instance
@@ -20,7 +20,7 @@ export type WorkspaceStatus = (typeof WORKSPACE_STATUS)[number]; // "active" | "
  * Permissions map per workspace role
  * Use "*" as wildcard to allow all permissions
  */
-export const ROLE_PERMISSIONS: Record<WorkspaceRole, string[]> = {
+export const ROLE_PERMISSIONS: Record<DefaultWorkspaceRole, string[]> = {
   user: ['read-self'],
   moderator: ['read-any', 'edit-any'],
   manager: ['read-any', 'edit-any', 'invite-users'],

@@ -2,7 +2,7 @@ import { HydratedDocument } from 'mongoose';
 
 import { Division, IDivision, DivisionMembership } from '@/models';
 import { DivisionInput } from '@/validations/division.validation';
-import e from 'express';
+import { Sanitizers } from '@/utils';
 
 /**
  * @function createDivision
@@ -11,17 +11,17 @@ import e from 'express';
  * @param {DivisionInput} userData - Division creation data.
  * @param {string} workspaceId - The ID of the workspace to create the division in.
  * @param {string} userId - The ID of the user creating the division.
- * @returns {Promise<HydratedDocument<IDivision>>} The newly created division document.
+ * @returns {Promise<SanitizedDivision>} The newly created division document.
  * @throws {Error} If division name already exists.
  */
 const createDivision = async (
   userData: DivisionInput,
-  workspaceId: string,
-  userId: string
-): Promise<HydratedDocument<IDivision>> => {
+  userId: string,
+  workspaceId: string
+): Promise<Sanitizers.SanitizedDivision> => {
   const { name, description } = userData;
 
-  const existingDivision = await Division.findOne({ name }).select('_id');
+  const existingDivision = await Division.exists({ name, workspace: workspaceId });
   if (existingDivision) throw new Error('Division name already exists');
 
   const division = await Division.create({
@@ -35,10 +35,10 @@ const createDivision = async (
     user: userId,
     workspace: workspaceId,
     division: division._id,
-    divisionRoles: ['admin'],
+    divisionRoles: ['division_admin'],
   });
 
-  return division;
+  return Sanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -46,17 +46,21 @@ const createDivision = async (
  * @description Get a single division by its ID.
  *
  * @param {string} divisionId - The ID of the division to retrieve.
- * @returns {Promise<HydratedDocument<IDivision>>} The division document.
+ * @returns {Promise<SanitizedDivision>} The division document.
  * @throws {Error} If division is not found.
  */
 export const getSingleDivision = async (
   workspaceId: string,
   divisionId: string
-): Promise<HydratedDocument<IDivision>> => {
-  const division = await Division.findOne({ _id: divisionId, workspace: workspaceId });
+): Promise<Sanitizers.SanitizedDivision> => {
+  const division = await Division.findOne({ _id: divisionId, workspace: workspaceId })
+    .populate('createdBy', 'username email')
+    .populate('workspace', 'name')
+    .lean();
+
   if (!division) throw new Error('Division not found');
 
-  return division;
+  return Sanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -65,24 +69,29 @@ export const getSingleDivision = async (
  *
  * @param {DivisionInput} userData - Division update data.
  * @param {string} divisionId - The ID of the division to update.
- * @returns {Promise<HydratedDocument<IDivision>>} The updated division document.
+ * @returns {Promise<SanitizedDivision>} The updated division document.
  * @throws {Error} If division is not found.
  */
 export const updateDivision = async (
   userData: DivisionInput,
   divisionId: string
-): Promise<HydratedDocument<IDivision>> => {
+): Promise<Sanitizers.SanitizedDivision> => {
   const { name, description } = userData;
+
+  const existingDivision = await Division.exists({ name, _id: { $ne: divisionId } });
+  if (existingDivision) throw new Error('Division name already exists');
 
   const division = await Division.findByIdAndUpdate(
     divisionId,
     { name, description },
     { new: true }
-  );
+  )
+    .select('name description')
+    .lean();
 
   if (!division) throw new Error('Division not found');
 
-  return division;
+  return Sanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -90,15 +99,18 @@ export const updateDivision = async (
  * @description Delete a division by its ID.
  *
  * @param {string} divisionId - The ID of the division to delete.
- * @returns {Promise<HydratedDocument<IDivision>>} The deleted division document.
+ * @returns {Promise<SanitizedDivision>} The deleted division document.
  * @throws {Error} If division is not found.
  */
-export const deleteDivision = async (divisionId: string): Promise<HydratedDocument<IDivision>> => {
-  const division = await Division.findByIdAndDelete(divisionId);
+export const deleteDivision = async (divisionId: string): Promise<Sanitizers.SanitizedDivision> => {
+  const division = await Division.findByIdAndDelete(divisionId)
+    .select('name description')
+    .populate('createdBy', 'username email')
+    .lean();
 
   if (!division) throw new Error('Division not found');
 
-  return division;
+  return Sanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -108,18 +120,48 @@ export const deleteDivision = async (divisionId: string): Promise<HydratedDocume
  * @param {string} workspaceId - The ID of the workspace to retrieve divisions for.
  * @param {number} page - The page number for pagination.
  * @param {number} limit - The number of divisions to retrieve per page.
- * @returns {Promise<HydratedDocument<IDivision>[]>} An array of division documents.
+ * @returns {Promise<SanitizedAllDivisions & { total: number }>} An array of division documents.
  */
 export const getAllDivisions = async (
   workspaceId: string,
   page: number,
   limit: number
-): Promise<HydratedDocument<IDivision>[]> => {
-  const divisions = await Division.find({ workspace: workspaceId })
-    .skip((page - 1) * limit)
-    .limit(limit);
+): Promise<Sanitizers.SanitizedAllDivisions & { total: number }> => {
+  const total: number = await Division.countDocuments({ workspace: workspaceId });
+  if (total === 0) return { divisions: [], total };
 
-  return divisions;
+  const skip: number = (page - 1) * limit;
+  const divisions = await Division.find({ workspace: workspaceId }).skip(skip).limit(limit).lean();
+
+  return { divisions: Sanitizers.allDivisionSanitizer(divisions).divisions, total };
+};
+
+/**
+ * @function getMyDivisionProfile
+ * @description Get the division profile for the given user and division.
+ *
+ * @param {string} userId - The ID of the user.
+ * @param {string} divisionId - The ID of the division.
+ * @param {string} workspaceId - The ID of the workspace.
+ * @returns {Promise<SanitizedDivisionMembership>} The division membership document.
+ */
+export const getMyDivisionProfile = async (
+  userId: string,
+  divisionId: string,
+  workspaceId: string
+): Promise<Sanitizers.SanitizedDivisionMembership> => {
+  const division = await DivisionMembership.findOne({
+    user: userId,
+    division: divisionId,
+    workspace: workspaceId,
+  })
+    .populate('user', 'username email')
+    .populate('division', 'name')
+    .populate('workspace', 'name')
+    .lean();
+  if (!division) throw new Error('Division not found');
+
+  return Sanitizers.divisionMembershipSanitizer(division);
 };
 
 export default {
@@ -128,4 +170,6 @@ export default {
   updateDivision,
   deleteDivision,
   getAllDivisions,
+
+  getMyDivisionProfile,
 };

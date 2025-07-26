@@ -1,4 +1,3 @@
-import { WORKSPACE_ROLES } from '@/config/roles.config';
 import { z } from 'zod';
 
 /**
@@ -24,13 +23,11 @@ export const workspaceSchema = z
     description: z.string().max(200, 'Description must be less than 200 characters').optional(),
   })
   .strict();
-
 export type WorkspaceInput = z.infer<typeof workspaceSchema>;
 
 /**
  * InviteInput
  * @property {string} email - Required. Must be a valid email format.
- * @property {string} role - Required. Must be one of the predefined workspace roles.
  *
  * @description
  * Zod schema for invite validation.
@@ -39,10 +36,23 @@ export type WorkspaceInput = z.infer<typeof workspaceSchema>;
 export const inviteSchema = z
   .object({
     email: z.email('Invalid email format'),
-    role: z.enum(WORKSPACE_ROLES, {
-      message: 'Role must be one of the predefined workspace roles',
-    }),
   })
   .strict();
-
 export type InviteInput = z.infer<typeof inviteSchema>;
+
+/**
+ * RolesInput
+ * @property {string} name - Required. Must be between 3 and 50 characters.
+ * @property {string[]} permissions - Required. At least one permission is required.
+ *
+ * @description
+ * Zod schema for role validation.
+ * Validates user input on the server side to enforce business rules.
+ */
+export const roleSchema = z
+  .object({
+    name: z.string().min(1, { message: 'Role name is required' }),
+    permissions: z.array(z.string()).min(1, { message: 'At least one permission is required' }),
+  })
+  .strict();
+export type RolesInput = z.infer<typeof roleSchema>;

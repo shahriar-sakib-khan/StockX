@@ -30,7 +30,11 @@ const workspaceScope =
     }
 
     // Assign membership to request object
-    req.membership = membership;
+    req.membership = {
+      user: userId,
+      workspace: workspaceId,
+      workspaceRoles: membership.workspaceRoles,
+    };
     
     // Role validation
     if (allowedRoles.length > 0) {

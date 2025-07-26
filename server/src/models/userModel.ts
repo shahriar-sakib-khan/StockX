@@ -68,10 +68,15 @@ const userSchema: Schema<IUser> = new Schema(
  * Instance Method (toJSON override)
  * TypeScript knows `this` is IUser here.
  */
-userSchema.methods.toJSON = function (): Omit<IUser, 'password'> {
+userSchema.methods.toJSON = function (): Partial<IUser> {
   const obj = this.toObject();
   delete obj.password;
-  return obj;
+  delete obj.__v;
+
+  obj.id = obj._id;
+  delete obj._id;
+
+  return obj as Partial<IUser>;
 };
 
 const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);

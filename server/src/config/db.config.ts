@@ -1,24 +1,28 @@
-import mongoose, { ConnectOptions, Mongoose } from "mongoose";
+import mongoose from 'mongoose';
 
 /**
- * Establishes connection with MongoDB
+ * Establishes a connection to the MongoDB database.
+ *
+ * @throws {Error} If the MONGO_URI is not set or the connection fails.
+ * @returns {Promise<typeof mongoose>} The mongoose instance after connection.
  */
-const connectDB = async (): Promise<Mongoose> => {
-  
-  if (!process.env.MONGO_URI) {
-    throw new Error("❌ Mongo URI not found in environment variables");
-  }
+const connectDB = async (): Promise<typeof mongoose> => {
   const MONGO_URI = process.env.MONGO_URI;
+
+  if (!MONGO_URI) {
+    throw new Error('❌ MONGO_URI not found in environment variables.');
+  }
 
   try {
     const conn = await mongoose.connect(MONGO_URI, {
-      dbName: "your_db_name_here", // optional: helps with clarity, can be omitted if connection string includes DB name
-    } as ConnectOptions);
+      dbName: process.env.DB_NAME,
+    });
 
-    console.log(`🟢 MongoDB Connected: ${conn.connection.host}`);
+    console.log(`🟢 MongoDB connected at ${conn.connection.host}`);
     return conn;
-  } catch (err: any) {
-    console.error(`🔴 MongoDB Connection Error: ${err.message}`);
+  } catch (error) {
+    const err = error as Error;
+    console.error(`🔴 MongoDB connection error: ${err.message}`);
     process.exit(1);
   }
 };

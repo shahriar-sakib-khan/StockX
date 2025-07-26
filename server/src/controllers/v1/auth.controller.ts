@@ -13,7 +13,7 @@ import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 
 import { authService } from '@/services/v1/index.js';
-import { JWTs } from '@/utils/index.js';
+import { Tokens } from '@/utils/index.js';
 
 /**
  * @function register
@@ -23,6 +23,7 @@ import { JWTs } from '@/utils/index.js';
  */
 export const register = async (req: Request, res: Response): Promise<void> => {
   const user = await authService.registerUser(req.body);
+
   res.status(StatusCodes.CREATED).json({
     message: 'User registered successfully',
     user,
@@ -38,8 +39,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 export const login = async (req: Request, res: Response): Promise<void> => {
   const user = await authService.loginUser(req.body);
 
-  const accessToken = JWTs.createAccessToken({ userId: user._id, role: user.role });
-  const refreshToken = JWTs.createRefreshToken({ userId: user._id });
+  const accessToken = Tokens.createAccessToken({ userId: user.id, role: user.role });
+  const refreshToken = Tokens.createRefreshToken({ userId: user.id });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
@@ -80,7 +81,8 @@ export const logout = (req: Request, res: Response): void => {
  * @access Private
  */
 export const refreshAccessToken = async (req: Request, res: Response): Promise<void> => {
-  const accessToken = await authService.refreshAccessToken(req.cookies.refreshToken);
+  const { refreshToken } = req.cookies;
+  const accessToken = await authService.refreshAccessToken(refreshToken);
 
   res.status(StatusCodes.OK).json({ accessToken });
 };

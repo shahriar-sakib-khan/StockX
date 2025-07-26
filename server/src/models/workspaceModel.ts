@@ -5,7 +5,7 @@ export interface IWorkspace extends Document {
   name: string;
   description?: string;
   createdBy: mongoose.Types.ObjectId;
-  workspaceRoles: { name: string; permissions: string[] }[];
+  workspaceRoles: { name: string; permissions: string[]; _id?: mongoose.Types.ObjectId }[];
 }
 
 const workspaceSchema: Schema<IWorkspace> = new Schema(
@@ -53,6 +53,13 @@ workspaceSchema.pre('findOneAndDelete', async function (next) {
   await Membership.deleteMany({ workspace: workspaceId });
   next();
 });
+
+workspaceSchema.methods.toJSON = function (): Partial<IWorkspace> {
+  const obj = this.toObject();
+  delete obj.__v;
+
+  return obj as Partial<IWorkspace>;
+};
 
 const Workspace: Model<IWorkspace> = mongoose.model<IWorkspace>('Workspace', workspaceSchema);
 export default Workspace;

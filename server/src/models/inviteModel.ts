@@ -46,4 +46,11 @@ const inviteSchema = new Schema<IInvite>(
   { timestamps: true }
 );
 
+inviteSchema.methods.toJSON = function (): Partial<IInvite> {
+  const obj = this.toObject();
+  delete obj.__v;
+
+  return obj as Partial<IInvite>;
+};
+
 export default mongoose.model<IInvite>('Invite', inviteSchema);

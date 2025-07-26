@@ -49,6 +49,13 @@ divisionMembershipSchema.pre('save', function (next) {
   next();
 });
 
+divisionMembershipSchema.methods.toJSON = function (): Partial<IDivisionMembership> {
+  const obj = this.toObject();
+  delete obj.__v;
+
+  return obj as Partial<IDivisionMembership>;
+};
+
 const DivisionMembership: Model<IDivisionMembership> = mongoose.model<IDivisionMembership>(
   'DivisionMembership',
   divisionMembershipSchema

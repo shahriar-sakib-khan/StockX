@@ -1,7 +1,10 @@
+/**
+ * @file Contains Zod validation schemas for authentication-related routes
+ */
 import { z } from 'zod';
 
 /**
- * @typedef {Object} RegisterSchema
+ * RegisterInputSchema
  * @property {string} firstName - Required. Only letters and spaces allowed.
  * @property {string} [lastName] - Optional. Only letters and spaces allowed.
  * @property {string} username - Required. 3-30 chars, letters, numbers, underscores, no leading/trailing underscore.
@@ -58,11 +61,10 @@ export const registerSchema = z
     address: z.string().min(1, { message: 'Address is required' }),
   })
   .strict();
-
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 /**
- * @typedef {Object} LoginInput
+ * LoginInputSchema
  * @property {string} loginIdentifier - Required. Must be a valid email or username.
  * @property {string} password - Required.
  *
@@ -87,5 +89,4 @@ export const loginSchema = z
     password: z.string().min(1, { message: 'Password is required' }),
   })
   .strict();
-
 export type LoginInput = z.infer<typeof loginSchema>;

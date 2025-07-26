@@ -1,20 +1,170 @@
 import { Errors } from '@/error';
-import { Workspace, IWorkspace } from '@/models';
+import { Workspace, IWorkspace, Membership } from '@/models';
+import { Sanitizers } from '@/utils';
+import { RolesInput } from '@/validations/workspace.validation';
 
 /**
- * All active workspace roles.
+ * All roles of the workspace.
  *
  * @param {string} workspaceId - Workspace's ID.
- * @returns {Promise<IWorkspace['customWorkspaceRoles']>} List of custom roles.
+ * @returns {Promise<IWorkspace['workspaceRoles']>} List of workspace roles.
+ * @throws {Errors.NotFoundError} If workspace not found.
  */
 export const getWorkspaceRoles = async (
   workspaceId: string
-): Promise<IWorkspace['customWorkspaceRoles']> => {
-  const workspace = await Workspace.findById(workspaceId).select('customWorkspaceRoles').lean();
+): Promise<IWorkspace['workspaceRoles']> => {
+  const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return workspace.customWorkspaceRoles;
+  return workspace.workspaceRoles;
 };
 
-export default { getWorkspaceRoles };
+/**
+ * Adds a new role to the workspace roles.
+ *
+ * @param {RolesInput} userData - Workspace update data.
+ * @param {string} workspaceId - Workspace ID.
+ * @returns {Promise<IWorkspace['workspaceRoles']>} List of workspace roles.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const addWorkspaceRole = async (
+  userData: RolesInput,
+  workspaceId: string
+): Promise<IWorkspace['workspaceRoles']> => {
+  const { name, permissions } = userData;
+  const workspace = await Workspace.findByIdAndUpdate(
+    workspaceId,
+    { $push: { workspaceRoles: { name, permissions } } },
+    { new: true }
+  );
+
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  return workspace.workspaceRoles;
+};
+
+/**
+ * Updates a role of the workspace roles.
+ *
+ * @param {RolesInput} userData - Workspace update data.
+ * @param {string} roleId - Role ID.
+ * @param {string} workspaceId - Workspace ID.
+ * @returns {Promise<IWorkspace['workspaceRoles']>} List of workspace roles.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const updateWorkspaceRole = async (
+  userData: RolesInput,
+  roleId: string,
+  workspaceId: string
+): Promise<IWorkspace['workspaceRoles']> => {
+  const { name, permissions } = userData;
+  const workspace = await Workspace.findOneAndUpdate(
+    { _id: workspaceId, 'workspaceRoles._id': roleId },
+    { $set: { 'workspaceRoles.$.name': name, 'workspaceRoles.$.permissions': permissions } },
+    { new: true }
+  );
+
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  return workspace.workspaceRoles;
+};
+
+/**
+ * Removes a role of the workspace roles.
+ *
+ * @param {string} roleId - Role ID.
+ * @param {string} workspaceId - Workspace ID.
+ * @returns {Promise<IWorkspace['workspaceRoles']>} List of workspace roles.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const removeWorkspaceRole = async (
+  roleId: string,
+  workspaceId: string
+): Promise<IWorkspace['workspaceRoles']> => {
+  const workspace = await Workspace.findOneAndUpdate(
+    { _id: workspaceId },
+    { $pull: { workspaceRoles: { _id: roleId } } },
+    { new: true }
+  );
+
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  return workspace.workspaceRoles;
+};
+
+/**
+ * Assigns a role to a user in the workspace.
+ *
+ * @param {string} userId - User's ID.
+ * @param {string} roleId - Role ID.
+ * @param {string} workspaceId - Workspace ID.
+ * @returns {Promise<SanitizedMembership>} Sanitized membership.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const assignRoleToUser = async (
+  userId: string,
+  roleId: string,
+  workspaceId: string
+): Promise<Sanitizers.SanitizedMembership> => {
+  const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  const role = workspace.workspaceRoles.filter(role => (role._id?.equals(roleId) ? role : null));
+  if (!role) throw new Errors.NotFoundError('Role not found in workspace');
+
+  const membership = await Membership.findOneAndUpdate(
+    { user: userId, workspace: workspaceId },
+    { $addToSet: { workspaceRoles: role[0].name } },
+    { new: true }
+  )
+    .populate('user', 'username email')
+    .populate('workspace', 'name');
+
+  if (!membership) throw new Errors.NotFoundError('Membership not found');
+
+  return Sanitizers.membershipSanitizer(membership);
+};
+
+/**
+ * Unassign a role from a user in the workspace.
+ *
+ * @param {string} userId - User's ID.
+ * @param {string} roleId - Role ID.
+ * @param {string} workspaceId - Workspace ID.
+ * @returns {Promise<SanitizedMembership>} Sanitized membership.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const unassignRoleFromUser = async (
+  userId: string,
+  roleId: string,
+  workspaceId: string
+): Promise<Sanitizers.SanitizedMembership> => {
+  const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  const role = workspace.workspaceRoles.filter(role => (role._id?.equals(roleId) ? role : null));
+  if (!role) throw new Errors.NotFoundError('Role not found in workspace');
+
+  const membership = await Membership.findOneAndUpdate(
+    { user: userId, workspace: workspaceId },
+    { $pull: { workspaceRoles: role[0].name } },
+    { new: true }
+  )
+    .populate('user', 'username email')
+    .populate('workspace', 'name');
+
+  if (!membership) throw new Errors.NotFoundError('Membership not found');
+
+  return Sanitizers.membershipSanitizer(membership);
+};
+
+export default {
+  getWorkspaceRoles,
+  addWorkspaceRole,
+  removeWorkspaceRole,
+  updateWorkspaceRole,
+
+  assignRoleToUser,
+  unassignRoleFromUser,
+};

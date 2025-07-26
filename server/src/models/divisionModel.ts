@@ -49,5 +49,12 @@ divisionSchema.pre('save', function (next) {
   next();
 });
 
+divisionSchema.methods.toJSON = function (): Partial<IDivision> {
+  const obj = this.toObject();
+  delete obj.__v;
+
+  return obj as Partial<IDivision>;
+};
+
 const Division: Model<IDivision> = mongoose.model<IDivision>('Division', divisionSchema);
 export default Division;

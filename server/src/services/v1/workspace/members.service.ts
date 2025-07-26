@@ -1,7 +1,8 @@
 import { HydratedDocument } from 'mongoose';
 
 import { Errors } from '@/error';
-import { IUser, Membership, Workspace } from '@/models';
+import { IMembership, IUser, Membership, Workspace } from '@/models';
+import { Sanitizers } from '@/utils';
 
 /**
  * All active workspace members.
@@ -11,25 +12,66 @@ import { IUser, Membership, Workspace } from '@/models';
  * @param {number} limit - Number of items per page.
  * @returns {Promise<HydratedDocument<IUser>[]>} List of active user of this workspaces.
  */
-export const getWorkspaceMembers = async (
+export const getAllWorkspaceMembers = async (
   workspaceId: string,
   page: number,
   limit: number
-): Promise<Array<HydratedDocument<IUser>>> => {
-  const workspace = await Workspace.findById(workspaceId).select('_id').lean();
-  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+): Promise<{ members: { user: HydratedDocument<IUser>; roles: string[] }[]; total: number }> => {
+  const total: number = await Membership.countDocuments({
+    workspace: workspaceId,
+    status: 'active',
+  });
+
+  if (total === 0) return { members: [], total };
 
   const skip: number = (page - 1) * limit;
   const memberships = await Membership.find({ workspace: workspaceId, status: 'active' })
     .skip(skip)
     .limit(limit)
-    .populate('user');
+    .populate('user', 'username email');
 
-  if (!memberships) throw new Errors.NotFoundError('Workspace not found');
+  const members = memberships.map(m => ({
+    user: m.user as unknown as HydratedDocument<IUser>,
+    roles: m.workspaceRoles,
+  }));
 
-  const members = memberships.map(m => m.user as unknown as HydratedDocument<IUser>);
-
-  return members;
+  return { members, total };
 };
 
-export default { getWorkspaceMembers };
+export const getWorkspaceMember = async (
+  workspace: string,
+  memberId: string
+): Promise<Sanitizers.SanitizedMembership> => {
+  const member = await Membership.findOne({ workspace, user: memberId }).populate(
+    'user',
+    'username email'
+  );
+  if (!member) throw new Errors.BadRequestError('Member does not exist.');
+
+  return Sanitizers.membershipSanitizer(member);
+};
+
+/**
+ * Remove a member from a workspace.
+ *
+ * @param {string} workspace - Workspace's ID.
+ * @param {string} memberId - Member's ID.
+ * @returns {Promise<Sanitizers.SanitizedMembership>} Sanitized workspace member.
+ */
+export const removeWorkspaceMember = async (
+  userId: string,
+  workspace: string,
+  memberId: string
+): Promise<Sanitizers.SanitizedMembership> => {
+  if (userId === memberId) throw new Errors.BadRequestError('You cannot remove yourself.');
+
+  const member = await Membership.findOneAndDelete({ workspace, user: memberId }).populate(
+    'user',
+    'username email'
+  );
+  if (!member) throw new Errors.BadRequestError('Member does not exist.');
+
+  return Sanitizers.membershipSanitizer(member);
+};
+
+export default { getAllWorkspaceMembers, getWorkspaceMember, removeWorkspaceMember };

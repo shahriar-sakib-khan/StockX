@@ -25,8 +25,22 @@ export const divisionSchema = z
       .optional(),
   })
   .strict();
-
 export type DivisionInput = z.infer<typeof divisionSchema>;
+
+/**
+ * DivisionMemberInput
+ * @property {string} memberIdentifier - Required. Must be a valid user identifier.
+ *
+ * @description
+ * Zod schema for division member validation.
+ * Validates user input on the server side to enforce business rules.
+ */
+export const divisionMemberSchema = z
+  .object({
+    memberIdentifier: z.string().min(1, { message: 'User identifier is required' }),
+  })
+  .strict();
+export type DivisionMemberInput = z.infer<typeof divisionMemberSchema>;
 
 /**
  * DivisionRoleInput
@@ -37,9 +51,30 @@ export type DivisionInput = z.infer<typeof divisionSchema>;
  * Zod schema for division role validation.
  * Validates user input on the server side to enforce business rules.
  */
-export const divisionRolesSchema = z.object({
-  name: z.string().min(1, { message: 'Role name is required' }),
-  permissions: z.array(z.string()).min(1, { message: 'At least one permission is required' }),
-});
+export const divisionRoleSchema = z
+  .object({
+    name: z.string().min(1, { message: 'Role name is required' }),
+    permissions: z.array(z.string()).min(1, { message: 'At least one permission is required' }),
+  })
+  .strict();
+export type DivisionRoleInput = z.infer<typeof divisionRoleSchema>;
 
-export type DivisionRoleInput = z.infer<typeof divisionRolesSchema>;
+/**
+ * DivisionUpdateRoleInput
+ * @property {string} name - Optional.
+ * @property {string[]} permissions - Optional.
+ *
+ * @description
+ * Zod schema for division update role validation.
+ * Validates user input on the server side to enforce business rules.
+ */
+export const divisionUpdateRoleSchema = z
+  .object({
+    name: z.string().min(1, { message: 'Role name is required' }).optional(),
+    permissions: z
+      .array(z.string())
+      .min(1, { message: 'At least one permission is required' })
+      .optional(),
+  })
+  .strict();
+export type DivisionUpdateRoleInput = z.infer<typeof divisionUpdateRoleSchema>;
