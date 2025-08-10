@@ -12,7 +12,7 @@ import {
 } from "@/controllers/v1/index.js";
 
 import {
-  authorizeRoles,
+  requireRole ,
   validateUpdateUserInput,
 } from "@/middlewares/index.js";
 
@@ -34,13 +34,13 @@ router.get("/transactions", getUserTransactionHistory);
  */
 router.get(
   "/admin/stats",
-  authorizeRoles("moderator", "admin"),
+  requireRole ("moderator", "admin"),
   getApplicationStats
 );
-router.get("/admin/users", authorizeRoles("moderator", "admin"), getAllUsers);
+router.get("/admin/users", requireRole ("moderator", "admin"), getAllUsers);
 router.get(
   "/admin/users/:id",
-  authorizeRoles("moderator", "admin"),
+  requireRole ("moderator", "admin"),
   getSingleUser
 );
 
@@ -50,14 +50,14 @@ router.get(
  */
 router.patch(
   "/admin/users/:id",
-  authorizeRoles("admin"),
+  requireRole ("admin"),
   validateUpdateUserInput,
   adminUpdateUser
 );
-router.delete("/admin/users/:id", authorizeRoles("admin"), adminDeleteUser);
+router.delete("/admin/users/:id", requireRole ("admin"), adminDeleteUser);
 router.get(
   "/admin/:id/transactions",
-  authorizeRoles("admin"),
+  requireRole ("admin"),
   getUserTransactionHistory
 );
 

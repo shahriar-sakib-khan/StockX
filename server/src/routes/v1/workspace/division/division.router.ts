@@ -1,10 +1,11 @@
-import express from 'express';
+import { Router } from 'express';
 
 import { divisionController } from '@/controllers/v1';
 import { workspaceScope, divisionScope, validateRequest } from '@/middlewares';
 import { division } from '@/validations';
+import inventoryRouter from './inventory.router';
 
-const router = express.Router({ mergeParams: true });
+const router = Router({ mergeParams: true });
 
 /**
  * @swagger
@@ -81,7 +82,11 @@ router.get('/:divisionId/members', divisionScope(), divisionController.allMember
  * @desc    Get a single member of a division
  * @access  Admin (division)
  */
-router.get('/:divisionId/members/:memberId', divisionScope(['division_admin']), divisionController.getMember);
+router.get(
+  '/:divisionId/members/:memberId',
+  divisionScope(['division_admin']),
+  divisionController.getMember
+);
 
 /**
  * @route   POST /:workspaceId/divisions/:divisionId/members
@@ -100,7 +105,11 @@ router.post(
  * @desc    Remove a member from the division
  * @access  Admin (division)
  */
-router.delete('/:divisionId/members', divisionScope(['division_admin']), divisionController.removeMember);
+router.delete(
+  '/:divisionId/members',
+  divisionScope(['division_admin']),
+  divisionController.removeMember
+);
 
 // ============================= Division Role Routes =============================
 
@@ -169,5 +178,10 @@ router.delete(
   divisionScope(['division_admin']),
   divisionController.unassignRole
 );
+
+// <============================> Sub-Routes-Inventory <============================>
+
+// router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
+router.use('/:divisionId/inventory', divisionScope(['division_admin']), inventoryRouter);
 
 export default router;

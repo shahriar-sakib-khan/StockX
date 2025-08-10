@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { validateRequest } from '@/middlewares';
 import { auth } from '@/validations';
 import { authController } from '@/controllers/v1';
-import { authenticateUser } from '@/middlewares';
+import { requireAuth } from '@/middlewares';
 
 const router = Router();
 
@@ -26,7 +26,7 @@ router.post('/login', validateRequest(auth.loginSchema), authController.login);
  * @desc    Log out the currently authenticated user
  * @access  Private
  */
-router.post('/logout', authenticateUser, authController.logout);
+router.post('/logout', requireAuth, authController.logout);
 
 /**
  * @route   POST /auth/refresh

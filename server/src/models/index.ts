@@ -17,3 +17,9 @@ export type { IInvite } from './inviteModel.js';
 
 export { default as DivisionMembership } from './divisionMembershipModel.js';
 export type { IDivisionMembership } from './divisionMembershipModel.js';
+
+export { default as GlobalBrand } from './globalBrandModel.js';
+export type { IGlobalBrand } from './globalBrandModel.js';
+
+export { default as LocalBrand } from './localBrandModel.js';
+export type { ILocalBrand } from './localBrandModel.js';

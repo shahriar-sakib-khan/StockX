@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { workspaceScope, validateRequest } from '@/middlewares';
 import { workspaceController } from '@/controllers/v1';
 import { workspace } from '@/validations';
-import divisionRouter from './division.router';
+import divisionRouter from './division/division.router';
 
 const router = Router();
 

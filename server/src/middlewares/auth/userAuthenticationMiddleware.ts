@@ -8,7 +8,7 @@ import { assertAuth } from '@/common';
  * Middleware to authenticate user from JWT access token (cookie or header).
  * Adds decoded user info to req.user and ensures type safety.
  */
-export const authenticateUser = (req: Request, res: Response, next: NextFunction): void => {
+export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
   const accessToken = req.cookies?.accessToken || req.headers.authorization?.split(' ')[1];
 
   if (!accessToken) {

@@ -1,8 +1,6 @@
-import { HydratedDocument } from 'mongoose';
-
-import { Division, IDivision, DivisionMembership } from '@/models';
+import { Division, DivisionMembership } from '@/models';
 import { DivisionInput } from '@/validations/division.validation';
-import { Sanitizers } from '@/utils';
+import { divisionSanitizers } from '@/utils';
 
 /**
  * @function createDivision
@@ -18,7 +16,7 @@ const createDivision = async (
   userData: DivisionInput,
   userId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedDivision> => {
+): Promise<divisionSanitizers.SanitizedDivision> => {
   const { name, description } = userData;
 
   const existingDivision = await Division.exists({ name, workspace: workspaceId });
@@ -38,7 +36,7 @@ const createDivision = async (
     divisionRoles: ['division_admin'],
   });
 
-  return Sanitizers.divisionSanitizer(division);
+  return divisionSanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -52,7 +50,7 @@ const createDivision = async (
 export const getSingleDivision = async (
   workspaceId: string,
   divisionId: string
-): Promise<Sanitizers.SanitizedDivision> => {
+): Promise<divisionSanitizers.SanitizedDivision> => {
   const division = await Division.findOne({ _id: divisionId, workspace: workspaceId })
     .populate('createdBy', 'username email')
     .populate('workspace', 'name')
@@ -60,7 +58,7 @@ export const getSingleDivision = async (
 
   if (!division) throw new Error('Division not found');
 
-  return Sanitizers.divisionSanitizer(division);
+  return divisionSanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -75,7 +73,7 @@ export const getSingleDivision = async (
 export const updateDivision = async (
   userData: DivisionInput,
   divisionId: string
-): Promise<Sanitizers.SanitizedDivision> => {
+): Promise<divisionSanitizers.SanitizedDivision> => {
   const { name, description } = userData;
 
   const existingDivision = await Division.exists({ name, _id: { $ne: divisionId } });
@@ -91,7 +89,7 @@ export const updateDivision = async (
 
   if (!division) throw new Error('Division not found');
 
-  return Sanitizers.divisionSanitizer(division);
+  return divisionSanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -102,7 +100,7 @@ export const updateDivision = async (
  * @returns {Promise<SanitizedDivision>} The deleted division document.
  * @throws {Error} If division is not found.
  */
-export const deleteDivision = async (divisionId: string): Promise<Sanitizers.SanitizedDivision> => {
+export const deleteDivision = async (divisionId: string): Promise<divisionSanitizers.SanitizedDivision> => {
   const division = await Division.findByIdAndDelete(divisionId)
     .select('name description')
     .populate('createdBy', 'username email')
@@ -110,7 +108,7 @@ export const deleteDivision = async (divisionId: string): Promise<Sanitizers.San
 
   if (!division) throw new Error('Division not found');
 
-  return Sanitizers.divisionSanitizer(division);
+  return divisionSanitizers.divisionSanitizer(division);
 };
 
 /**
@@ -126,14 +124,14 @@ export const getAllDivisions = async (
   workspaceId: string,
   page: number,
   limit: number
-): Promise<Sanitizers.SanitizedAllDivisions & { total: number }> => {
+): Promise<divisionSanitizers.SanitizedAllDivisions & { total: number }> => {
   const total: number = await Division.countDocuments({ workspace: workspaceId });
   if (total === 0) return { divisions: [], total };
 
   const skip: number = (page - 1) * limit;
   const divisions = await Division.find({ workspace: workspaceId }).skip(skip).limit(limit).lean();
 
-  return { divisions: Sanitizers.allDivisionSanitizer(divisions).divisions, total };
+  return { divisions: divisionSanitizers.allDivisionSanitizer(divisions).divisions, total };
 };
 
 /**
@@ -149,7 +147,7 @@ export const getMyDivisionProfile = async (
   userId: string,
   divisionId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
   const division = await DivisionMembership.findOne({
     user: userId,
     division: divisionId,
@@ -161,7 +159,7 @@ export const getMyDivisionProfile = async (
     .lean();
   if (!division) throw new Error('Division not found');
 
-  return Sanitizers.divisionMembershipSanitizer(division);
+  return divisionSanitizers.divisionMembershipSanitizer(division);
 };
 
 export default {

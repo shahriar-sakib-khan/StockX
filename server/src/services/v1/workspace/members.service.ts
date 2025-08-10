@@ -1,8 +1,8 @@
 import { HydratedDocument } from 'mongoose';
 
 import { Errors } from '@/error';
-import { IMembership, IUser, Membership, Workspace } from '@/models';
-import { Sanitizers } from '@/utils';
+import { IUser, Membership } from '@/models';
+import { workspaceSanitizers } from '@/utils';
 
 /**
  * All active workspace members.
@@ -41,14 +41,14 @@ export const getAllWorkspaceMembers = async (
 export const getWorkspaceMember = async (
   workspace: string,
   memberId: string
-): Promise<Sanitizers.SanitizedMembership> => {
+): Promise<workspaceSanitizers.SanitizedMembership> => {
   const member = await Membership.findOne({ workspace, user: memberId }).populate(
     'user',
     'username email'
   );
   if (!member) throw new Errors.BadRequestError('Member does not exist.');
 
-  return Sanitizers.membershipSanitizer(member);
+  return workspaceSanitizers.membershipSanitizer(member);
 };
 
 /**
@@ -56,13 +56,13 @@ export const getWorkspaceMember = async (
  *
  * @param {string} workspace - Workspace's ID.
  * @param {string} memberId - Member's ID.
- * @returns {Promise<Sanitizers.SanitizedMembership>} Sanitized workspace member.
+ * @returns {Promise<workspaceSanitizers.SanitizedMembership>} Sanitized workspace member.
  */
 export const removeWorkspaceMember = async (
   userId: string,
   workspace: string,
   memberId: string
-): Promise<Sanitizers.SanitizedMembership> => {
+): Promise<workspaceSanitizers.SanitizedMembership> => {
   if (userId === memberId) throw new Errors.BadRequestError('You cannot remove yourself.');
 
   const member = await Membership.findOneAndDelete({ workspace, user: memberId }).populate(
@@ -71,7 +71,7 @@ export const removeWorkspaceMember = async (
   );
   if (!member) throw new Errors.BadRequestError('Member does not exist.');
 
-  return Sanitizers.membershipSanitizer(member);
+  return workspaceSanitizers.membershipSanitizer(member);
 };
 
 export default { getAllWorkspaceMembers, getWorkspaceMember, removeWorkspaceMember };

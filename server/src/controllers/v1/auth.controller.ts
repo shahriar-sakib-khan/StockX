@@ -1,7 +1,8 @@
 /**
  * @module AuthController
- *
- * Contains controllers for handling authentication flows:
+ * 
+ * @description This module contains the controller functions for the authentication routes.
+ * 
  * - User registration
  * - Login with token issuance
  * - Logout by clearing cookies

@@ -9,7 +9,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { IWorkspace, Membership, Workspace } from '@/models';
 import { WorkspaceInput } from '@/validations/workspace.validation';
 import { Errors } from '@/error';
-import { Sanitizers } from '@/utils';
+import { workspaceSanitizers } from '@/utils';
 
 /**
  * @function createWorkspace
@@ -25,7 +25,7 @@ import { Sanitizers } from '@/utils';
 export const createWorkspace = async (
   userData: WorkspaceInput,
   userId: string
-): Promise<Sanitizers.SanitizedWorkspace> => {
+): Promise<workspaceSanitizers.SanitizedWorkspace> => {
   const { name, description } = userData;
 
   // Prevent duplicate workspaces for the same user
@@ -50,7 +50,7 @@ export const createWorkspace = async (
   });
 
   // Return only the relevant, sanitized fields
-  return Sanitizers.workspaceSanitizer(workspace);
+  return workspaceSanitizers.workspaceSanitizer(workspace);
 };
 
 /**
@@ -64,7 +64,7 @@ export const getAllWorkspaces = async (
   userId: string,
   page: number,
   limit: number
-): Promise<Sanitizers.SanitizedWorkspaces & { total: number }> => {
+): Promise<workspaceSanitizers.SanitizedWorkspaces & { total: number }> => {
   const skip: number = (page - 1) * limit;
   const memberships = await Membership.find({ user: userId, status: 'active' })
     .skip(skip)
@@ -76,7 +76,7 @@ export const getAllWorkspaces = async (
   const total: number = await Membership.countDocuments({ user: userId, status: 'active' });
 
   return {
-    workspaces: Sanitizers.allWorkspaceSanitizer(workspaces).workspaces,
+    workspaces: workspaceSanitizers.allWorkspaceSanitizer(workspaces).workspaces,
     total,
   };
 };
@@ -91,12 +91,12 @@ export const getAllWorkspaces = async (
  */
 export const getSingleWorkspace = async (
   workspaceId: string
-): Promise<Sanitizers.SanitizedWorkspace> => {
+): Promise<workspaceSanitizers.SanitizedWorkspace> => {
   const workspace = await Workspace.findById(workspaceId).lean();
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return Sanitizers.workspaceSanitizer(workspace);
+  return workspaceSanitizers.workspaceSanitizer(workspace);
 };
 
 /**
@@ -111,7 +111,7 @@ export const getSingleWorkspace = async (
 export const updateWorkspace = async (
   userData: WorkspaceInput,
   workspaceId: string
-): Promise<Sanitizers.SanitizedWorkspace> => {
+): Promise<workspaceSanitizers.SanitizedWorkspace> => {
   const { name, description } = userData;
   const workspace = await Workspace.findByIdAndUpdate(
     workspaceId,
@@ -123,7 +123,7 @@ export const updateWorkspace = async (
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return Sanitizers.workspaceSanitizer(workspace);
+  return workspaceSanitizers.workspaceSanitizer(workspace);
 };
 
 /**
@@ -136,14 +136,14 @@ export const updateWorkspace = async (
  */
 export const deleteWorkspace = async (
   workspaceId: string
-): Promise<Sanitizers.SanitizedWorkspace> => {
+): Promise<workspaceSanitizers.SanitizedWorkspace> => {
   const workspace = await Workspace.findByIdAndDelete(workspaceId)
     .select('name description')
     .lean();
 
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
-  return Sanitizers.workspaceSanitizer(workspace);
+  return workspaceSanitizers.workspaceSanitizer(workspace);
 };
 
 /**
@@ -158,7 +158,7 @@ export const deleteWorkspace = async (
 export const getMyWorkspaceProfile = async (
   userId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedMembership> => {
+): Promise<workspaceSanitizers.SanitizedMembership> => {
   const membership = await Membership.findOne({ user: userId, workspace: workspaceId })
     .populate('workspace', 'name')
     .populate('user', 'username email')
@@ -166,7 +166,7 @@ export const getMyWorkspaceProfile = async (
 
   if (!membership) throw new Errors.NotFoundError('Not a member of the workspace');
 
-  return Sanitizers.membershipSanitizer(membership);
+  return workspaceSanitizers.membershipSanitizer(membership);
 };
 
 export default {

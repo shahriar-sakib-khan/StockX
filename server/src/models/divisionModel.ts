@@ -10,31 +10,11 @@ export interface IDivision extends Document {
 
 const divisionSchema: Schema<IDivision> = new Schema(
   {
-    name: {
-      type: String,
-      required: [true, 'Division name is required'],
-      trim: true,
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    workspace: {
-      type: Schema.Types.ObjectId,
-      ref: 'Workspace',
-      required: true,
-    },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    divisionRoles: [
-      {
-        name: { type: String, required: true },
-        permissions: [{ type: String }],
-      },
-    ],
+    name: { type: String, required: [true, 'Division name is required'], trim: true },
+    description: { type: String, default: '' },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    divisionRoles: [{ name: { type: String, required: true }, permissions: [{ type: String }] }],
   },
   { timestamps: true }
 );

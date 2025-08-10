@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { IInvite, Invite, Membership, User } from '@/models';
 import { Errors } from '@/error';
 import { InviteInput } from '@/validations/workspace.validation';
-import { Sanitizers, Tokens } from '@/utils';
+import { workspaceSanitizers, Tokens } from '@/utils';
 
 /**
  * @function sendWorkspaceInvite
@@ -64,7 +64,7 @@ export const sendWorkspaceInvite = async (
 export const acceptWorkspaceInvite = async (
   token: string,
   userId: string
-): Promise<Sanitizers.SanitizedWorkspaceInvite> => {
+): Promise<workspaceSanitizers.SanitizedWorkspaceInvite> => {
   const invite = await Invite.findOne({ token });
 
   if (!invite) throw new Errors.BadRequestError('Invalid invitation');
@@ -86,7 +86,7 @@ export const acceptWorkspaceInvite = async (
   invite.status = 'accepted';
   await invite.save();
 
-  return Sanitizers.workspaceInviteSanitizer(invite);
+  return workspaceSanitizers.workspaceInviteSanitizer(invite);
 };
 
 /**
@@ -100,7 +100,7 @@ export const acceptWorkspaceInvite = async (
 export const declineWorkspaceInvite = async (
   token: string,
   userId: string
-): Promise<Sanitizers.SanitizedWorkspaceInvite> => {
+): Promise<workspaceSanitizers.SanitizedWorkspaceInvite> => {
   const invite = await Invite.findOne({ token });
 
   if (!invite) throw new Errors.BadRequestError('Invalid invitation');
@@ -115,7 +115,7 @@ export const declineWorkspaceInvite = async (
   invite.status = 'declined';
   await invite.save();
 
-  return Sanitizers.workspaceInviteSanitizer(invite);
+  return workspaceSanitizers.workspaceInviteSanitizer(invite);
 };
 
 /**
@@ -131,10 +131,10 @@ export const getAllInvites = async (
   workspace: string,
   page: number,
   limit: number
-): Promise<{ SanitizedWorkspaceInvites: Sanitizers.SanitizedWorkspaceInvite[]; total: number }> => {
+): Promise<{ SanitizedWorkspaceInvites: workspaceSanitizers.SanitizedWorkspaceInvite[]; total: number }> => {
   const skip: number = (page - 1) * limit;
   const allInvites = await Invite.find({ workspace }).skip(skip).limit(limit);
-  const SanitizedWorkspaceInvites = allInvites.map(i => Sanitizers.workspaceInviteSanitizer(i));
+  const SanitizedWorkspaceInvites = allInvites.map(i => workspaceSanitizers.workspaceInviteSanitizer(i));
 
   const total: number = await Invite.countDocuments({ workspace });
 
@@ -150,13 +150,13 @@ export const getAllInvites = async (
  */
 export const deleteWorkspaceInvite = async (
   token: string
-): Promise<Sanitizers.SanitizedWorkspaceInvite> => {
+): Promise<workspaceSanitizers.SanitizedWorkspaceInvite> => {
   const invite = await Invite.findOne({ token });
   if (!invite) throw new Errors.BadRequestError('Invalid invite.');
 
   await invite.deleteOne();
 
-  return Sanitizers.workspaceInviteSanitizer(invite);
+  return workspaceSanitizers.workspaceInviteSanitizer(invite);
 };
 
 export default {

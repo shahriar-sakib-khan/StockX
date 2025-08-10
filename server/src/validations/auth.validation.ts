@@ -5,12 +5,12 @@ import { z } from 'zod';
 
 /**
  * RegisterInputSchema
- * @property {string} firstName - Required. Only letters and spaces allowed.
- * @property {string} [lastName] - Optional. Only letters and spaces allowed.
+ * @property {string} firstName - Optional, can be added later. Only letters and spaces allowed.
+ * @property {string} [lastName] - Optional, can be added later. Only letters and spaces allowed.
  * @property {string} username - Required. 3-30 chars, letters, numbers, underscores, no leading/trailing underscore.
  * @property {string} email - Required. Must be a valid email format.
  * @property {string} password - Required. 8-100 chars, must include at least one number.
- * @property {string} address - Required.
+ * @property {string} address - Optional, can be added later.
  *
  * @description
  * Zod schema for user registration validation.
@@ -22,7 +22,8 @@ export const registerSchema = z
     firstName: z
       .string()
       .min(1, { message: 'First name is required' })
-      .regex(/^[A-Za-z\s]+$/, { message: 'First name must contain only letters and spaces' }),
+      .regex(/^[A-Za-z\s]+$/, { message: 'First name must contain only letters and spaces' })
+      .optional(),
 
     lastName: z
       .string()

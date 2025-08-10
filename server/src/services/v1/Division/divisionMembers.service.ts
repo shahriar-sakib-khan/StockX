@@ -1,6 +1,6 @@
 import { Errors } from '@/error';
 import { Division, DivisionMembership, Membership, User } from '@/models';
-import { Sanitizers } from '@/utils';
+import { divisionSanitizers } from '@/utils';
 
 /**
  * @function getDivisionMembers
@@ -17,7 +17,7 @@ export const getAllDivisionMembers = async (
   workspaceId: string,
   page: number,
   limit: number
-): Promise<Sanitizers.SanitizedDivisionMembers & { total: number }> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembers & { total: number }> => {
   // Check if division exists
   const divisionExist = await Division.exists({ _id: divisionId, workspace: workspaceId });
   if (!divisionExist) throw new Errors.NotFoundError('Division not found');
@@ -43,7 +43,7 @@ export const getAllDivisionMembers = async (
     .populate('invitedBy', 'username')
     .lean();
 
-  return { members: Sanitizers.divisionMembersSanitizer(members).members, total };
+  return { members: divisionSanitizers.divisionMembersSanitizer(members).members, total };
 };
 
 /**
@@ -60,7 +60,7 @@ export const getSingleDivisionMember = async (
   memberId: string,
   divisionId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
   // Check if member exists
   const divisionMembership = await DivisionMembership.findOne({
     user: memberId,
@@ -72,7 +72,7 @@ export const getSingleDivisionMember = async (
 
   if (!divisionMembership) throw new Errors.NotFoundError('Member not found');
 
-  return Sanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 /**
@@ -90,7 +90,7 @@ export const addMemberToDivision = async (
   workspaceId: string,
   divisionId: string,
   invitedBy: string
-): Promise<Sanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
   // Check if the member identifier is an email or user ID
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberIdentifier);
   const memberId = isEmail
@@ -127,7 +127,7 @@ export const addMemberToDivision = async (
 
   await divisionMembership.populate('user', 'username email');
 
-  return Sanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 /**
@@ -143,7 +143,7 @@ export const removeMemberFromDivision = async (
   memberIdentifier: string,
   workspaceId: string,
   divisionId: string
-): Promise<Sanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
   // Check if the member identifier is an email or user ID
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberIdentifier);
   const memberId = isEmail
@@ -161,7 +161,7 @@ export const removeMemberFromDivision = async (
 
   if (!divisionMembership) throw new Errors.BadRequestError('Not a member of this division');
 
-  return Sanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 export default {

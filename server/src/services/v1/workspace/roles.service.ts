@@ -1,7 +1,7 @@
 import { Errors } from '@/error';
 import { Workspace, IWorkspace, Membership } from '@/models';
-import { Sanitizers } from '@/utils';
 import { RolesInput } from '@/validations/workspace.validation';
+import { workspaceSanitizers } from '@/utils';
 
 /**
  * All roles of the workspace.
@@ -106,7 +106,7 @@ export const assignRoleToUser = async (
   userId: string,
   roleId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedMembership> => {
+): Promise<workspaceSanitizers.SanitizedMembership> => {
   const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
@@ -123,7 +123,7 @@ export const assignRoleToUser = async (
 
   if (!membership) throw new Errors.NotFoundError('Membership not found');
 
-  return Sanitizers.membershipSanitizer(membership);
+  return workspaceSanitizers.membershipSanitizer(membership);
 };
 
 /**
@@ -139,7 +139,7 @@ export const unassignRoleFromUser = async (
   userId: string,
   roleId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedMembership> => {
+): Promise<workspaceSanitizers.SanitizedMembership> => {
   const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
   if (!workspace) throw new Errors.NotFoundError('Workspace not found');
 
@@ -156,7 +156,7 @@ export const unassignRoleFromUser = async (
 
   if (!membership) throw new Errors.NotFoundError('Membership not found');
 
-  return Sanitizers.membershipSanitizer(membership);
+  return workspaceSanitizers.membershipSanitizer(membership);
 };
 
 export default {

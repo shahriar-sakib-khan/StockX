@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
 import authRouter from './auth/router';
+import adminRouter from './admin/router';
 import userRouter from './user/router';
 import paymentRouter from './payment';
 import workspaceRouter from './workspace/router';
 
-import { authenticateUser } from '@/middlewares';
+import { requireAuth, requireRole } from '@/middlewares';
 
 const router = Router();
 
@@ -14,6 +15,8 @@ const router = Router();
  * tags:
  *   - name: Auth
  *     description: Authentication and session management
+ *   - name: Admin
+ *     description: Admin (ostad) routes
  *   - name: User
  *     description: User profile and account management
  *   - name: Workspace
@@ -25,8 +28,9 @@ const router = Router();
 router.use('/auth', authRouter);
 
 // Authenticated routes
-router.use('/user', authenticateUser, userRouter);
-router.use('/workspace', authenticateUser, workspaceRouter);
+router.use('/user', requireAuth, userRouter);
+router.use('/admin', requireAuth, requireRole('ostad'), adminRouter);
+router.use('/workspace', requireAuth, workspaceRouter);
 router.use('/payment', paymentRouter);
 
 export default router;

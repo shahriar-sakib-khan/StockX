@@ -1,7 +1,7 @@
 import { User } from '@/models';
-import { JWTs, Passwords, Sanitizers } from '@/utils';
 import { Errors } from '@/error';
 import { auth } from '@/validations';
+import { JWTs, Passwords, userSanitizers } from '@/utils';
 
 /**
  * Register a new user.
@@ -13,7 +13,7 @@ import { auth } from '@/validations';
  */
 export const registerUser = async (
   userData: auth.RegisterInput
-): Promise<Sanitizers.SanitizedUser> => {
+): Promise<userSanitizers.SanitizedUser> => {
   const { firstName, lastName, username, email, password, address } = userData;
 
   const existingUsers = await User.find({
@@ -37,7 +37,7 @@ export const registerUser = async (
     password: hashedPassword,
   });
 
-  return Sanitizers.userSanitizer(user);
+  return userSanitizers.userSanitizer(user);
 };
 
 /**
@@ -52,7 +52,7 @@ export const registerUser = async (
 export const loginUser = async ({
   loginIdentifier,
   password,
-}: auth.LoginInput): Promise<Sanitizers.SanitizedUser> => {
+}: auth.LoginInput): Promise<userSanitizers.SanitizedUser> => {
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginIdentifier);
 
   const user = await User.findOne(
@@ -64,7 +64,7 @@ export const loginUser = async ({
   const isValid = await Passwords.compareHashedPassword(password, user.password);
   if (!isValid) throw new Errors.UnauthenticatedError('Invalid credentials');
 
-  return Sanitizers.userSanitizer(user);
+  return userSanitizers.userSanitizer(user);
 };
 
 /**

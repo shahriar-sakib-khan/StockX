@@ -1,7 +1,7 @@
 export * from './validators/userInputValidation.js';
 export * from './validators/paymentInputValidation.js';
 export * from './auth/userAuthenticationMiddleware.js';
-export * from './rbac/rbacMiddleware.js';
+export * from './rbac/roleAuthorization.js';
 
 export { default as validateRequest } from './validators/validateRequest';
 

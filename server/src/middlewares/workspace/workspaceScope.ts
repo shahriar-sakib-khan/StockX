@@ -10,12 +10,25 @@ const workspaceScope =
     const { userId, role } = req.user;
     const { workspaceId } = req.params;
 
-    // Workspace check 
-    const workspace = await Workspace.findById(workspaceId).lean();
-    if (!workspace) return res.status(StatusCodes.NOT_FOUND).json({ message: 'Workspace not found' });
+    // Validate required objects exist
+    if (!req.user) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Authentication missing.' });
+    }
+
+    // Workspace check
+    const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
+    if (!workspace)
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'Workspace not found' });
 
     // SuperAdmin override (ostad)
-    if (role === 'ostad') return next();
+    if (role === 'ostad') {
+      req.membership = {
+        user: userId,
+        workspace: workspaceId,
+        workspaceRoles: workspace.workspaceRoles.map(role => role.name),
+      };
+      return next();
+    }
 
     // Membership check
     const membership = await Membership.findOne({
@@ -35,7 +48,7 @@ const workspaceScope =
       workspace: workspaceId,
       workspaceRoles: membership.workspaceRoles,
     };
-    
+
     // Role validation
     if (allowedRoles.length > 0) {
       const hasWorkspaceRoles = membership.workspaceRoles.some(

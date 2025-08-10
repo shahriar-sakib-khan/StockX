@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
 import { initiatePaymentSession, handleIPN } from '@/controllers/v1/index.js';
-import { authenticateUser, validatePaymentInput } from '@/middlewares/index.js';
+import { requireAuth, validatePaymentInput } from '@/middlewares/index.js';
 
 const router = Router();
 
-router.post('/initiate', authenticateUser, validatePaymentInput, initiatePaymentSession);
+router.post('/initiate', requireAuth, validatePaymentInput, initiatePaymentSession);
 router.post('/ipn', handleIPN);
 
 router.post('/success/:tranId', (req, res) => {

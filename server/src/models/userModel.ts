@@ -7,23 +7,20 @@ import { SUPER_ROLES } from '@/config/roles.config.js';
  * This represents the shape of a User *document* in MongoDB
  */
 export interface IUser extends Document {
-  firstName: string;
+  firstName?: string;
   lastName?: string;
   username: string;
   email: string;
   password: string;
-  address: string;
+  address?: string;
   role: (typeof SUPER_ROLES)[number];
 }
 
-/**
- * User the Schema (Mongoose + TypeScript types)
- */
 const userSchema: Schema<IUser> = new Schema(
   {
     firstName: {
       type: String,
-      required: [true, 'First name is required'],
+      default: '',
     },
 
     lastName: {
@@ -52,7 +49,6 @@ const userSchema: Schema<IUser> = new Schema(
 
     address: {
       type: String,
-      required: [true, 'Address is required'],
     },
 
     role: {

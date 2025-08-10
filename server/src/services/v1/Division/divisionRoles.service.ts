@@ -1,9 +1,7 @@
-import { HydratedDocument } from 'mongoose';
-
-import { Division, DivisionMembership, IDivision, IDivisionMembership } from '@/models';
+import { Division, DivisionMembership } from '@/models';
 import { Errors } from '@/error';
 import { DivisionRoleInput, DivisionUpdateRoleInput } from '@/validations/division.validation';
-import { Sanitizers } from '@/utils';
+import { divisionSanitizers } from '@/utils';
 
 /**
  * @function getDivisionRoles
@@ -123,7 +121,7 @@ export const assignRoleToUser = async (
   userId: string,
   divisionId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
   const divisionMembership = await DivisionMembership.findOne({
     user: userId,
     workspace: workspaceId,
@@ -149,7 +147,7 @@ export const assignRoleToUser = async (
   divisionMembership.divisionRoles.push(roleToAdd);
   await divisionMembership.save();
 
-  return Sanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 /**
@@ -167,7 +165,7 @@ export const unassignRoleFromUser = async (
   userId: string,
   divisionId: string,
   workspaceId: string
-): Promise<Sanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
   const divisionMembership = await DivisionMembership.findOne({
     user: userId,
     division: divisionId,
@@ -195,7 +193,7 @@ export const unassignRoleFromUser = async (
   );
   await divisionMembership.save();
 
-  return Sanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 // <============================> Exports <============================>

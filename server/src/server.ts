@@ -7,9 +7,10 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 // <============================> INTERNAL IMPORTS <============================>
-import { connectDB } from '@/config';
 import apiRouter from '@/routes';
 import { errorHandler } from '@/error';
+import { connectDB } from '@/config';
+import runBootstrap from './bootstrap';
 // <============================> IMPORTS END HERE  <============================>
 
 const app: Application = express();
@@ -43,6 +44,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async (): Promise<void> => {
   try {
     await connectDB();
+    await runBootstrap();
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);

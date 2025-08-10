@@ -1,0 +1,1 @@
+export {default as brandService} from './brands.service';
