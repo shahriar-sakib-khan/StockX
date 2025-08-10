@@ -1,10 +1,12 @@
 import { Navigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 export default function AppContainer({ children }) {
-  const { data, isLoading } = useAuth();
+  // const { data, isLoading } = useAuth();
+  const Data = { name: "hello" };
+  const isLoading = false;
 
   if (isLoading) {
     return (
@@ -14,7 +16,7 @@ export default function AppContainer({ children }) {
     );
   }
 
-  if (!data) {
+  if (!Data) {
     return (
       <Navigate
         to="/login"
@@ -26,7 +28,7 @@ export default function AppContainer({ children }) {
 
   return (
     <div className="grid h-full w-full">
-      <Navbar userMenu />
+      <Navbar dark userMenu />
       <div className="grid grid-cols-[auto_1fr]">
         <Sidebar />
         <main>{children}</main>

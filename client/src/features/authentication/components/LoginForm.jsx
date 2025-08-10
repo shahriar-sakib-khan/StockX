@@ -39,13 +39,18 @@ export default function LoginForm() {
   };
 
   return (
-    <section className="flex flex-col gap-2 rounded-lg border-1 border-gray-300 p-4">
+    <section className="flex flex-col gap-4 rounded-lg border-0 border-gray-300 bg-white p-8 shadow-lg">
+      <div className="w-full rounded border-1 border-gray-200 py-2 text-center">
+        {/* <span className="mr-2 rounded bg-gray-300 px-2"></span> */}
+        <span>Continue with Google</span>
+      </div>
       <FormInputField
         id="email"
         type="email"
         label="Email or Username"
         placeholder="Enter email or username"
         {...loginIdentifierObj}
+        className="min-w-[30ch]"
       />
       <FormInputField
         id="password"
@@ -54,7 +59,6 @@ export default function LoginForm() {
         placeholder="Enter password"
         {...passwordObj}
         onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-        className="mt-2"
       />
       {isError && (
         <span className="text-md text-center text-red-400">
@@ -64,7 +68,7 @@ export default function LoginForm() {
       <Button
         label="Log in"
         className="mt-2"
-        disabled={!loginIdentifier || password.length < 3}
+        // disabled={!loginIdentifier || password.length < 3}
         isLoading={isPending}
         onClick={handleSubmit}
       />

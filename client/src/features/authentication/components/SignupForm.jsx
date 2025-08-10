@@ -7,26 +7,27 @@ import useInput from "../../../hooks/useInput";
 export default function SignupForm() {
   const navigate = useNavigate();
 
-  const [firstName, resetFirstName, firstNameObj] = useInput("firstName", "");
-  const [lastName, resetLastName, lastNameObj] = useInput("lastName", "");
+  // const [firstName, resetFirstName, firstNameObj] = useInput("firstName", "");
+  // const [lastName, resetLastName, lastNameObj] = useInput("lastName", "");
 
   const [username, resetUsername, usernameObj] = useInput("username", "");
   const [email, resetEmail, emailObj] = useInput("email", "");
 
-  const [address, resetAddress, addressObj] = useInput("address", "");
+  // const [address, resetAddress, addressObj] = useInput("address", "");
 
   const [password, resetPassword, passwordObj] = useInput("password", "");
   const [confirmPassword, resetConfirmPassword, confirmPasswordObj] = useInput(
     "confirmPassword",
     "",
   );
+  confirmPassword;
 
   const resetValues = () => {
-    resetFirstName();
-    resetLastName();
+    // resetFirstName();
+    // resetLastName();
     resetEmail();
     resetUsername();
-    resetAddress();
+    // resetAddress();
     resetPassword();
     resetConfirmPassword();
   };
@@ -48,18 +49,18 @@ export default function SignupForm() {
 
   const handleSubmit = () => {
     createAccount({
-      firstName,
-      lastName,
+      // firstName,
+      // lastName,
       username,
       email,
       password,
-      address,
+      // address,
     });
   };
 
   return (
-    <section className="flex flex-col gap-2 rounded-lg border-1 border-gray-300 p-4">
-      <div className="flex gap-2">
+    <section className="flex flex-col gap-4 rounded-lg border-0 border-gray-300 bg-white p-8 shadow-lg">
+      {/* <div className="flex gap-2">
         <FormInputField
           id="firstName"
           type="text"
@@ -76,13 +77,14 @@ export default function SignupForm() {
           {...lastNameObj}
           className="w-40"
         />
-      </div>
+      </div> */}
       <FormInputField
         id="username"
         type="text"
         placeholder="Username"
         label="Username"
         {...usernameObj}
+        className="min-w-[35ch]"
       />
       <FormInputField
         id="email"
@@ -91,13 +93,13 @@ export default function SignupForm() {
         label="Email"
         {...emailObj}
       />
-      <FormInputField
+      {/* <FormInputField
         id="address"
         type="text"
         placeholder="Enter your address"
         label="Address"
         {...addressObj}
-      />
+      /> */}
       <FormInputField
         id="password"
         type="password"
@@ -123,7 +125,7 @@ export default function SignupForm() {
         className="mt-2"
         onClick={handleSubmit}
         isLoading={isPending}
-        disabled={!email || password.length < 3 || password !== confirmPassword}
+        // disabled={!email || password.length < 3 || password !== confirmPassword}
       />
       <div className="mt-1 flex gap-2 self-center text-sm">
         <span>Already have an account? </span>

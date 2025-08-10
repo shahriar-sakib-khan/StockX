@@ -11,3 +11,4 @@ export { default as FormInputField } from "./form/FormInputField";
 export { default as Logo } from "./ui/Logo";
 export { default as Button } from "./ui/Button";
 export { default as UserMenu } from "./ui/UserMenu";
+export { default as WorkspaceMenu } from "./ui/WorkspaceMenu";

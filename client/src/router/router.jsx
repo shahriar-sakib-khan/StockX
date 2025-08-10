@@ -6,10 +6,14 @@ import {
   ErrorPage,
   Dashboard,
   SettingsPage,
+  InventoryPage,
+  ShopsPage,
+  VehiclesPage,
+  ProfilePage,
+  HistoryPage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
-import ProfilePage from "../pages/ProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +29,38 @@ const router = createBrowserRouter([
         element: (
           <AppContainer>
             <Dashboard />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "inventory",
+        element: (
+          <AppContainer>
+            <InventoryPage />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "shops",
+        element: (
+          <AppContainer>
+            <ShopsPage />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "vehicles",
+        element: (
+          <AppContainer>
+            <VehiclesPage />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "history",
+        element: (
+          <AppContainer>
+            <HistoryPage />
           </AppContainer>
         ),
       },

@@ -1,13 +1,34 @@
-import Logo from "../ui/Logo";
+import { MdNotificationsNone as NotificationIcon } from "react-icons/md";
 import UserMenu from "../ui/UserMenu";
+import Logo from "../ui/Logo";
+import clsx from "clsx";
 
-export default function Navbar({ userMenu = false }) {
+export default function Navbar({
+  userMenu = false,
+  className = "",
+  wrapper = "wide",
+  dark = false,
+}) {
   return (
-    <header className="flex h-[var(--navbar-height)] items-center bg-gray-200">
-      <div className="wrapper">
+    <header
+      className={clsx(
+        "flex h-[var(--navbar-height)] items-center",
+        className,
+        dark && "bg-gray-900",
+      )}
+    >
+      <div className={clsx(wrapper === "narrow" ? "wrapper-l" : "wrapper")}>
         <div className="flex w-full items-center">
-          <Logo className="mr-auto" />
-          {userMenu && <UserMenu className="ml-auto" />}
+          <Logo
+            className={clsx(
+              "mr-auto text-xl",
+              dark ? "text-gray-300" : "text-gray-700",
+            )}
+          />
+          <button className="transition-opacity duration-100 hover:opacity-80">
+            <NotificationIcon className="text-xl text-gray-300" />
+          </button>
+          {userMenu && <UserMenu className="ml-0" dark={dark} />}
         </div>
       </div>
     </header>

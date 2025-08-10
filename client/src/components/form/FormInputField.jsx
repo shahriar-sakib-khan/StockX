@@ -15,9 +15,12 @@ const FormInputField = React.forwardRef(function FormInputField(
   ref,
 ) {
   return (
-    <div className={["flex w-full flex-col gap-1"].join(" ")}>
+    <div className="flex w-full flex-col gap-1">
       {label && (
-        <label htmlFor={id} className="text-md pl-0.5 text-gray-700">
+        <label
+          htmlFor={id}
+          className="pl-0.5 text-xs font-semibold text-gray-700"
+        >
           {label}
         </label>
       )}
@@ -32,7 +35,7 @@ const FormInputField = React.forwardRef(function FormInputField(
         onKeyDown={onKeyDown}
         className={[
           className,
-          "transition-outline border-0 bg-gray-50 px-[0.5em] py-[0.05em] text-gray-700 outline-1 outline-gray-300 placeholder:text-gray-500 focus:bg-white focus:outline-1 focus:outline-blue-300",
+          "rounded border-0 px-3 py-1.5 text-gray-700 outline-1 outline-gray-300 transition-all duration-150 placeholder:text-gray-400 hover:outline-gray-400 focus:bg-white focus:outline-1 focus:outline-blue-300",
         ].join(" ")}
       />
     </div>
