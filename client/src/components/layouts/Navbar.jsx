@@ -14,7 +14,7 @@ export default function Navbar({
       className={clsx(
         "flex h-[var(--navbar-height)] items-center",
         className,
-        dark && "bg-gray-900",
+        dark && "bg-gray-700",
       )}
     >
       <div className={clsx(wrapper === "narrow" ? "wrapper-l" : "wrapper")}>

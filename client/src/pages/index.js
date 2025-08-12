@@ -12,3 +12,4 @@ export { default as InventoryPage } from "./InventoryPage";
 export { default as ShopsPage } from "./ShopsPage";
 export { default as VehiclesPage } from "./VehiclesPage";
 export { default as HistoryPage } from "./HistoryPage";
+export { default as MembersPage } from "./MembersPage";

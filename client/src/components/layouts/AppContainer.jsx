@@ -2,10 +2,11 @@ import { Navigate } from "react-router-dom";
 // import useAuth from "../../hooks/useAuth";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import Titlebar from "./titlebar";
 
 export default function AppContainer({ children }) {
   // const { data, isLoading } = useAuth();
-  const Data = { name: "hello" };
+  const Data = { name: "Visitor" };
   const isLoading = false;
 
   if (isLoading) {
@@ -31,7 +32,10 @@ export default function AppContainer({ children }) {
       <Navbar dark userMenu />
       <div className="grid grid-cols-[auto_1fr]">
         <Sidebar />
-        <main>{children}</main>
+        <main className="grid grid-rows-[1fr_auto]">
+          <Titlebar />
+          {children}
+        </main>
       </div>
     </div>
   );

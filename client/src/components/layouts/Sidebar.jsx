@@ -1,20 +1,22 @@
 import { LuSquareChevronLeft as MenuIcon } from "react-icons/lu";
-import { LuLayoutDashboard as DashboardIcon } from "react-icons/lu";
-import { MdOutlineInventory2 as InventoryIcon } from "react-icons/md";
-import { AiOutlineShop as ShopIcon } from "react-icons/ai";
-import { HiOutlineTruck as VehicleIcon } from "react-icons/hi2";
-import { FaRegClock as HistoryIcon } from "react-icons/fa";
+import { pagesConfig } from "../../pages/utils/pagesConfig";
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import DivisionMenu from "../ui/DivisionMenu";
+import { useUIStore } from "../../stores/useUIStore";
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+  const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+  const toggleMenu = useUIStore((state) => state.toggleMenu);
   // const isAdmin = false;
-  const currentWorkspace = "My workspace";
+  const DashboardIcon = pagesConfig["/dashboard"]?.icon;
+  const InventoryIcon = pagesConfig["/inventory"]?.icon;
+  const ShopIcon = pagesConfig["/shops"]?.icon;
+  const VehicleIcon = pagesConfig["/vehicles"]?.icon;
+  const HistoryIcon = pagesConfig["/history"]?.icon;
 
   const heading = (headingText) => (
     <h2
-      className={`mb-2 overflow-hidden text-sm font-semibold transition-all ${open ? "w-full" : "w-0"}`}
+      className={`pointer-events-none mb-2 overflow-hidden text-sm font-semibold transition-all ${isSidebarOpen ? "w-full" : "w-0"}`}
     >
       {headingText.toUpperCase()}
     </h2>
@@ -24,20 +26,20 @@ export default function Sidebar() {
     <NavLink
       to={link}
       className={({ isActive }) =>
-        `group relative flex items-center border-l-3 p-1 pl-2 transition-all ${
+        `group relative flex items-center border-l-3 p-1 pl-2 text-gray-700 ${
           isActive
-            ? "border-green-500 bg-gray-100 text-gray-700"
+            ? "border-green-500 bg-gray-100"
             : "border-transparent hover:bg-gray-100"
         }`
       }
     >
       {icon}
       <h3
-        className={`overflow-hidden transition-all ${open ? "grow-1 pl-2" : "w-0"}`}
+        className={`overflow-hidden transition-all ${isSidebarOpen ? "grow-1 pl-2" : "w-0"}`}
       >
         {text}
       </h3>
-      {!open && (
+      {!isSidebarOpen && (
         <h3
           className={`invisible absolute left-full translate-x-0 rounded bg-white p-1.5 opacity-20 shadow-md transition-all group-hover:visible group-hover:translate-x-6 group-hover:opacity-100`}
         >
@@ -49,34 +51,23 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex h-[var(--height-with-nav)] flex-col border-r-1 border-gray-200 text-gray-700 transition-all ${open ? "w-[var(--sidebar-width)]" : "w-15"}`}
-      // open ? "w-[var(--sidebar-width)]" : "w-56"
+      className={`flex h-[var(--height-with-nav)] flex-col border-r-1 border-gray-200 text-gray-700 transition-all ${isSidebarOpen ? "w-[var(--sidebar-width)]" : "w-15"}`}
     >
       <div
-        className={`mb-4 flex items-center justify-between border-b-1 border-gray-300 p-3 text-gray-800`}
-        // open ? "justify-between" : "items-start justify-center"
-        // style={!open ? { minHeight: "100%" } : {}}
+        className={`mb-4 flex h-[var(--titlebar-height)] items-center justify-between border-b-1 border-gray-300 bg-gray-100 p-3 text-gray-800`}
       >
-        {/* {open && ( */}
+        <DivisionMenu />
         <button
-          className={`overflow-hidden text-left text-nowrap transition-all ${open ? "grow-1" : "w-0"}`}
-        >
-          <span className="mr-2 bg-gray-300 px-2"></span>
-          <h2 className="inline font-semibold">{currentWorkspace}</h2>
-        </button>
-        {/* )} */}
-        <button
-          // className={` ${open ? "" : "w-full"}`}
-          onClick={() => setOpen((prev) => !prev)}
-          aria-label={open ? "Close sidebar" : "Open sidebar"}
+          className="rounded p-1 transition-all hover:bg-gray-200"
+          onClick={() => toggleMenu("isSidebarOpen")}
+          aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
         >
           <MenuIcon
-            className={`text-2xl text-gray-500 ${open ? "rotate-0" : "rotate-180"} transition-transform`}
+            className={`text-2xl text-gray-500 ${isSidebarOpen ? "rotate-0" : "rotate-180"} transition-transform`}
           />
         </button>
       </div>
       <div className={`flex flex-col gap-4 px-3`}>
-        {/* ${open ? "" : "hidden"} */}
         <nav aria-label="General">
           {heading("GENERAL")}
           <div className="flex flex-col gap-2">

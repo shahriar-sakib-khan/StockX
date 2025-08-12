@@ -1,37 +1,11 @@
+import { StatsSection } from "../features";
+import { heading } from "../features/dashboard/utils/Heading";
+import { Section } from "../features/dashboard/utils/Section";
+
 export default function Dashboard() {
-  const heading = (headingText) => (
-    <h2 className="mb-4 inline-block px-4 text-xl font-semibold text-gray-500">
-      {headingText}
-      {/* {headingText.toUpperCase()} */}
-    </h2>
-  );
-
-  const Section = ({ children }) => {
-    return <section className="flex flex-col p-4">{children}</section>;
-  };
-
-  const StatsSection = () => {
-    return (
-      <div className="grid grid-cols-3 gap-4">
-        <div className="flex flex-col rounded-2xl bg-green-200 p-4">
-          <span className="text-xl font-semibold text-green-700">Sales</span>
-          <span className="text-nowrap">
-            <span className="text-2xl text-green-600">10,000</span>{" "}
-            <span className="text-sm text-green-700">Taka</span>
-          </span>
-        </div>
-        <div className="bg-red-200"></div>
-        <div className="bg-amber-200"></div>
-      </div>
-    );
-  };
-
   return (
-    <div className="h-[var(--height-with-nav)] overflow-auto bg-gray-100">
-      <Section>
-        {heading("Stats")}
-        {StatsSection()}
-      </Section>
+    <div className="h-[var(--height-with-nav-titlebar)] overflow-auto bg-gray-100">
+      <StatsSection />
       <Section>
         {heading("Options")}
         <div className="grid h-60 grid-cols-3 gap-4">
@@ -105,16 +79,6 @@ export default function Dashboard() {
           View all
         </button>
       </Section>
-      {/* <h1 className="text-3xl font-semibold text-gray-700">
-        Hello {username || "there"}
-      </h1>
-      {username ? (
-        <p className="text-xl text-gray-500">
-          You are logged in as "{roles || "user"}"
-        </p>
-      ) : (
-        <p className="text-xl text-gray-500">You are not logged in</p>
-      )} */}
     </div>
   );
 }

@@ -1,17 +1,17 @@
 import { Profile, UpdatePasswordForm, UpdateProfileForm } from "../features";
-import useAuth from "../hooks/useAuth";
-import useToggle from "../hooks/useToggle";
+// import useAuth from "../hooks/useAuth";
+// import useToggle from "../hooks/useToggle";
 
 export default function ProfilePage() {
-  const [editOpen, toggleEditOpen] = useToggle("editOpen", false);
-  const { data, refetch } = useAuth();
+  // const [editOpen, toggleEditOpen] = useToggle("editOpen", false);
+  // const { data, refetch } = useAuth();
 
   return (
-    <div className="wrapper flex min-h-[var(--height-with-nav)] flex-col items-center gap-4 pt-4">
+    <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col items-center gap-4 pt-4">
       <h1 className="text-left text-2xl font-semibold text-gray-700">
         Profile
       </h1>
-      <Profile
+      {/* <Profile
         data={data}
         editOpen={editOpen}
         toggleEditOpen={toggleEditOpen}
@@ -24,9 +24,9 @@ export default function ProfilePage() {
             editOpen={editOpen}
             toggleEditOpen={toggleEditOpen}
           />
-          {/* <UpdatePasswordForm /> */}
+          <UpdatePasswordForm />
         </div>
-      )}
+      )} */}
     </div>
   );
 }

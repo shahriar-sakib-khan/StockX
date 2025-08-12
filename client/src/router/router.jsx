@@ -11,6 +11,7 @@ import {
   VehiclesPage,
   ProfilePage,
   HistoryPage,
+  MembersPage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
@@ -69,6 +70,14 @@ const router = createBrowserRouter([
         element: (
           <AppContainer>
             <ProfilePage />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "members",
+        element: (
+          <AppContainer>
+            <MembersPage />
           </AppContainer>
         ),
       },
