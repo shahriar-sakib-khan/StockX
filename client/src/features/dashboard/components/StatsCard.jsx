@@ -1,22 +1,26 @@
 export default function StatCard({
+  Icon,
   title,
   value,
-  bgColor = "bg-white",
-  titleColor,
-  valueColor,
-  signColor,
-  shadow,
+  // bgColor = "bg-white",
+  // titleColor,
+  // valueColor,
+  // signColor,
+  // shadow,
 }) {
   return (
     <div
-      className={`pointer-events-none flex flex-col rounded-2xl p-4 ${bgColor} ${shadow}`}
+      className={`pointer-events-none flex flex-col rounded-2xl bg-white px-[min(10%,2rem)] py-2`}
     >
-      <span className={`text-lg ${titleColor}`}>{title}</span>
+      <span className={`flex items-center gap-2 text-lg text-gray-400`}>
+        {Icon}
+        {title}
+      </span>
       <span className="text-nowrap">
-        <span className={`text-2xl font-semibold ${valueColor}`}>
+        <span className={`text-3xl font-semibold text-gray-600`}>
           {value.toLocaleString()}
         </span>{" "}
-        <span className={`text-sm ${signColor || valueColor}`}>Taka</span>
+        <span className={`text-sm`}>Tk</span>
       </span>
     </div>
   );

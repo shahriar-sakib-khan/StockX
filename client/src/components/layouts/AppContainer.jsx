@@ -1,23 +1,25 @@
 import { Navigate } from "react-router-dom";
-// import useAuth from "../../hooks/useAuth";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Titlebar from "./titlebar";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 export default function AppContainer({ children }) {
-  // const { data, isLoading } = useAuth();
-  const Data = { name: "Visitor" };
-  const isLoading = false;
+  const user = useAuthStore((state) => state.user);
+  const initializing = useAuthStore((state) => state.initializing);
+  // let Data = { name: "Visitor" };
+  // const isLoading = false;
+  // Data = data;
 
-  if (isLoading) {
+  if (initializing) {
     return (
-      <div className="flex h-full items-center justify-center text-3xl font-semibold text-gray-700">
+      <div className="flex h-screen items-center justify-center text-3xl font-semibold text-gray-700">
         Loading...
       </div>
     );
   }
 
-  if (!Data) {
+  if (!user) {
     return (
       <Navigate
         to="/login"
@@ -32,10 +34,10 @@ export default function AppContainer({ children }) {
       <Navbar dark userMenu />
       <div className="grid grid-cols-[auto_1fr]">
         <Sidebar />
-        <main className="grid grid-rows-[1fr_auto]">
+        <div className="grid grid-rows-[1fr_auto]">
           <Titlebar />
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );

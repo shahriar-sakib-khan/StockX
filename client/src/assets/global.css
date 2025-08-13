@@ -24,6 +24,10 @@ p {
   pointer-events: none;
 }
 
+img {
+  @apply text-base font-light italic;
+}
+
 /* custom variables - colors */
 @theme {
   --color-primary: hsl(0, 0%, 100%); /* white */
@@ -36,14 +40,26 @@ p {
   --navbar-height: 3rem;
   --height-with-nav: calc(100dvh - var(--navbar-height));
 
-  --sidebar-width: 14rem;
-  --width-with-sidebar: calc(100dvw - var(--sidebar-width));
+  --sidebar-width-sm: 3.75rem;
+  --sidebar-width-lg: 14rem;
+  --width-with-sidebar-sm: calc(100dvw - var(--sidebar-width-sm));
+  --width-with-sidebar-lg: calc(100dvw - var(--sidebar-width-lg));
 
   --titlebar-height: 3rem;
   --height-with-titlebar: calc(100dvh - var(--titlebar-height));
 
   --height-with-nav-titlebar: calc(
     var(--height-with-nav) - var(--titlebar-height)
+  );
+
+  --rightbar-width: 20rem;
+  --width-with-rightbar: calc(100dvw - var(--rightbar-width));
+
+  --width-with-sidebar-lg-rightbar: calc(
+    var(--width-with-rightbar) - var(--sidebar-width-lg)
+  );
+  --width-with-sidebar-sm-rightbar: calc(
+    var(--width-with-rightbar) - var(--sidebar-width-sm)
   );
 }
 
@@ -54,6 +70,21 @@ p {
   }
   .wrapper-l {
     @apply mx-auto w-full max-w-[1280px] px-8;
+  }
+
+  /* performant shadow */
+  .card-shadow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0.5em;
+    opacity: 0;
+    box-shadow: 6px 6px 8px hsla(0, 0%, 0%, 0.1);
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+  .card-shadow:hover::after {
+    opacity: 1;
   }
 }
 

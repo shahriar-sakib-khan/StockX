@@ -16,7 +16,7 @@ export default function Sidebar() {
 
   const heading = (headingText) => (
     <h2
-      className={`pointer-events-none mb-2 overflow-hidden text-sm font-semibold transition-all ${isSidebarOpen ? "w-full" : "w-0"}`}
+      className={`pointer-events-none mb-3 overflow-hidden text-xs font-semibold tracking-wider text-gray-500 transition-all ${isSidebarOpen ? "w-full" : "w-0"}`}
     >
       {headingText.toUpperCase()}
     </h2>
@@ -41,7 +41,7 @@ export default function Sidebar() {
       </h3>
       {!isSidebarOpen && (
         <h3
-          className={`invisible absolute left-full translate-x-0 rounded bg-white p-1.5 opacity-20 shadow-md transition-all group-hover:visible group-hover:translate-x-6 group-hover:opacity-100`}
+          className={`invisible absolute left-full z-[100] translate-x-0 rounded bg-white p-1.5 opacity-20 shadow-md transition-all group-hover:visible group-hover:translate-x-6 group-hover:opacity-100`}
         >
           {text}
         </h3>
@@ -51,10 +51,10 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex h-[var(--height-with-nav)] flex-col border-r-1 border-gray-200 text-gray-700 transition-all ${isSidebarOpen ? "w-[var(--sidebar-width)]" : "w-15"}`}
+      className={`flex h-[var(--height-with-nav)] flex-col border-r-1 border-gray-200 text-gray-700 transition-all ${isSidebarOpen ? "w-[var(--sidebar-width-lg)]" : "w-[var(--sidebar-width-sm)]"}`}
     >
       <div
-        className={`mb-4 flex h-[var(--titlebar-height)] items-center justify-between border-b-1 border-gray-300 bg-gray-100 p-3 text-gray-800`}
+        className={`mb-4 flex h-[var(--titlebar-height)] items-center justify-between border-b-1 border-gray-300 bg-gray-50 p-3 text-gray-800`}
       >
         <DivisionMenu />
         <button
