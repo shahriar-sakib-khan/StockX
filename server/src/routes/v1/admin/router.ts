@@ -1,6 +1,6 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { addGlobalBrand, allGlobalBrands, detailedGlobalBrands } from "@/controllers/v1/admin.controller";
+import { adminController } from '@/controllers/v1';
 
 const router = Router();
 
@@ -14,24 +14,17 @@ const router = Router();
 // <============================> Global brand routes <============================>
 
 /**
- * @route   GET /admin/brands
- * @desc    Get all global brands
- * @access  master admin (Ostad)
- */
-router.get('/brands', allGlobalBrands);
-
-/**
  * @route   GET /admin/brands/d
  * @desc    Get all global brands with details
  * @access  master admin (Ostad)
  */
-router.get('/brands/d', detailedGlobalBrands);
+router.get('/brands/d', adminController.detailedGlobalBrands);
 
 /**
  * @route   POST /admin/brands
  * @desc    Add global brand
  * @access  master admin (Ostad)
  */
-router.post('/brands', addGlobalBrand);
+router.post('/brands', adminController.addGlobalBrand);
 
 export default router;

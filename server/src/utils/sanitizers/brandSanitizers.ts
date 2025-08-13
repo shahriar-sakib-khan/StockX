@@ -8,13 +8,13 @@ import { userSanitizer } from './userSanitizers';
 
 // ----------------- Global Brands -----------------
 export const globalBrandSanitizer = (
-  globalBrands: IGlobalBrand | HydratedDocument<IGlobalBrand>
+  globalBrand: IGlobalBrand | HydratedDocument<IGlobalBrand>
 ) => ({
-  id: String(globalBrands._id),
-  name: globalBrands.name,
-  regulatorTypes: globalBrands.regulatorTypes,
-  sizes: globalBrands.sizes,
-  prices: globalBrands.prices,
+  id: String(globalBrand._id),
+  name: globalBrand.name,
+  regulatorTypes: globalBrand.regulatorTypes,
+  sizes: globalBrand.sizes,
+  prices: globalBrand.prices,
 });
 export type SanitizedGlobalBrand = ReturnType<typeof globalBrandSanitizer>;
 
@@ -43,6 +43,7 @@ export const localBrandSanitizer = (localBrand: ILocalBrand | HydratedDocument<I
     ? resolveRef(localBrand.selectedBy, userSanitizer)
     : localBrand.selectedBy,
   isActive: localBrand.isActive,
+  totalCylinders: localBrand.totalCount,
 });
 export type SanitizedLocalBrand = ReturnType<typeof localBrandSanitizer>;
 

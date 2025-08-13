@@ -4,12 +4,23 @@
  * @description This module contains the controller functions for the inventory routes.
  */
 
-import { assertAuth } from '@/common';
-import { brandService } from '@/services/v1';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-// <============================> Local Brand Controllers <============================>
+import { assertAuth } from '@/common';
+import { brandService, cylinderService } from '@/services/v1';
+import { seedLocalCylinders } from '@/services/v1/inventory/cylinders.service';
+
+// <============================> Brand Controllers <============================>
+
+export const allGlobalBrands = async (req: Request, res: Response) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+  const { globalBrands, total } = await brandService.getGlobalBrands(page, limit);
+
+  res.status(StatusCodes.OK).json({ total, page, limit, globalBrands });
+};
 
 export const allLocalBrands = async (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
@@ -47,7 +58,34 @@ export const selectBrands = async (req: Request, res: Response) => {
 
   const updateStats = await brandService.selectLocalBrands(req.body, userId);
 
+  const { workspaceId, divisionId } = req.params;
+  await seedLocalCylinders(req.body, workspaceId, divisionId, userId);
+
   res.status(StatusCodes.OK).json({ updateStats });
 };
 
-export default { allLocalBrands, detailedLocalBrands, selectBrands };
+// <============================> Cylinder Controllers <============================>
+
+export const allCylinders = async (req: Request, res: Response) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const { workspaceId, divisionId } = req.params;
+
+  const { cylinders, total } = await cylinderService.getCylinders(
+    page,
+    limit,
+    workspaceId,
+    divisionId
+  );
+
+  res.status(StatusCodes.OK).json({ total, page, limit, cylinders });
+};
+
+export default {
+  allGlobalBrands,
+  allLocalBrands,
+  detailedLocalBrands,
+  selectBrands,
+
+  allCylinders,
+};

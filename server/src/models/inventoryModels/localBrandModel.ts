@@ -6,6 +6,7 @@ export interface ILocalBrand extends Document {
   division: mongoose.Types.ObjectId;
   selectedBy: mongoose.Types.ObjectId;
   isActive: boolean;
+  totalCount: number;
 }
 
 const localBrandSchema: Schema<ILocalBrand> = new Schema(
@@ -15,6 +16,7 @@ const localBrandSchema: Schema<ILocalBrand> = new Schema(
     division: { type: Schema.Types.ObjectId, ref: 'Division', required: true },
     selectedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     isActive: { type: Boolean, default: false },
+    totalCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

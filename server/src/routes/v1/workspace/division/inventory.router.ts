@@ -3,7 +3,15 @@ import { Router } from 'express';
 
 const router = Router({ mergeParams: true });
 
-// <============================> Division brands <============================>
+// <============================> Brand Controllers <============================>
+
+/**
+ * @route   GET /:workspaceId/divisions/:divisionId/inventory/global-brands
+ * @desc    Get all global brands
+ * @access  Authenticated
+ */
+router.get('/global-brands', inventoryController.allGlobalBrands);
+
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/inventory/brands
  * @desc    Get all brands in a division
@@ -11,7 +19,6 @@ const router = Router({ mergeParams: true });
  */
 router.get('/brands', inventoryController.allLocalBrands);
 
-// <============================> Detailed division brands <============================>
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/inventory/brands/d
  * @desc    Get all brands in a division with details
@@ -19,13 +26,15 @@ router.get('/brands', inventoryController.allLocalBrands);
  */
 router.get('/brands/d', inventoryController.detailedLocalBrands);
 
-
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/inventory/brands
+ * @route   PATCH /:workspaceId/divisions/:divisionId/inventory/brands
  * @desc    Select brands in a division
  * @access  Division admin
  */
-router.post('/brands', inventoryController.selectBrands);
+router.patch('/brands', inventoryController.selectBrands);
 
+// <============================> Cylinder Controllers <============================>
+
+router.get('/cylinders', inventoryController.allCylinders);
 
 export default router;

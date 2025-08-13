@@ -1,6 +1,7 @@
 import { GlobalBrand, LocalBrand } from '@/models';
 import { brandSanitizers } from '@/utils';
 import { Types } from 'mongoose';
+import { seedLocalCylinders } from './cylinders.service';
 
 /**
  * @function getGlobalBrands
@@ -62,15 +63,15 @@ export const deleteGlobalBrand = async () => {};
 // <============================> Local Brand Services <============================>
 
 /**
- * @function initiateLocalBrands
- * @description Initiate the local brands for the given workspace, division, and user.
+ * @function seedLocalBrands
+ * @description Seed the local brands for the given workspace, division, and user.
  *
  * @param {string} workspaceId - The ID of the workspace to retrieve divisions for.
  * @param {string} divisionId - The ID of the division to retrieve divisions for.
  * @param {string} userId - The ID of the user to retrieve divisions for.
  * @returns {Promise<void>} Returns nothing.
  */
-export const initiateLocalBrands = async (
+export const seedLocalBrands = async (
   workspaceId: string,
   divisionId: string,
   userId: string
@@ -84,10 +85,9 @@ export const initiateLocalBrands = async (
     selectedBy: userId,
     isActive: false,
   }));
-  console.log('localBrands', localBrands);
 
-  const result = await LocalBrand.insertMany(localBrands);
-  console.log('result', result);
+  await LocalBrand.insertMany(localBrands);
+  console.log('local brands seeded successfully');
 };
 
 /**
@@ -187,7 +187,7 @@ export default {
   deleteGlobalBrand,
   getDetailedGlobalBrands,
 
-  initiateLocalBrands,
+  seedLocalBrands,
   getLocalBrands,
   detailedLocalBrands,
   selectLocalBrands,

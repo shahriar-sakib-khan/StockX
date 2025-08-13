@@ -17,15 +17,6 @@ import { StatusCodes } from 'http-status-codes';
 
 import { brandService } from '@/services/v1';
 
-export const allGlobalBrands = async (req: Request, res: Response) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-
-  const { globalBrands, total } = await brandService.getGlobalBrands(page, limit);
-
-  res.status(StatusCodes.OK).json({ total, page, limit, globalBrands });
-};
-
 export const detailedGlobalBrands = async (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
@@ -40,4 +31,4 @@ export const addGlobalBrand = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ newBrand });
 };
 
-export default { allGlobalBrands, addGlobalBrand, detailedGlobalBrands };
+export default { addGlobalBrand, detailedGlobalBrands };
