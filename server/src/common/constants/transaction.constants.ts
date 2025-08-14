@@ -11,7 +11,7 @@ export const TransactionCategory = [
   'owner_withdraw',
   'transfer', // cash<->bank<->mobile internal
 ] as const;
-export type TxCategory = (typeof TransactionCategory)[number];
+export type TxCategoryType = (typeof TransactionCategory)[number];
 
 export const PaymentMethod = ['cash', 'bank', 'mobile', 'other'] as const;
 export type PaymentMethodType = (typeof PaymentMethod)[number];
