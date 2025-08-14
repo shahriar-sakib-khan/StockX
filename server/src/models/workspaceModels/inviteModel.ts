@@ -1,14 +1,18 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IInvite extends Document {
+  workspace: Types.ObjectId;
+
   email: string;
-  user?: mongoose.Types.ObjectId | null;
-  workspace: mongoose.Types.ObjectId;
+  user?: Types.ObjectId | null;
   role: string;
-  invitedBy: mongoose.Types.ObjectId;
+  invitedBy: Types.ObjectId;
   status: 'pending' | 'sent' | 'accepted' | 'declined' | 'expired';
   token: string;
   expiresAt: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const inviteSchema = new Schema<IInvite>(
@@ -53,4 +57,5 @@ inviteSchema.methods.toJSON = function (): Partial<IInvite> {
   return obj as Partial<IInvite>;
 };
 
-export default mongoose.model<IInvite>('Invite', inviteSchema);
+const Invite: Model<IInvite> = mongoose.model<IInvite>('Invite', inviteSchema);
+export default Invite;

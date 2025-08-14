@@ -1,22 +1,21 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IDivisionMembership extends Document {
-  user: mongoose.Types.ObjectId;
-  workspace: mongoose.Types.ObjectId;
-  division: mongoose.Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
+
+  user: Types.ObjectId;
   divisionRoles: string[];
   status: 'active' | 'invited' | 'removed';
-  invitedBy?: mongoose.Types.ObjectId | null;
-  removedBy?: mongoose.Types.ObjectId | null;
+  invitedBy?: Types.ObjectId | null;
+  removedBy?: Types.ObjectId | null;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
     workspace: {
       type: Schema.Types.ObjectId,
       ref: 'Workspace',
@@ -25,6 +24,11 @@ const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
     division: {
       type: Schema.Types.ObjectId,
       ref: 'Division',
+      required: true,
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     divisionRoles: {

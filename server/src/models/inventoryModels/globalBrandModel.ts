@@ -9,6 +9,9 @@ export interface IGlobalBrand extends Document {
     regulatorType: string;
     price: number;
   }[];
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const globalBrandSchema: Schema<IGlobalBrand> = new Schema(

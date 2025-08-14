@@ -1,6 +1,6 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
-import { SUPER_ROLES } from '@/config/roles.config.js';
+import { roleConstants } from '@/common/constants';
 
 /**
  * TypeScript Interface for User fields
@@ -13,7 +13,10 @@ export interface IUser extends Document {
   email: string;
   password: string;
   address?: string;
-  role: (typeof SUPER_ROLES)[number];
+  role: roleConstants.SuperRoleType;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema: Schema<IUser> = new Schema(
@@ -53,7 +56,7 @@ const userSchema: Schema<IUser> = new Schema(
 
     role: {
       type: String,
-      enum: SUPER_ROLES,
+      enum: roleConstants.SuperRoles,
       default: 'user',
     },
   },
@@ -76,5 +79,4 @@ userSchema.methods.toJSON = function (): Partial<IUser> {
 };
 
 const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
-
 export default User;

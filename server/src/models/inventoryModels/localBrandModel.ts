@@ -1,12 +1,13 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface ILocalBrand extends Document {
-  globalBrand: mongoose.Types.ObjectId;
-  workspace: mongoose.Types.ObjectId;
-  division: mongoose.Types.ObjectId;
-  selectedBy: mongoose.Types.ObjectId;
+  globalBrand: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
+  selectedBy: Types.ObjectId;
   isActive: boolean;
-  totalCount: number;
+  totalFullCount: number;
+  totalEmptyCount: number;
 }
 
 const localBrandSchema: Schema<ILocalBrand> = new Schema(
@@ -16,7 +17,8 @@ const localBrandSchema: Schema<ILocalBrand> = new Schema(
     division: { type: Schema.Types.ObjectId, ref: 'Division', required: true },
     selectedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     isActive: { type: Boolean, default: false },
-    totalCount: { type: Number, default: 0 },
+    totalFullCount: { type: Number, default: 0 },
+    totalEmptyCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

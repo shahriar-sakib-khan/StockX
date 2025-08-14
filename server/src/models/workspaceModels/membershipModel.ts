@@ -1,25 +1,29 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-import { WORKSPACE_STATUS } from '@/config/roles.config';
+import { roleConstants } from '@/common/constants';
 
 export interface IMembership extends Document {
-  user: mongoose.Types.ObjectId;
-  workspace: mongoose.Types.ObjectId;
+  workspace: Types.ObjectId;
+
+  user: Types.ObjectId;
   workspaceRoles: string[];
-  status: 'active' | 'invited';
-  invitedBy?: mongoose.Types.ObjectId;
+  status: roleConstants.WorkspaceStatusType;
+  invitedBy?: Types.ObjectId;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const membershipSchema: Schema<IMembership> = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
     workspace: {
       type: Schema.Types.ObjectId,
       ref: 'Workspace',
+      required: true,
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     workspaceRoles: {
@@ -28,7 +32,7 @@ const membershipSchema: Schema<IMembership> = new Schema(
     },
     status: {
       type: String,
-      enum: WORKSPACE_STATUS,
+      enum: roleConstants.WorkspaceStatuses,
       default: 'active',
     },
     invitedBy: {

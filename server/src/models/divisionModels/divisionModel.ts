@@ -1,24 +1,30 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import DivisionMembership from './divisionMembershipModel';
 
 export interface IDivision extends Document {
+  workspace: Types.ObjectId;
+
   name: string;
   description?: string;
-  workspace: mongoose.Types.ObjectId;
-  createdBy: mongoose.Types.ObjectId;
-  divisionRoles: { name: string; permissions: string[]; _id?: mongoose.Types.ObjectId }[];
+  divisionRoles: { name: string; permissions: string[]; _id?: Types.ObjectId }[];
+  createdBy: Types.ObjectId;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const divisionSchema: Schema<IDivision> = new Schema(
   {
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     name: { type: String, required: [true, 'Division name is required'], trim: true },
     description: { type: String, default: '' },
-    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     divisionRoles: [{ name: { type: String, required: true }, permissions: [{ type: String }] }],
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
 );
 
+// Pre-save Hook → Seed with base roles if none provided
 divisionSchema.pre('save', function (next) {
   if (!this.divisionRoles || this.divisionRoles.length === 0) {
     this.divisionRoles = [
@@ -26,6 +32,13 @@ divisionSchema.pre('save', function (next) {
       { name: 'division_member', permissions: [] },
     ];
   }
+  next();
+});
+
+// Pre-delete Hook → Remove all division memberships
+divisionSchema.pre('findOneAndDelete', async function (next) {
+  const divisionId = this.getQuery()['_id'];
+  await DivisionMembership.deleteMany({ division: divisionId });
   next();
 });
 

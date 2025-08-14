@@ -1,11 +1,11 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 import Membership from './membershipModel';
 
 export interface IWorkspace extends Document {
   name: string;
   description?: string;
-  createdBy: mongoose.Types.ObjectId;
-  workspaceRoles: { name: string; permissions: string[]; _id?: mongoose.Types.ObjectId }[];
+  createdBy: Types.ObjectId;
+  workspaceRoles: { name: string; permissions: string[]; _id?: Types.ObjectId }[];
 }
 
 const workspaceSchema: Schema<IWorkspace> = new Schema(
@@ -48,6 +48,7 @@ workspaceSchema.pre('save', function (next) {
   next();
 });
 
+// Pre-delete Hook → Remove all workspace memberships
 workspaceSchema.pre('findOneAndDelete', async function (next) {
   const workspaceId = this.getQuery()['_id'];
   await Membership.deleteMany({ workspace: workspaceId });

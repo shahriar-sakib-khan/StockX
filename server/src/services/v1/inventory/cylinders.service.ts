@@ -25,20 +25,20 @@ export const seedLocalCylinders = async (
   if (activeBrands.length === 0) return;
 
   // fetch global brand info
-  const localBrands = await LocalBrand.find({ _id: { $in: activeBrands } })
+  const activeLocalBrands = await LocalBrand.find({ _id: { $in: activeBrands } })
     .select('globalBrand')
     .populate('globalBrand', 'name sizes regulatorTypes')
     .lean();
 
   const bulkOps: any[] = [];
 
-  for (const localBrand of localBrands) {
+  for (const localBrand of activeLocalBrands) {
     const { sizes, regulatorTypes, name } = localBrand.globalBrand as unknown as IGlobalBrand;
-    const states = [true, false]; // true = Full, false = Empty
+    const fullStates = [true, false]; // true = Full, false = Empty
 
     for (const size of sizes) {
       for (const regulatorType of regulatorTypes) {
-        for (const isFull of states) {
+        for (const isFull of fullStates) {
           const sku = await generateSKU({ name, size, unit: 'L', regulatorType, workspaceId });
 
           // prepare bulk operation with upsert to avoid duplicates
@@ -113,4 +113,15 @@ export const getCylinders = async (
   return { cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders).cylinders, total };
 };
 
-export default { getCylinders, seedLocalCylinders };
+export const changeCylinderCount = async (
+  cylinder: any,
+  cylinderId: string,
+  userId: string
+): Promise<any> => {};
+
+export default {
+  getCylinders,
+  seedLocalCylinders,
+  
+  changeCylinderCount,
+};

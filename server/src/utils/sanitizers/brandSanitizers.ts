@@ -43,7 +43,8 @@ export const localBrandSanitizer = (localBrand: ILocalBrand | HydratedDocument<I
     ? resolveRef(localBrand.selectedBy, userSanitizer)
     : localBrand.selectedBy,
   isActive: localBrand.isActive,
-  totalCylinders: localBrand.totalCount,
+  totalFullCount: localBrand.totalFullCount,
+  totalEmptyCount: localBrand.totalEmptyCount,
 });
 export type SanitizedLocalBrand = ReturnType<typeof localBrandSanitizer>;
 
@@ -53,6 +54,8 @@ export const allLocalBrandSanitizer = (localBrands: ILocalBrand[]) => ({
     globalBrand: localBrand.globalBrand
       ? resolveRef(localBrand.globalBrand, globalBrandSanitizer).name
       : localBrand.globalBrand,
+    totalFullCount: localBrand.totalFullCount,
+    totalEmptyCount: localBrand.totalEmptyCount,
   })),
 });
 export type SanitizedAllLocalBrands = ReturnType<typeof allLocalBrandSanitizer>;

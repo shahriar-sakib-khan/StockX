@@ -36,5 +36,9 @@ router.patch('/brands', inventoryController.selectBrands);
 // <============================> Cylinder Controllers <============================>
 
 router.get('/cylinders', inventoryController.allCylinders);
+// router.post('/cylinders', inventoryController.addCylinder);
+// router.put('/cylinders/:cylinderId', inventoryController.updateCylinder);
+// router.delete('/cylinders/:cylinderId', inventoryController.deleteCylinder);
+router.post('/cylinders/:cylinderId/count', inventoryController.changeCylinderCount);
 
 export default router;
