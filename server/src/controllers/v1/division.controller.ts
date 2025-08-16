@@ -31,8 +31,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { assertAuth } from '@/common/assertions';
 import { divisionService, divisionMembersService, divisionRolesService } from '@/services/v1';
-import { seedLocalBrands } from '@/services/v1/inventory/brands.service';
-import { seedLocalCylinders } from '@/services/v1/inventory/cylinders.service';
+import { seedBaseTxCategories, seedBaseAccounts, seedLocalBrands } from '@/bootstrap';
 
 // <============================> General Division Controllers <============================>
 
@@ -45,14 +44,14 @@ export const createDivision = async (req: Request, res: Response) => {
 
   // Create local brands from global brands with inactive status for selection
   await seedLocalBrands(workspaceId, division.id, userId);
+  await seedBaseTxCategories(workspaceId, division.id);
+  await seedBaseAccounts(workspaceId, division.id);
 
   res.status(StatusCodes.CREATED).json({ message: 'Division created successfully', division });
 };
 
 export const singleDivision = async (req: Request, res: Response) => {
   const { workspaceId, divisionId } = req.params;
-  console.log(req.params, workspaceId, divisionId);
-  
 
   const division = await divisionService.getSingleDivision(workspaceId, divisionId);
 

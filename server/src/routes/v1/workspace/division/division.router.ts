@@ -4,6 +4,7 @@ import { divisionController } from '@/controllers/v1';
 import { workspaceScope, divisionScope, validateRequest } from '@/middlewares';
 import { division } from '@/validations';
 import inventoryRouter from './inventory.router';
+import transactionRouter from './transaction.router';
 
 const router = Router({ mergeParams: true });
 
@@ -181,7 +182,10 @@ router.delete(
 
 // <============================> Sub-Routes-Inventory <============================>
 
-// router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
-router.use('/:divisionId/inventory', divisionScope(['division_admin']), inventoryRouter);
+router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
+
+// <============================> Sub-Routes-Transactions <============================>
+
+router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
 
 export default router;

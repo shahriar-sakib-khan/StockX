@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IVehicleStats extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   vehicleId: Types.ObjectId;
   totalFuelCost: number;
@@ -15,8 +15,8 @@ export interface IVehicleStats extends Document {
 
 const vehicleStatsSchema: Schema<IVehicleStats> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     vehicleId: { type: Schema.Types.ObjectId, ref: 'Vehicle', required: true, index: true },
     totalFuelCost: { type: Number, default: 0 },
     totalRepairCost: { type: Number, default: 0 },
@@ -25,7 +25,7 @@ const vehicleStatsSchema: Schema<IVehicleStats> = new Schema(
   { timestamps: false }
 );
 
-vehicleStatsSchema.index({ workspaceId: 1, divisionId: 1, vehicleId: 1 }, { unique: true });
+vehicleStatsSchema.index({ workspace: 1, division: 1, vehicleId: 1 }, { unique: true });
 
 vehicleStatsSchema.methods.toJSON = function (): Partial<IVehicleStats> {
   const obj = this.toObject();
@@ -34,5 +34,8 @@ vehicleStatsSchema.methods.toJSON = function (): Partial<IVehicleStats> {
   return obj;
 };
 
-const VehicleStats: Model<IVehicleStats> = mongoose.model<IVehicleStats>('VehicleStats', vehicleStatsSchema);
+const VehicleStats: Model<IVehicleStats> = mongoose.model<IVehicleStats>(
+  'VehicleStats',
+  vehicleStatsSchema
+);
 export default VehicleStats;

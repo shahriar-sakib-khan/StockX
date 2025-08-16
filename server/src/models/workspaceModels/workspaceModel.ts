@@ -50,8 +50,8 @@ workspaceSchema.pre('save', function (next) {
 
 // Pre-delete Hook → Remove all workspace memberships
 workspaceSchema.pre('findOneAndDelete', async function (next) {
-  const workspaceId = this.getQuery()['_id'];
-  await Membership.deleteMany({ workspace: workspaceId });
+  const workspace = this.getQuery()['_id'];
+  await Membership.deleteMany({ workspace: workspace });
   next();
 });
 

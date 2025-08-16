@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IVehicle extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   regNumber: string;
   brand?: string;
@@ -14,8 +14,8 @@ export interface IVehicle extends Document {
 
 const vehicleSchema: Schema<IVehicle> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     regNumber: { type: String, required: true },
     brand: String,
     vehicleModel: String,
@@ -23,7 +23,7 @@ const vehicleSchema: Schema<IVehicle> = new Schema(
   { timestamps: true }
 );
 
-vehicleSchema.index({ workspaceId: 1, divisionId: 1, regNumber: 1 }, { unique: true });
+vehicleSchema.index({ workspace: 1, division: 1, regNumber: 1 }, { unique: true });
 
 vehicleSchema.methods.toJSON = function (): Partial<IVehicle> {
   const obj = this.toObject();

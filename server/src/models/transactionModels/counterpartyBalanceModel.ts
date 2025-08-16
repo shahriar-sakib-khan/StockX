@@ -3,8 +3,8 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import { txConstants } from '@/common/constants';
 
 export interface ICounterpartyBalance extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   counterpartyType: txConstants.CounterpartyKindType; // 'customer' | 'store'
   counterpartyId: Types.ObjectId;
@@ -22,8 +22,8 @@ export interface ICounterpartyBalance extends Document {
 
 const counterpartyBalanceSchema: Schema<ICounterpartyBalance> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     counterpartyType: { type: String, enum: ['customer', 'store'], required: true },
     counterpartyId: { type: Schema.Types.ObjectId, required: true, index: true },
     balance: { type: Number, default: 0 },
@@ -37,7 +37,7 @@ const counterpartyBalanceSchema: Schema<ICounterpartyBalance> = new Schema(
 );
 
 // counterpartyBalanceSchema.index(
-//   { workspaceId: 1, divisionId: 1, counterpartyType: 1, counterpartyId: 1 },
+//   { workspace: 1, division: 1, counterpartyType: 1, counterpartyId: 1 },
 //   { unique: true }
 // );
 

@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IStore extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   name: string;
   contactName?: string;
@@ -15,8 +15,8 @@ export interface IStore extends Document {
 
 const storeSchema: Schema<IStore> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     name: { type: String, required: true },
     contactName: String,
     phone: String,
@@ -25,7 +25,7 @@ const storeSchema: Schema<IStore> = new Schema(
   { timestamps: true }
 );
 
-// storeSchema.index({ workspaceId: 1, divisionId: 1, name: 1 });
+// storeSchema.index({ workspace: 1, division: 1, name: 1 });
 
 storeSchema.methods.toJSON = function (): Partial<IStore> {
   const obj = this.toObject();

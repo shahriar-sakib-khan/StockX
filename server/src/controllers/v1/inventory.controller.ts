@@ -9,7 +9,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { assertAuth } from '@/common';
 import { brandService, cylinderService } from '@/services/v1';
-import { seedLocalCylinders } from '@/services/v1/inventory/cylinders.service';
+import { seedLocalCylinders } from '@/bootstrap';
 
 // <============================> Brand Controllers <============================>
 
@@ -81,20 +81,6 @@ export const allCylinders = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ total, page, limit, cylinders });
 };
 
-export const changeCylinderCount = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-  const { workspaceId, divisionId, cylinderId } = req.params;
-
-  const { cylinders, updateStats } = await cylinderService.changeCylinderCount(
-    req.body,
-    cylinderId,
-    userId
-  );
-
-  res.status(StatusCodes.OK).json({ updateStats, cylinders });
-};
-
 export default {
   allGlobalBrands,
   allLocalBrands,
@@ -102,5 +88,4 @@ export default {
   selectBrands,
 
   allCylinders,
-  changeCylinderCount,
 };

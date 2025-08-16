@@ -37,8 +37,8 @@ divisionSchema.pre('save', function (next) {
 
 // Pre-delete Hook → Remove all division memberships
 divisionSchema.pre('findOneAndDelete', async function (next) {
-  const divisionId = this.getQuery()['_id'];
-  await DivisionMembership.deleteMany({ division: divisionId });
+  const division = this.getQuery()['_id'];
+  await DivisionMembership.deleteMany({ division: division });
   next();
 });
 

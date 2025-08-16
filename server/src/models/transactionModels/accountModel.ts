@@ -3,8 +3,8 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import { txConstants } from '@/common/constants';
 
 export interface IAccount extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   code: string; // e.g., 1000-CASH, 1100-AR, 2100-AP, 4100-REV-GAS
   name: string; // Cash, Bank, AR, AP, Revenue-Gas, Expense-Salary, etc.
@@ -17,8 +17,8 @@ export interface IAccount extends Document {
 
 const accountSchema: Schema<IAccount> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     code: { type: String, required: true },
     name: { type: String, required: true },
     type: {
@@ -31,7 +31,7 @@ const accountSchema: Schema<IAccount> = new Schema(
   { timestamps: true }
 );
 
-accountSchema.index({ workspaceId: 1, divisionId: 1, code: 1 }, { unique: true });
+accountSchema.index({ workspace: 1, division: 1, code: 1 }, { unique: true });
 
 accountSchema.methods.toJSON = function (): Partial<IAccount> {
   const obj = this.toObject();

@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IStaffStats extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   staffId: Types.ObjectId;
   totalSalaryPaid: number;
@@ -15,8 +15,8 @@ export interface IStaffStats extends Document {
 
 const staffStatsSchema: Schema<IStaffStats> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     staffId: { type: Schema.Types.ObjectId, ref: 'Staff', required: true, index: true },
     totalSalaryPaid: { type: Number, default: 0 },
     lastPaidAt: Date,
@@ -25,7 +25,7 @@ const staffStatsSchema: Schema<IStaffStats> = new Schema(
   { timestamps: false }
 );
 
-// staffStatsSchema.index({ workspaceId: 1, divisionId: 1, staffId: 1 }, { unique: true });
+// staffStatsSchema.index({ workspace: 1, division: 1, staffId: 1 }, { unique: true });
 
 staffStatsSchema.methods.toJSON = function (): Partial<IStaffStats> {
   const obj = this.toObject();

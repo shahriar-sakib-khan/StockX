@@ -3,8 +3,8 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import { txConstants } from '@/common/constants';
 
 export interface ITransaction extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   // Simple two-sided money (mini debit/credit)
   debitAccountId: Types.ObjectId; // e.g., Cash, AR:CustomerX, Inventory:Gas, Expense:Salary
@@ -27,7 +27,7 @@ export interface ITransaction extends Document {
   transactedBy: Types.ObjectId;
   ref?: string; // invoice/voucher no
 
-  details?: Record<string, any>; // polymorphic payload (items, cylinderSwap, notes)
+  details?: Record<string, any>;
 
   createdAt: Date;
   updatedAt: Date;
@@ -35,8 +35,8 @@ export interface ITransaction extends Document {
 
 const transactionSchema: Schema<ITransaction> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
 
     debitAccountId: { type: Schema.Types.ObjectId, ref: 'Account', required: true, index: true },
     creditAccountId: { type: Schema.Types.ObjectId, ref: 'Account', required: true, index: true },
@@ -62,14 +62,14 @@ const transactionSchema: Schema<ITransaction> = new Schema(
     transactedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     ref: String,
 
-    details: { type: Schema.Types.Mixed },
+    details: { type: Schema.Types.Map, of: Schema.Types.Mixed },
   },
   { timestamps: true }
 );
 
-// transactionSchema.index({ workspaceId: 1, divisionId: 1, createdAt: -1 });
-// transactionSchema.index({ workspaceId: 1, divisionId: 1, counterpartyId: 1, createdAt: -1 });
-// transactionSchema.index({ workspaceId: 1, divisionId: 1, category: 1, createdAt: -1 });
+// transactionSchema.index({ workspace: 1, division: 1, createdAt: -1 });
+// transactionSchema.index({ workspace: 1, division: 1, counterpartyId: 1, createdAt: -1 });
+// transactionSchema.index({ workspace: 1, division: 1, category: 1, createdAt: -1 });
 
 transactionSchema.methods.toJSON = function (): Partial<ITransaction> {
   const obj = this.toObject();

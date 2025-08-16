@@ -1,15 +1,16 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IStockMovement extends Document {
-  workspaceId: Types.ObjectId;
-  divisionId: Types.ObjectId;
+  workspace: Types.ObjectId;
+  division: Types.ObjectId;
 
   type: 'sale' | 'purchase' | 'adjustment' | 'swap';
-  itemType: 'gas' | 'cylinder' | 'stove';
-  brand?: string;
+  itemId: Schema.Types.ObjectId;
+  itemType: String;
+  name?: string;
   quantity: number; // +in / -out
   unit: 'L' | 'unit';
-  transactionId?: Types.ObjectId; // link to Transaction
+  transactionId: Types.ObjectId;
   meta?: Record<string, any>;
 
   createdAt: Date;
@@ -18,20 +19,21 @@ export interface IStockMovement extends Document {
 
 const stockMovementSchema: Schema<IStockMovement> = new Schema(
   {
-    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    divisionId: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     type: { type: String, enum: ['sale', 'purchase', 'adjustment', 'swap'], required: true },
+    itemId: { type: Schema.Types.ObjectId, required: true, refPath: 'Cylinder' },
     itemType: { type: String, enum: ['gas', 'cylinder', 'stove'], required: true },
-    brand: String,
+    name: String,
     quantity: { type: Number, required: true },
     unit: { type: String, enum: ['kg', 'unit'], required: true },
-    transactionId: { type: Schema.Types.ObjectId, ref: 'Transaction' },
+    transactionId: { type: Schema.Types.ObjectId, ref: 'Transaction', required: true },
     meta: { type: Schema.Types.Mixed },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: { createdAt: true, updatedAt: false }, versionKey: false }
 );
 
-stockMovementSchema.index({ workspaceId: 1, divisionId: 1, createdAt: -1 });
+stockMovementSchema.index({ workspace: 1, division: 1, createdAt: -1 });
 
 stockMovementSchema.methods.toJSON = function (): Partial<IStockMovement> {
   const obj = this.toObject();

@@ -1,9 +1,11 @@
-import { inventoryController } from '@/controllers/v1';
 import { Router } from 'express';
+
+import { inventoryController } from '@/controllers/v1';
+import { divisionScope } from '@/middlewares';
 
 const router = Router({ mergeParams: true });
 
-// <============================> Brand Controllers <============================>
+// <============================> Brand Routers <============================>
 
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/inventory/global-brands
@@ -31,14 +33,19 @@ router.get('/brands/d', inventoryController.detailedLocalBrands);
  * @desc    Select brands in a division
  * @access  Division admin
  */
-router.patch('/brands', inventoryController.selectBrands);
+router.patch('/brands', divisionScope(['division_admin']), inventoryController.selectBrands);
 
-// <============================> Cylinder Controllers <============================>
+// <============================> Cylinder Routers <============================>
 
+/**
+ * @route   GET /:workspaceId/divisions/:divisionId/inventory/cylinders
+ * @desc    Get all cylinders in a division
+ * @access  Authenticated
+ */
 router.get('/cylinders', inventoryController.allCylinders);
+
 // router.post('/cylinders', inventoryController.addCylinder);
 // router.put('/cylinders/:cylinderId', inventoryController.updateCylinder);
 // router.delete('/cylinders/:cylinderId', inventoryController.deleteCylinder);
-router.post('/cylinders/:cylinderId/count', inventoryController.changeCylinderCount);
 
 export default router;

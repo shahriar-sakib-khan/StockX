@@ -1,16 +1,28 @@
 export const TransactionCategory = [
-  'sale_retail', // shop/retail sales
-  'sale_b2b', // store/wholesale sales
-  'purchase_bulk_cyl', // buying gas/cylinders from supplier
-  'payment_in', // customer/store pays us
-  'payment_out', // we pay supplier/other
-  'expense_salary',
-  'expense_vehicle_fuel',
-  'expense_vehicle_repair',
-  'expense_other',
-  'owner_withdraw',
-  'transfer', // cash<->bank<->mobile internal
+  // ========== Retail Sales ==========
+  'cylinder_sale_cash',       // cash retail sales
+  'cylinder_sale_credit',     // credit retail sales
+  'cylinder_swap_retail',     // cylinder swap in retail
+
+  // ========== Wholesale Purchases ==========
+  'cylinder_purchase_wholesale_cash', // buy cylinders in cash
+  'cylinder_purchase_wholesale_ap',   // buy cylinders on credit (AP)
+  'cylinder_payment_to_supplier',     // pay supplier for earlier purchase
+
+  // ========== Expenses ==========
+  'salary_payment',          // staff salaries
+  'fuel_payment',            // fuel for vehicles
+  'repair_payment',          // vehicle repair/maintenance
+  'office_expense',          // office expense
+
+  // ========== Owner/Withdrawal ==========
+  'owner_withdraw',          // owner taking out money
+
+  // ========== Miscellaneous ==========
+  'other_income',            // miscellaneous income
+  'other_expense',           // miscellaneous expense
 ] as const;
+
 export type TxCategoryType = (typeof TransactionCategory)[number];
 
 export const PaymentMethod = ['cash', 'bank', 'mobile', 'other'] as const;

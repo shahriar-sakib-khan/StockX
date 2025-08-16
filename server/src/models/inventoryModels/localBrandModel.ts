@@ -1,13 +1,17 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface ILocalBrand extends Document {
-  globalBrand: Types.ObjectId;
   workspace: Types.ObjectId;
   division: Types.ObjectId;
+
+  globalBrand: Types.ObjectId;
   selectedBy: Types.ObjectId;
   isActive: boolean;
   totalFullCount: number;
   totalEmptyCount: number;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const localBrandSchema: Schema<ILocalBrand> = new Schema(
