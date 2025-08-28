@@ -1,26 +1,33 @@
 import { NavLink } from "react-router-dom";
-import hero_img from "../assets/images/hero.webp";
-import Logo from "../components/ui/Logo";
+import hero_img from "../../assets/images/hero.webp";
+import Logo from "../../components/ui/Logo";
 
 const Header = () => {
   return (
     <header className="wrapper-l flex h-[calc(var(--navbar-height)*1.5)] items-center text-base">
       <Logo className="text-2xl font-bold" />
-      <div className="ml-auto flex gap-2 border-r-3 border-gray-200 text-sm">
+      <div className="mr-2 ml-auto flex gap-2 border-gray-200 text-sm">
         <NavLink
-          to="login"
+          to="pricing"
           className="rounded px-4 py-1 font-semibold text-gray-700 transition-all duration-100 hover:bg-gray-100"
         >
           Pricing
         </NavLink>
         <NavLink
-          to="login"
+          to="services"
+          className="rounded px-4 py-1 font-semibold text-gray-700 transition-all duration-100 hover:bg-gray-100"
+        >
+          Services
+        </NavLink>
+        <NavLink
+          to="support"
           className="rounded px-4 py-1 font-semibold text-gray-700 transition-all duration-100 hover:bg-gray-100"
         >
           Support
         </NavLink>
       </div>
-      <div className="flex gap-2 px-2 text-sm">
+      <span className="h-6 w-0.5 bg-gray-300/70"></span>
+      <div className="mx-2 flex gap-2 text-sm">
         <NavLink
           to="login"
           className="rounded px-4 py-1 font-semibold text-gray-700 transition-all duration-100 hover:bg-gray-100"

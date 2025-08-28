@@ -1,6 +1,10 @@
 import { NavLink } from "react-router-dom";
 
-export default function OptionCard({ path = "", imgSrc = "", title = "" }) {
+export default function QuickActionCard({
+  path = "",
+  imgSrc = "",
+  title = "",
+}) {
   return (
     <NavLink
       to={path}

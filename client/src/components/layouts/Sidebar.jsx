@@ -14,7 +14,7 @@ export default function Sidebar() {
   const VehicleIcon = pagesConfig["/vehicles"]?.icon;
   const HistoryIcon = pagesConfig["/history"]?.icon;
 
-  const heading = (headingText) => (
+  const sideBarHeading = (headingText) => (
     <h2
       className={`pointer-events-none mb-3 overflow-hidden text-xs font-semibold tracking-wider text-gray-500 transition-all ${isSidebarOpen ? "w-full" : "w-0"}`}
     >
@@ -69,7 +69,7 @@ export default function Sidebar() {
       </div>
       <div className={`flex flex-col gap-4 px-3`}>
         <nav aria-label="General">
-          {heading("GENERAL")}
+          {sideBarHeading("GENERAL")}
           <div className="flex flex-col gap-2">
             {navItem(
               <DashboardIcon className="shrink-0 text-xl text-gray-700" />,

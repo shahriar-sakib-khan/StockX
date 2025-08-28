@@ -1,5 +1,5 @@
 import StatsCard from "./StatsCard";
-import { heading } from "../utils/Heading";
+import { Heading } from "../utils/Heading";
 import { Section } from "../utils/Section";
 import { BiCoinStack as SalesIcon } from "react-icons/bi";
 import { TbCalendarDue as DueIcon } from "react-icons/tb";
@@ -45,7 +45,8 @@ export default function StatsSection() {
   return (
     <Section>
       <div className="rounded-md border border-gray-200 bg-white p-2 pt-4">
-        {heading("Sales Overview")}
+        {/* {heading("Sales Overview")} */}
+        <Heading>Sales Overview</Heading>
         <div className="grid grid-cols-3">
           {stats.map((stat, i) => (
             <StatsCard key={i} {...stat} />

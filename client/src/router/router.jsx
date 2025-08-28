@@ -12,6 +12,9 @@ import {
   ProfilePage,
   HistoryPage,
   MembersPage,
+  SupportPage,
+  PricingPage,
+  ServicesPage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
@@ -23,6 +26,9 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <LandingPage /> },
+      { path: "support", element: <SupportPage /> },
+      { path: "pricing", element: <PricingPage /> },
+      { path: "services", element: <ServicesPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "signup", element: <SignupPage /> },
       {

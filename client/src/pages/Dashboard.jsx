@@ -1,5 +1,9 @@
-import { OptionsSection, StatsSection } from "../features";
-import { heading } from "../features/dashboard/utils/Heading";
+import {
+  InventoryOverviewSection,
+  QuickActionsSection,
+  StatsSection,
+} from "../features";
+import { Heading } from "../features/dashboard/utils/Heading";
 import { Section } from "../features/dashboard/utils/Section";
 import { useUIStore } from "../stores/useUIStore";
 import { PiWallet as WalletIcon } from "react-icons/pi";
@@ -10,17 +14,18 @@ export default function Dashboard() {
   return (
     <div className="grid h-[var(--height-with-nav-titlebar)] grid-cols-[auto_1fr] bg-amber-50">
       <main
-        className={`overflow-auto bg-gray-50 transition-all ${isSidebarOpen ? "w-[var(--width-with-sidebar-lg-rightbar)]" : "w-[var(--width-with-sidebar-sm-rightbar)]"}`}
+        className={`flex flex-col gap-4 overflow-auto bg-gray-50 transition-all ${isSidebarOpen ? "w-[var(--width-with-sidebar-lg-rightbar)]" : "w-[var(--width-with-sidebar-sm-rightbar)]"}`}
       >
         <StatsSection />
-        <OptionsSection />
+        <QuickActionsSection />
+        <InventoryOverviewSection />
 
         <Section>
-          {heading("Graph")}
+          <Heading>Graph</Heading>
           <div className="h-40 bg-blue-100"></div>
         </Section>
         <Section>
-          {heading("Recents")}
+          <Heading>Recents</Heading>
           <div className="flex flex-col gap-4">
             <div className="h-5 bg-red-100"></div>
             <div className="h-5 bg-red-100"></div>
@@ -29,24 +34,7 @@ export default function Dashboard() {
           </div>
         </Section>
         <Section>
-          {heading("Inventory Overview")}
-          <div className="grid h-30 grid-cols-6 gap-2">
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-            <div className="bg-blue-200"></div>
-          </div>
-        </Section>
-        <Section>
-          {heading("Customer Shops")}
+          <Heading>Custormer Shops</Heading>
           <div className="grid grid-cols-[1rem_1fr_1rem] gap-2">
             <button className="flex self-center px-0.5 font-bold">{`<`}</button>
             <div className="grid h-30 grid-cols-4 gap-2">
@@ -62,7 +50,7 @@ export default function Dashboard() {
           </button>
         </Section>
         <Section>
-          {heading("Vehicles")}
+          <Heading>Vehicles</Heading>
           <div className="grid grid-cols-[1rem_1fr_1rem] gap-2">
             <button className="flex self-center px-0.5 font-bold">{`<`}</button>
             <div className="grid h-30 grid-cols-4 gap-2">
