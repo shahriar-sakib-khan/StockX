@@ -3,6 +3,7 @@ import clsx from "clsx";
 import cylinderImg from "../../../assets/images/cylinderModel.png";
 import { TableHeader } from "../utils/TableHeader";
 import { TableRow } from "../utils/TableRow";
+import SearchBar from "./Searchbar";
 
 const brands = [
   {
@@ -38,6 +39,17 @@ const brands = [
       { type: "22mm", size: 45, quantity: 8 },
     ],
   },
+  {
+    id: "brand4",
+    name: "Nigaz",
+    imageUrl: cylinderImg,
+    stockCount: 17,
+    cylinders: [
+      { type: "20mm", size: 12, quantity: 18 },
+      { type: "22mm", size: 45, quantity: 9 },
+      { type: "22mm", size: 33, quantity: 11 },
+    ],
+  },
 ];
 
 const headers = [
@@ -50,12 +62,10 @@ const headers = [
 ];
 
 // Main Table Component
-export default function CylinderTable({ brandCount }) {
+export default function CylinderTable({ overview = false, brandCount }) {
   const [selectedSize, setSelectedSize] = useState("12");
   const [selectedType, setSelectedType] = useState("20mm");
-
-  const displayedBrands =
-    typeof brandCount === "number" ? brands.slice(0, brandCount) : brands;
+  const [searchTerm, setSearchTerm] = useState("");
 
   // collect unique sizes & types across all brands
   const sizes = [
@@ -65,8 +75,30 @@ export default function CylinderTable({ brandCount }) {
     ...new Set(brands.flatMap((b) => b.cylinders.map((c) => c.type))),
   ];
 
+  // filter brands by search term
+  let displayedBrands =
+    typeof brandCount === "number" ? brands.slice(0, brandCount) : brands;
+
+  if (searchTerm.trim() !== "") {
+    displayedBrands = displayedBrands.filter((b) =>
+      b.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }
+
   return (
     <div className="w-full p-4">
+      {/* Search Bar */}
+      {!overview && (
+        <div className="mb-8 flex w-full items-center justify-center">
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search brand..."
+            className="w-100"
+          />
+        </div>
+      )}
+
       {/* Filters as Buttons */}
       <div className="mb-4 flex gap-16">
         {/* Sizes */}
@@ -110,9 +142,6 @@ export default function CylinderTable({ brandCount }) {
 
       {/* Table */}
       <table className="w-full border-collapse overflow-hidden rounded-md border bg-white tracking-wider shadow-sm">
-        {/* <caption className="mb-4 rounded-lg bg-blue-400 p-2 font-bold tracking-wider text-white">
-          {"LPG Stock Management".toUpperCase()}
-        </caption> */}
         <thead className="bg-gray-200/75 text-left text-sm font-semibold text-gray-600">
           <TableHeader headers={headers} />
         </thead>

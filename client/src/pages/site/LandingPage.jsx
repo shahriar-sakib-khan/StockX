@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
 import hero_img from "../../assets/images/hero.webp";
 import Logo from "../../components/ui/Logo";
+import { useAuthStore } from "../../stores/useAuthStore-deprecated";
+import { useEffect } from "react";
 
 const Header = () => {
   return (
@@ -77,6 +79,12 @@ const Hero = () => {
 };
 
 export default function LandingPage() {
+  const clearUser = useAuthStore((state) => state.clearUser);
+
+  useEffect(() => {
+    clearUser();
+  }, [clearUser]);
+
   return (
     <div>
       <Header />

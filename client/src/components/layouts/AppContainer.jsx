@@ -1,33 +1,19 @@
-import { Navigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
-import Titlebar from "./titlebar";
-import { useAuthStore } from "../../stores/useAuthStore";
+import Titlebar from "./Titlebar";
+import { useAuthStore } from "../../stores/useAuthStore-deprecated";
+import LoadingComponent from "../ui/LoadingComponent";
+import { redirectToLogin } from "../../utils/redirectToLogin";
 
 export default function AppContainer({ children }) {
   const user = useAuthStore((state) => state.user);
   const initializing = useAuthStore((state) => state.initializing);
   // let Data = { name: "Visitor" };
-  // const isLoading = false;
-  // Data = data;
+  // const isLoading = true;
 
-  if (initializing) {
-    return (
-      <div className="flex h-screen items-center justify-center text-3xl font-semibold text-gray-700">
-        Loading...
-      </div>
-    );
-  }
+  if (initializing) return <LoadingComponent />;
 
-  if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ redirectUrl: window.location.pathname }}
-      />
-    );
-  }
+  if (!user) return redirectToLogin(window.location.pathname);
 
   return (
     <div className="grid h-full w-full">

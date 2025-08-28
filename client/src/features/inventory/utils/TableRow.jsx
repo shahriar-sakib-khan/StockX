@@ -26,7 +26,7 @@ export const TableRow = ({
   };
 
   return (
-    <tr className="border-b border-gray-200 text-gray-600">
+    <tr className="border-b border-gray-200 bg-white text-gray-600 hover:bg-gray-50">
       <td data-cell={headers[0]} className="p-4">
         {index + 1}
       </td>

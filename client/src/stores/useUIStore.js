@@ -24,7 +24,7 @@ export const useUIStore = create(
       },
     }),
     {
-      name: "sidebar-storage", // localstorage key
+      name: "menu-storage", // localstorage key
       partialize: (state) => ({ isSidebarOpen: state.isSidebarOpen }),
     },
   ),

@@ -14,3 +14,6 @@ export { default as InventoryOverviewSection } from "./dashboard/components/Inve
 
 // inventory
 export { default as InventoryTable } from "./inventory/components/InventoryTable";
+
+// selection
+export { default as BrandSelection } from "./selection/components/BrandSelection";

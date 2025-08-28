@@ -1,11 +1,16 @@
 import { Button, FormInputField } from "../../../components";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/authServices";
 import useInput from "../../../hooks/useInput";
+import { useAuthStore } from "../../../stores/useAuthStore-deprecated";
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
   const [loginIdentifier, resetLoginIdentifier, loginIdentifierObj] = useInput(
     "loginIdentifier",
     "",
@@ -24,10 +29,15 @@ export default function LoginForm() {
     error,
   } = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      navigate("/dashboard", {
-        replace: true,
-      });
+    onSuccess: async () => {
+      // Initialize auth to fetch the current user and update Zustand state
+      await initializeAuth();
+
+      // Redirect to the original page or fallback
+      const redirectUrl = location.state?.redirectUrl || "/dashboard";
+      navigate(redirectUrl, { replace: true });
+
+      // Reset form inputs
       resetValues();
     },
   });
@@ -68,7 +78,10 @@ export default function LoginForm() {
         className="mt-2"
         // disabled={!loginIdentifier || password.length < 3}
         isLoading={isPending}
-        onClick={handleSubmit}
+        onClick={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
       />
       <div className="mt-1 flex gap-2 self-center text-sm">
         <span>Don't have an account? </span>

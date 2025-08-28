@@ -7,8 +7,8 @@ const useAuth = (options = {}) => {
   const { data, ...rest } = useQuery({
     queryKey: [AUTH],
     queryFn: getUser,
-    staleTime: Infinity, // stores the fetched user in query cache
-    ...options, // allowing overrides
+    staleTime: Infinity, // keep cached indefinitely
+    ...options,
   });
 
   return { data, ...rest };
