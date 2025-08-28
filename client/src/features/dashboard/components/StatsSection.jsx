@@ -8,7 +8,7 @@ import { TbReportMoney as ExpensesIcon } from "react-icons/tb";
 const stats = [
   {
     Icon: (
-      <SalesIcon className="size-8 rounded bg-green-100 p-1 text-green-600" />
+      <SalesIcon className="size-8 rounded bg-emerald-100 p-1 text-emerald-600" />
     ),
     title: "Sales",
     value: 10000,
@@ -18,7 +18,9 @@ const stats = [
     shadow: "shadow-sm shadow-green-500/40",
   },
   {
-    Icon: <DueIcon className="size-8 rounded bg-blue-100 p-1 text-blue-600" />,
+    Icon: (
+      <DueIcon className="size-8 rounded bg-orange-100 p-1 text-orange-600" />
+    ),
     title: "Dues",
     value: 2500,
     bgColor: "bg-amber-200/70",
@@ -28,7 +30,7 @@ const stats = [
   },
   {
     Icon: (
-      <ExpensesIcon className="size-8 rounded bg-red-100 p-1 text-red-600" />
+      <ExpensesIcon className="size-8 rounded bg-rose-100 p-1 text-rose-600" />
     ),
     title: "Expenses",
     value: 4000,
@@ -43,7 +45,7 @@ export default function StatsSection() {
   return (
     <Section>
       <div className="rounded-md border border-gray-200 bg-white p-2 pt-4">
-        {heading("Stats Overview")}
+        {heading("Sales Overview")}
         <div className="grid grid-cols-3">
           {stats.map((stat, i) => (
             <StatsCard key={i} {...stat} />

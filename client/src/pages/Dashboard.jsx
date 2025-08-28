@@ -2,6 +2,7 @@ import { OptionsSection, StatsSection } from "../features";
 import { heading } from "../features/dashboard/utils/Heading";
 import { Section } from "../features/dashboard/utils/Section";
 import { useUIStore } from "../stores/useUIStore";
+import { PiWallet as WalletIcon } from "react-icons/pi";
 
 export default function Dashboard() {
   const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
@@ -77,16 +78,22 @@ export default function Dashboard() {
           </button>
         </Section>
       </main>
-      <aside className="flex w-[var(--rightbar-width)] flex-col border-l border-gray-300 bg-white">
+      <aside className="flex w-[var(--rightbar-width)] flex-col border-l border-gray-300 bg-gray-50">
         <Section>
-          <div className="flex flex-col bg-gray-100 py-3">
-            {heading("Cashbox")}
-            <span className="w-full text-right text-nowrap">
-              <span className={`text-3xl font-semibold text-gray-600`}>
-                {"15,000".toLocaleString()}
-              </span>{" "}
-              <span className={`text-sm`}>Tk</span>
-            </span>
+          <div className="flex gap-4 rounded-md border border-gray-200 bg-white py-3">
+            <div className="flex flex-col gap-2">
+              <div className="ml-3 flex items-center gap-2">
+                <WalletIcon className="size-8 rounded-sm bg-blue-100 p-1 text-2xl text-blue-600" />
+                <h2 className="text-lg text-gray-400">Balance</h2>
+              </div>
+              <div className="mt-1 w-full pl-2 text-left">
+                <span className={`text-3xl font-semibold text-gray-600`}>
+                  {"15,000".toLocaleString()}
+                </span>{" "}
+                <span className={`text-sm`}>Tk</span>
+              </div>
+            </div>
+            <div className="mr-2 grow rounded-sm bg-gray-100"></div>
           </div>
         </Section>
         <Section>

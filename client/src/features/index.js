@@ -12,6 +12,4 @@ export { default as StatsSection } from "./dashboard/components/StatsSection";
 export { default as OptionsSection } from "./dashboard/components/OptionsSection";
 
 // inventory
-export { default as BrandBox } from "./inventory/components/BrandBox";
-export { default as CylinderCard } from "./inventory/components/CylinderCard";
-export { default as CylinderInfoCard } from "./inventory/components/CylinderInfoCard";
+export { default as InventoryTable } from "./inventory/components/InventoryTable";

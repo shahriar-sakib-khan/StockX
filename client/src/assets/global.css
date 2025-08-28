@@ -10,6 +10,10 @@ html {
   font-family: Roboto, "Open Sans", sans-serif;
 }
 
+body {
+  @apply tracking-wider;
+}
+
 button {
   cursor: pointer;
 }

@@ -29,7 +29,7 @@ const Header = () => {
         </NavLink>
         <NavLink
           to="signup"
-          className="bg-blue-500 px-4 py-1.25 font-semibold text-white transition-all duration-200 hover:bg-blue-600"
+          className="rounded-md bg-blue-400 px-4 py-1.25 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-400/90"
         >
           Sign up
         </NavLink>
@@ -56,7 +56,7 @@ const Hero = () => {
         <div className="flex items-center justify-between gap-4 text-base">
           <NavLink
             to="signup"
-            className="bg-blue-500 px-6 py-1 font-semibold text-white transition-all duration-200 hover:bg-blue-400"
+            className="rounded-md bg-blue-400 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-400/90"
           >
             Get started
           </NavLink>

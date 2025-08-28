@@ -16,7 +16,7 @@ export default function StatCard({
         {Icon}
         {title}
       </span>
-      <span className="text-nowrap">
+      <span className="mt-1 text-nowrap">
         <span className={`text-3xl font-semibold text-gray-600`}>
           {value.toLocaleString()}
         </span>{" "}
