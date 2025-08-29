@@ -1,58 +1,70 @@
 import { useNavigate } from "react-router-dom";
 import SelectionCard from "./SelectionCard";
 import { useEffect, useState } from "react";
+import {
+  useGlobalBrands,
+  useDivisionBrands,
+  useSaveDivisionBrands,
+} from "../../../hooks/useBrand";
+import brandLogo from "../../../assets/images/bashundhara.webp";
 
-export default function BrandSelection() {
+export default function BrandSelection({ workspaceId, divisionId }) {
   const navigate = useNavigate();
 
-  // Placeholder state until stores are ready
-  const [draftSelectedBrands] = useState([]);
-  const [allBrands] = useState([
-    { id: 1, name: "Brand A", logo: "/logos/brandA.png" },
-    { id: 2, name: "Brand B", logo: "/logos/brandB.png" },
-    { id: 3, name: "Brand C", logo: "/logos/brandC.png" },
-  ]);
+  // Fetch brands
+  const { data: allBrands = [], isLoading: loadingAll } = useGlobalBrands(
+    workspaceId,
+    divisionId,
+  );
+  const { data: selectedBrands = [], isLoading: loadingSelected } =
+    useDivisionBrands(workspaceId, divisionId);
 
-  // Placeholder functions for selection logic
-  const toggleSingleBrand = (id) => {
-    id;
-    // To be implemented later
-  };
+  const { mutate: saveBrands, isLoading: isSaving } = useSaveDivisionBrands(
+    workspaceId,
+    divisionId,
+  );
 
-  const toggleAllBrandsSelection = () => {
-    // To be implemented later
-  };
+  // Store only selected IDs
+  const [draftSelectedIds, setDraftSelectedIds] = useState([]);
+
+  // Initialize selection
+  useEffect(() => {
+    if (Array.isArray(selectedBrands) && selectedBrands.length > 0) {
+      setDraftSelectedIds(selectedBrands.map((b) => b.id));
+    }
+  }, [selectedBrands]);
+
+  const toggleSingleBrand = (id) =>
+    setDraftSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+
+  const toggleAllBrandsSelection = () =>
+    setDraftSelectedIds(
+      draftSelectedIds.length === allBrands.length
+        ? []
+        : allBrands.map((b) => b.id),
+    );
 
   const submitSelectedBrands = () => {
-    // To be implemented later
+    if (!draftSelectedIds.length) return;
+    saveBrands(draftSelectedIds, {
+      onSuccess: () => navigate("./initialization"),
+    });
   };
 
-  const initializeDraft = () => {
-    // To be implemented later
-  };
-
-  useEffect(() => {
-    initializeDraft();
-  }, []);
-
-  const handleSubmit = () => {
-    if (draftSelectedBrands.length > 0) {
-      submitSelectedBrands();
-      navigate("./initialization");
-    }
-  };
-
-  const allSelected = draftSelectedBrands.length === allBrands.length;
-  const isSubmitDisabled = draftSelectedBrands.length === 0;
+  const allSelected = draftSelectedIds.length === allBrands.length;
+  const isSubmitDisabled =
+    draftSelectedIds.length === 0 || isSaving || loadingAll || loadingSelected;
 
   return (
     <main className="bg-gray-50 p-6">
       <div className="mx-auto max-w-5xl">
-        {/* Title and submit */}
+        {/* Header + Submit */}
         <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Selection Page
+            <h2 className="text-2xl font-semibold text-gray-500">
+              Select brands
             </h2>
             <button
               className={`rounded-md px-4 py-2 font-medium text-white ${
@@ -60,10 +72,10 @@ export default function BrandSelection() {
                   ? "cursor-not-allowed bg-gray-400"
                   : "bg-blue-600 hover:bg-blue-700"
               }`}
-              onClick={handleSubmit}
+              onClick={submitSelectedBrands}
               disabled={isSubmitDisabled}
             >
-              Submit
+              {isSaving ? "Saving..." : "Submit"}
             </button>
           </div>
 
@@ -75,23 +87,30 @@ export default function BrandSelection() {
               {allSelected ? "Deselect All" : "Select All"}
             </button>
             <span className="font-medium text-gray-700">
-              Selected: {draftSelectedBrands.length} / {allBrands.length}
+              Selected: {draftSelectedIds.length} / {allBrands.length}
             </span>
           </div>
         </section>
 
         {/* Brand list */}
         <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {allBrands.map((brand) => (
-            <SelectionCard
-              key={brand.id}
-              id={brand.id}
-              name={brand.name}
-              logo={brand.logo}
-              isSelected={draftSelectedBrands.some((b) => b.id === brand.id)}
-              onSelect={() => toggleSingleBrand(brand.id)}
-            />
-          ))}
+          {loadingAll || loadingSelected
+            ? [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-20 animate-pulse rounded bg-gray-200/50"
+                />
+              ))
+            : allBrands.map((brand) => (
+                <SelectionCard
+                  key={brand.id}
+                  id={brand.id}
+                  name={brand.name}
+                  logo={brandLogo}
+                  isSelected={draftSelectedIds.includes(brand.id)}
+                  onSelect={() => toggleSingleBrand(brand.id)}
+                />
+              ))}
         </section>
       </div>
     </main>

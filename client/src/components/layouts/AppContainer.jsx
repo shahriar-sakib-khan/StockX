@@ -1,7 +1,7 @@
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Titlebar from "./Titlebar";
-import { useAuthStore } from "../../stores/useAuthStore-deprecated";
+import { useAuthStore } from "../../stores/useAuthStore";
 import LoadingComponent from "../ui/LoadingComponent";
 import { redirectToLogin } from "../../utils/redirectToLogin";
 

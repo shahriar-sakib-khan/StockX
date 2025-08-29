@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAuthStore } from "../stores/useAuthStore-deprecated";
+import { useAuthStore } from "../stores/useAuthStore";
 
 const API_URL = import.meta.env.VITE_API_URL;
 if (!API_URL)
@@ -22,11 +22,17 @@ API.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response) {
-      const { status, data } = error.response;
-      return Promise.reject({ status, ...data });
+      const { status, data } = error.response || {};
+      return Promise.reject({
+        status,
+        message: data.message || "Something went wrong",
+        errors: data.errors || null,
+      });
     } else {
-      // Network error or no response received
-      return Promise.reject({ status: null, message: error.message });
+      return Promise.reject({
+        status: null,
+        message: error.message || "Network error",
+      });
     }
   },
 );

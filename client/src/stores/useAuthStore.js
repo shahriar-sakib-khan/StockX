@@ -6,25 +6,27 @@ import {
 
 export const useAuthStore = create((set) => ({
   user: null,
+  accessToken: null,
   initializating: true,
 
   // refresh token and fetch user
   initializeAuth: async () => {
-    set({ initializing: true });
+    set({ initializating: true });
     try {
       const data = await refreshToken();
       if (data.accessToken) {
+        set({ accessToken: data.accessToken });
         const userData = await getUser();
         set({ user: userData });
       } else {
-        set({ user: null });
+        set({ accessToken: null, user: null });
       }
     } catch {
-      set({ user: null });
+      set({ accessToken: null, user: null });
     } finally {
-      set({ initializing: false });
+      set({ initializating: false });
     }
   },
 
-  clearUser: () => set({ user: null }),
+  clearUser: () => set({ user: null, accessToken: null }),
 }));

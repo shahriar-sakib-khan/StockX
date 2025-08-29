@@ -1,9 +1,10 @@
-import { Button, FormInputField } from "../../../components";
+import { Button, Divider, FormInputField } from "../../../components";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/authServices";
 import useInput from "../../../hooks/useInput";
-import { useAuthStore } from "../../../stores/useAuthStore-deprecated";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { FcGoogle as GoogleIcon } from "react-icons/fc";
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -48,10 +49,10 @@ export default function LoginForm() {
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border-0 border-gray-300 bg-white p-8 shadow-lg">
-      <div className="w-full rounded border-1 border-gray-200 py-2 text-center">
-        {/* <span className="mr-2 rounded bg-gray-300 px-2"></span> */}
-        <span>Continue with Google</span>
+      <div className="flex w-full cursor-pointer items-center justify-center gap-2 rounded py-2 text-center outline-1 outline-gray-200">
+        <GoogleIcon className="text-xl" /> <span>Continue with Google</span>
       </div>
+      <Divider text="Or" />
       <FormInputField
         id="email"
         type="email"

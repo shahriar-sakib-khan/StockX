@@ -14,3 +14,6 @@ export { default as Button } from "./ui/Button";
 export { default as UserMenu } from "./ui/UserMenu";
 export { default as DivisionMenu } from "./ui/DivisionMenu";
 export { default as LoadingComponent } from "./ui/LoadingComponent";
+
+//mini
+export { default as Divider } from "./mini/Divider";
