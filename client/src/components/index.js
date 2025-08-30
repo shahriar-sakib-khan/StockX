@@ -17,3 +17,4 @@ export { default as LoadingComponent } from "./ui/LoadingComponent";
 
 //mini
 export { default as Divider } from "./mini/Divider";
+export { default as Tabs } from "./mini/Tabs";

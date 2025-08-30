@@ -17,3 +17,6 @@ export { default as InventoryTable } from "./inventory/components/InventoryTable
 
 // selection
 export { default as BrandSelection } from "./selection/components/BrandSelection";
+
+// staff
+export { default as StaffCard } from "./staff/components/StaffCard";

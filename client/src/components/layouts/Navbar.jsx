@@ -6,7 +6,7 @@ import clsx from "clsx";
 export default function Navbar({
   userMenu = false,
   className = "",
-  wrapper = "wide",
+  wrapper = "",
   dark = false,
 }) {
   return (
@@ -17,7 +17,15 @@ export default function Navbar({
         dark && "bg-gray-700",
       )}
     >
-      <div className={clsx(wrapper === "narrow" ? "wrapper-l" : "wrapper")}>
+      <div
+        className={clsx(
+          wrapper === "narrow"
+            ? "wrapper-l"
+            : wrapper === "wide"
+              ? "wrapper"
+              : "wrapper-p",
+        )}
+      >
         <div className="flex w-full items-center">
           <Logo
             className={clsx(

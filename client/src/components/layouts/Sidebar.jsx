@@ -13,6 +13,7 @@ export default function Sidebar() {
   const ShopIcon = pagesConfig["/shops"]?.icon;
   const VehicleIcon = pagesConfig["/vehicles"]?.icon;
   const HistoryIcon = pagesConfig["/history"]?.icon;
+  const StaffIcon = pagesConfig["/staff"]?.icon;
 
   const sideBarHeading = (headingText) => (
     <h2
@@ -95,6 +96,11 @@ export default function Sidebar() {
               <HistoryIcon className="shrink-0 text-xl text-gray-700" />,
               "History",
               "/history",
+            )}
+            {navItem(
+              <StaffIcon className="shrink-0 text-xl text-gray-700" />,
+              "Staff",
+              "/staff",
             )}
           </div>
         </nav>

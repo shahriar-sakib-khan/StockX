@@ -6,6 +6,7 @@ import { FaRegClock as HistoryIcon } from "react-icons/fa";
 import { CgProfile as ProfileIcon } from "react-icons/cg";
 import { MdOutlineSettings as SettingsIcon } from "react-icons/md";
 import { HiOutlineUserGroup as MembersIcon } from "react-icons/hi2";
+import { GoPeople as StaffIcon } from "react-icons/go";
 
 export const pagesConfig = {
   "/profile": { title: "Profile", icon: ProfileIcon },
@@ -16,4 +17,5 @@ export const pagesConfig = {
   "/history": { title: "History", icon: HistoryIcon },
   "/settings": { title: "Settings", icon: SettingsIcon },
   "/members": { title: "Members", icon: MembersIcon },
+  "/staff": { title: "Staff", icon: StaffIcon },
 };

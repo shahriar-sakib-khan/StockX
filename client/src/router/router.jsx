@@ -18,6 +18,7 @@ import {
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
+import StaffPage from "../pages/StaffPage";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,14 @@ const router = createBrowserRouter([
         element: (
           <AppContainer>
             <InventoryPage />
+          </AppContainer>
+        ),
+      },
+      {
+        path: "staff",
+        element: (
+          <AppContainer>
+            <StaffPage />
           </AppContainer>
         ),
       },

@@ -62,10 +62,18 @@ const headers = [
 ];
 
 // Main Table Component
-export default function CylinderTable({ overview = false, brandCount }) {
+export default function CylinderTable({ overview = false, brandCount, type }) {
   const [selectedSize, setSelectedSize] = useState("12");
   const [selectedType, setSelectedType] = useState("20mm");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const typeMap = {
+    cylinder: "brand",
+    stoves: "stove",
+    regulators: "regulator",
+  };
+
+  const product = typeMap[type] || type;
 
   // collect unique sizes & types across all brands
   const sizes = [
@@ -86,23 +94,21 @@ export default function CylinderTable({ overview = false, brandCount }) {
   }
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full bg-transparent p-4">
       {/* Search Bar */}
-      {!overview && (
-        <div className="mb-8 flex w-full items-center justify-center">
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search brand..."
-            className="w-100"
-          />
-        </div>
-      )}
 
       {/* Filters as Buttons */}
       <div className="mb-4 flex gap-16">
+        {!overview && (
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder={`Search ${product}...`}
+            className="w-100"
+          />
+        )}
         {/* Sizes */}
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
           <h2 className="text-gray-600">Size: </h2>
           {sizes.map((s) => (
             <button
@@ -111,7 +117,7 @@ export default function CylinderTable({ overview = false, brandCount }) {
               className={clsx(
                 "rounded border px-3 py-1 text-sm font-medium",
                 selectedSize === String(s)
-                  ? "border-blue-500 bg-blue-500 text-white"
+                  ? "border-emerald-500 bg-emerald-500 text-white"
                   : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100",
               )}
             >
@@ -121,7 +127,7 @@ export default function CylinderTable({ overview = false, brandCount }) {
         </div>
 
         {/* Types */}
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <h2 className="text-gray-600">Type: </h2>
           {types.map((t) => (
             <button
@@ -130,7 +136,7 @@ export default function CylinderTable({ overview = false, brandCount }) {
               className={clsx(
                 "rounded border px-3 py-1 text-sm font-medium",
                 selectedType === t
-                  ? "border-blue-500 bg-blue-500 text-white"
+                  ? "border-emerald-500 bg-emerald-500 text-white"
                   : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100",
               )}
             >

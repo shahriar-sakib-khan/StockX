@@ -18,7 +18,7 @@ export default function SearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded bg-gray-50 py-2 pr-3 pl-8 text-sm text-gray-700 shadow-sm outline-gray-300 focus:bg-white focus:outline-3"
+        className="w-full rounded bg-gray-50 py-2 pr-3 pl-8 text-sm text-gray-700 shadow-sm outline outline-gray-300 focus:bg-white focus:outline-3"
       />
     </form>
   );

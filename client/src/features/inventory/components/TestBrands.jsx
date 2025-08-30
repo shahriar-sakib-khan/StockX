@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { getDivisionBrands, getGlobalBrands } from "../services/brandServices";
+import { getDivisionBrands } from "../services/brandServices";
 
 export default function TestBrands() {
   const workspaceId = "68a481f250fec8909ab2670c";

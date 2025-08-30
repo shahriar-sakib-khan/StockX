@@ -75,6 +75,13 @@ img {
   .wrapper-l {
     @apply mx-auto w-full max-w-[1280px] px-8;
   }
+  .wrapper-p {
+    @apply mx-auto w-full px-6;
+  }
+
+  .primary-button {
+    @apply rounded-md bg-blue-400 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-400/90;
+  }
 
   /* Base card shadow */
   .card-shadow {
@@ -84,18 +91,19 @@ img {
   /* Fake hover shadow */
   .fake-shadow {
     position: relative;
-  }
-  .fake-shadow::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    opacity: 0;
-    box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.2);
-    transition: opacity 0.125s ease-in;
-  }
-  .fake-shadow:hover::after {
-    opacity: 1;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.2);
+      transition: opacity 0.125s ease-in;
+    }
+    &:hover::after {
+      opacity: 1;
+    }
   }
 
   /* Selected card shadow */

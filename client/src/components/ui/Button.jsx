@@ -13,7 +13,7 @@ export default function Button({
       onClick={disabled || isLoading ? () => {} : onClick}
       disabled={disabled || isLoading}
       className={[
-        "cursor-pointer rounded-md bg-blue-400 py-0.5 font-semibold text-white transition-all duration-200 hover:bg-blue-500",
+        "primary-button py-1",
         "disabled:bg-gray-300",
         className,
       ].join(" ")}

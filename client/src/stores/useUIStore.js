@@ -6,7 +6,7 @@ export const useUIStore = create(
     (set) => ({
       // States
       isUserMenuOpen: false,
-      isSidebarOpen: false,
+      isSidebarOpen: true,
       isDivisionMenuOpen: false,
 
       // Generic setter

@@ -8,8 +8,11 @@ import {
 } from "../../../hooks/useBrand";
 import brandLogo from "../../../assets/images/bashundhara.webp";
 
-export default function BrandSelection({ workspaceId, divisionId }) {
+export default function BrandSelection() {
   const navigate = useNavigate();
+
+  const workspaceId = "68a481f250fec8909ab2670c";
+  const divisionId = "68a481f850fec8909ab26719";
 
   // Fetch brands
   const { data: allBrands = [], isLoading: loadingAll } = useGlobalBrands(
@@ -67,10 +70,10 @@ export default function BrandSelection({ workspaceId, divisionId }) {
               Select brands
             </h2>
             <button
-              className={`rounded-md px-4 py-2 font-medium text-white ${
+              className={`rounded-md px-4 py-2 font-semibold text-white ${
                 isSubmitDisabled
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  ? "cursor-not-allowed bg-gray-300"
+                  : "primary-button"
               }`}
               onClick={submitSelectedBrands}
               disabled={isSubmitDisabled}

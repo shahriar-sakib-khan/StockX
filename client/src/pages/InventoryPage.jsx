@@ -1,18 +1,24 @@
-import { BrandSelection, InventoryTable } from "../features";
-import SelectionCard from "../features/selection/components/SelectionCard";
-import TestBrands from "../features/inventory/components/TestBrands";
+import { Tabs } from "../components";
+import { InventoryTable } from "../features";
 
 export default function InventoryPage() {
-  const workspaceId = "68a481f250fec8909ab2670c";
-  const divisionId = "68a481f850fec8909ab26719";
+  const tabs = [
+    { key: "cylinders", label: "Cylinders" },
+    { key: "stoves", label: "Stoves" },
+    { key: "regulators", label: "Regulators" },
+  ];
 
   return (
     <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-2 bg-gray-100 p-2">
-      <div className="">
-        <InventoryTable />
-      </div>
-      <BrandSelection workspaceId={workspaceId} divisionId={divisionId} />
-      {/* <TestBrands /> */}
+      <Tabs tabs={tabs} defaultActive={tabs[0].key}>
+        {({ activeTab }) => (
+          <>
+            {activeTab === "cylinders" && <InventoryTable type="cylinder" />}
+            {activeTab === "stoves" && <InventoryTable type="stove" />}
+            {activeTab === "regulators" && <InventoryTable type="regulator" />}
+          </>
+        )}
+      </Tabs>
     </div>
   );
 }
