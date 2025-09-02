@@ -20,3 +20,9 @@ export { default as BrandSelection } from "./selection/components/BrandSelection
 
 // staff
 export { default as StaffCard } from "./staff/components/StaffCard";
+
+// vehicle
+export { default as VehicleCard } from "./vehicle/components/VehicleCard";
+
+// shop
+export { default as ShopCard } from "./shop/components/ShopCard";

@@ -17,7 +17,7 @@ export const useAuthStore = create((set) => ({
             if (data.accessToken) {
                 set({ accessToken: data.accessToken });
                 const userData = await getUser();
-                set({ user: userData });
+                set({ user: userData.user });
             } else {
                 set({ accessToken: null, user: null });
             }

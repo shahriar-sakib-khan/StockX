@@ -2,7 +2,28 @@ import { useState } from "react";
 import { StaffCard } from "../features";
 
 export default function StaffPage() {
-    const [staffList, setStaffList] = useState([]);
+    const [staffList, setStaffList] = useState([
+        {
+            id: Date.now(),
+            name: "Salif bro",
+            role: "Friend",
+            salary: "18,000/-",
+            paid: "15,000/-",
+            remaining: "3,000/-",
+            salaryStatus: "Paid",
+            lastPaidDate: "12 August, 2025",
+        },
+        {
+            id: Date.now(),
+            name: "Sakib bro",
+            role: "Friend",
+            salary: "18,000/-",
+            paid: "15,000/-",
+            remaining: "3,000/-",
+            salaryStatus: "Paid",
+            lastPaidDate: "12 August, 2025",
+        },
+    ]);
 
     const onAdd = () => {
         const newStaff = {

@@ -13,7 +13,7 @@ const API = axios.create({
 // Request interceptor for sending access token
 API.interceptors.request.use((config) => {
     const token = useAuthStore.getState().accessToken;
-    console.log("🔑 Sending token:", token);
+    // console.log("🔑 Sending token:", token);
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });

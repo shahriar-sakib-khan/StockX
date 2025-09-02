@@ -26,9 +26,10 @@ export default function BrandSelection() {
     // Initialize selection (mirror from API but only id + isActive)
     useEffect(() => {
         if (Array.isArray(allBrands) && allBrands.length > 0) {
-            setDraftBrands(
-                allBrands.map((b) => ({ id: b.id, isActive: b.isActive })),
-            );
+            const sortedBrands = [...allBrands]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((b) => ({ id: b.id, isActive: b.isActive }));
+            setDraftBrands(sortedBrands);
         }
     }, [allBrands]);
 
@@ -55,9 +56,9 @@ export default function BrandSelection() {
 
     // Submit
     const submitSelectedBrands = () => {
-        if (!draftBrands.length) return;
+        if (!Array.isArray(draftBrands) || draftBrands.length === 0) return;
         saveBrands(draftBrands, {
-            onSuccess: () => navigate("./dashboard"),
+            onSuccess: () => navigate("/inventory"),
         });
     };
 
