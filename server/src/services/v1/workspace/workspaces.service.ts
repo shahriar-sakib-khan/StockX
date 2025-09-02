@@ -76,7 +76,7 @@ export const getAllWorkspaces = async (
   const total: number = await Membership.countDocuments({ user: userId, status: 'active' });
 
   return {
-    workspaces: workspaceSanitizers.allWorkspaceSanitizer(workspaces).workspaces,
+    workspaces: workspaceSanitizers.allWorkspaceSanitizer(workspaces, ['id', 'name']).workspaces,
     total,
   };
 };

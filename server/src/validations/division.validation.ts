@@ -15,10 +15,10 @@ export const divisionSchema = z
       .string()
       .min(3, { message: 'Division name must be at least 3 characters' })
       .max(50, { message: 'Division name must be less than 50 characters' })
-      .regex(
-        /^[A-Za-z0-9\s_-]+$/,
-        'Division name can only include letters, numbers, spaces, hyphens, and underscores'
-      ),
+      .regex(/^[A-Za-z0-9\s_-]+$/, {
+        message:
+          'Division name can only include letters, numbers, spaces, hyphens, and underscores',
+      }),
     description: z
       .string()
       .max(200, { message: 'Description must be less than 200 characters' })
@@ -61,8 +61,8 @@ export type DivisionRoleInput = z.infer<typeof divisionRoleSchema>;
 
 /**
  * DivisionUpdateRoleInput
- * @property {string} name - Optional.
- * @property {string[]} permissions - Optional.
+ * @property {string} [name] - Optional. Role name.
+ * @property {string[]} [permissions] - Optional. At least one permission is required if provided.
  *
  * @description
  * Zod schema for division update role validation.

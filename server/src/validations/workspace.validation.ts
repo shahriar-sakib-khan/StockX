@@ -13,14 +13,16 @@ export const workspaceSchema = z
   .object({
     name: z
       .string()
-      .min(3, 'Workspace name must be at least 3 characters')
-      .max(50, 'Workspace name must be less than 50 characters')
-      .regex(
-        /^[A-Za-z0-9\s_-]+$/,
-        'Workspace name can only include letters, numbers, spaces, hyphens, and underscores'
-      ),
-
-    description: z.string().max(200, 'Description must be less than 200 characters').optional(),
+      .min(3, { message: 'Workspace name must be at least 3 characters' })
+      .max(50, { message: 'Workspace name must be less than 50 characters' })
+      .regex(/^[A-Za-z0-9\s_-]+$/, {
+        message:
+          'Workspace name can only include letters, numbers, spaces, hyphens, and underscores',
+      }),
+    description: z
+      .string()
+      .max(200, { message: 'Description must be less than 200 characters' })
+      .optional(),
   })
   .strict();
 export type WorkspaceInput = z.infer<typeof workspaceSchema>;
@@ -35,7 +37,7 @@ export type WorkspaceInput = z.infer<typeof workspaceSchema>;
  */
 export const inviteSchema = z
   .object({
-    email: z.email('Invalid email format'),
+    email: z.string().email({ message: 'Invalid email format' }),
   })
   .strict();
 export type InviteInput = z.infer<typeof inviteSchema>;

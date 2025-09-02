@@ -3,6 +3,7 @@ import { GlobalBrand } from '@/models';
 const defaultBrands = [
   {
     name: 'Omera',
+    image: 'imagURL',
     regulatorTypes: ['20', '22'],
     sizes: [5, 12, 20],
     prices: [
@@ -13,6 +14,7 @@ const defaultBrands = [
   },
   {
     name: 'Bashundhara',
+    image: 'imagURL',
     regulatorTypes: ['20', '22'],
     sizes: [5, 12, 20],
     prices: [
@@ -23,6 +25,7 @@ const defaultBrands = [
   },
   {
     name: 'Green LPG',
+    image: 'imagURL',
     regulatorTypes: ['20', '22'],
     sizes: [5, 12, 20],
     prices: [

@@ -1,6 +1,7 @@
 import { Division, DivisionMembership } from '@/models';
 import { DivisionInput } from '@/validations/division.validation';
 import { divisionSanitizers } from '@/utils';
+import { Errors } from '@/error';
 
 /**
  * @function createDivision
@@ -20,7 +21,7 @@ const createDivision = async (
   const { name, description } = userData;
 
   const existingDivision = await Division.exists({ name, workspace: workspaceId });
-  if (existingDivision) throw new Error('Division name already exists');
+  if (existingDivision) throw new Errors.BadRequestError('Division name already exists');
 
   const division = await Division.create({
     name,
@@ -56,7 +57,7 @@ export const getSingleDivision = async (
     .populate('workspace', 'name')
     .lean();
 
-  if (!division) throw new Error('Division not found');
+  if (!division) throw new Errors.NotFoundError('Division not found');
 
   return divisionSanitizers.divisionSanitizer(division);
 };
@@ -68,7 +69,7 @@ export const getSingleDivision = async (
  * @param {DivisionInput} userData - Division update data.
  * @param {string} divisionId - The ID of the division to update.
  * @returns {Promise<SanitizedDivision>} The updated division document.
- * @throws {Error} If division is not found.
+ * @throws {Error} If division is not found or division name already exists.
  */
 export const updateDivision = async (
   userData: DivisionInput,
@@ -77,7 +78,7 @@ export const updateDivision = async (
   const { name, description } = userData;
 
   const existingDivision = await Division.exists({ name, _id: { $ne: divisionId } });
-  if (existingDivision) throw new Error('Division name already exists');
+  if (existingDivision) throw new Errors.BadRequestError('Division name already exists');
 
   const division = await Division.findByIdAndUpdate(
     divisionId,
@@ -87,7 +88,7 @@ export const updateDivision = async (
     .select('name description')
     .lean();
 
-  if (!division) throw new Error('Division not found');
+  if (!division) throw new Errors.NotFoundError('Division not found');
 
   return divisionSanitizers.divisionSanitizer(division);
 };
@@ -106,7 +107,7 @@ export const deleteDivision = async (divisionId: string): Promise<divisionSaniti
     .populate('createdBy', 'username email')
     .lean();
 
-  if (!division) throw new Error('Division not found');
+  if (!division) throw new Errors.NotFoundError('Division not found');
 
   return divisionSanitizers.divisionSanitizer(division);
 };
@@ -124,7 +125,7 @@ export const getAllDivisions = async (
   workspaceId: string,
   page: number,
   limit: number
-): Promise<divisionSanitizers.SanitizedAllDivisions & { total: number }> => {
+): Promise<divisionSanitizers.SanitizedDivisions & { total: number }> => {
   const total: number = await Division.countDocuments({ workspace: workspaceId });
   if (total === 0) return { divisions: [], total };
 
@@ -157,7 +158,7 @@ export const getMyDivisionProfile = async (
     .populate('division', 'name')
     .populate('workspace', 'name')
     .lean();
-  if (!division) throw new Error('Division not found');
+  if (!division) throw new Errors.NotFoundError('Division not found');
 
   return divisionSanitizers.divisionMembershipSanitizer(division);
 };

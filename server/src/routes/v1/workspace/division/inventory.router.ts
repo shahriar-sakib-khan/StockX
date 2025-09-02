@@ -8,18 +8,18 @@ const router = Router({ mergeParams: true });
 // <============================> Brand Routers <============================>
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/inventory/global-brands
- * @desc    Get all global brands
+ * @route   GET /:workspaceId/divisions/:divisionId/inventory/brands
+ * @desc    Get all active brands in a division
  * @access  Authenticated
  */
-router.get('/global-brands', inventoryController.allGlobalBrands);
+router.get('/brands', inventoryController.activeLocalBrands);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/inventory/brands
+ * @route   GET /:workspaceId/divisions/:divisionId/inventory/all-brands
  * @desc    Get all brands in a division
  * @access  Authenticated
  */
-router.get('/brands', inventoryController.allLocalBrands);
+router.get('/all-brands', inventoryController.allLocalBrands);
 
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/inventory/brands/d

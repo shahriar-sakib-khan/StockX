@@ -1,20 +1,18 @@
 /**
  * @module AuthController
- * 
- * @description This module contains the controller functions for the authentication routes.
- * 
- * - User registration
- * - Login with token issuance
- * - Logout by clearing cookies
- * - Access token refreshing
+ *
+ * @description Controller for authentication related operations.
  */
-// <============================>  <============================>
 
-import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
-import { authService } from '@/services/v1/index.js';
-import { Tokens } from '@/utils/index.js';
+import { authService } from '@/services/v1';
+import { Tokens } from '@/utils';
+
+/**
+ * ----------------- Authentication Controllers -----------------
+ */
 
 /**
  * @function register
@@ -22,7 +20,7 @@ import { Tokens } from '@/utils/index.js';
  * @route POST /api/v1/auth/register
  * @access Public
  */
-export const register = async (req: Request, res: Response): Promise<void> => {
+export const register = async (req: Request, res: Response) => {
   const user = await authService.registerUser(req.body);
 
   res.status(StatusCodes.CREATED).json({
@@ -37,7 +35,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
  * @route POST /api/v1/auth/login
  * @access Public
  */
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response) => {
   const user = await authService.loginUser(req.body);
 
   const accessToken = Tokens.createAccessToken({ userId: user.id, role: user.role });
@@ -48,6 +46,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     secure: process.env.NODE_ENV === 'production',
     expires: new Date(Date.now() + Number(process.env.JWT_REFRESH_EXPIRES_IN_MS)),
     sameSite: 'strict',
+    path: '/', // ensures cookie is cleared correctly on logout
   });
 
   res.status(StatusCodes.OK).json({
@@ -59,20 +58,30 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 /**
  * @function logout
- * @desc Logs out user by clearing the refresh token cookie.
+ * @desc Logs out user by clearing access and refresh token cookies.
  * @route POST /api/v1/auth/logout
  * @access Private
  */
-export const logout = (req: Request, res: Response): void => {
-  res.cookie('refreshToken', '', {
+export const logout = (req: Request, res: Response) => {
+  res.cookie('accessToken', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     expires: new Date(0), // Unix epoch
     sameSite: 'strict',
-    path: '/', // Important: clears root cookie
+    path: '/',
   });
 
-  res.status(StatusCodes.OK).json({ message: 'User logged out' });
+  res.cookie('refreshToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    expires: new Date(0),
+    sameSite: 'strict',
+    path: '/',
+  });
+
+  res.status(StatusCodes.OK).json({
+    message: 'User logged out successfully',
+  });
 };
 
 /**
@@ -81,11 +90,20 @@ export const logout = (req: Request, res: Response): void => {
  * @route POST /api/v1/auth/refresh-token
  * @access Private
  */
-export const refreshAccessToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshAccessToken = async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
+
   const accessToken = await authService.refreshAccessToken(refreshToken);
 
   res.status(StatusCodes.OK).json({ accessToken });
 };
 
-export default { register, login, logout, refreshAccessToken };
+/**
+ * ----------------- Auth Controllers (default export) -----------------
+ */
+export default {
+  register, // Register a new user
+  login, // Login user and issue tokens
+  logout, // Logout user and clear refresh token
+  refreshAccessToken, // Refresh access token using refresh token
+};

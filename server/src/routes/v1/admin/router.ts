@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
+import { validateRequest } from '@/middlewares';
 import { adminController } from '@/controllers/v1';
-
-const router = Router();
+import { user } from '@/validations';
 
 /**
  * @swagger
@@ -10,21 +10,46 @@ const router = Router();
  *   name: Admin
  *   description: Admin (ostad) routes
  */
-
-// <============================> Global brand routes <============================>
-
-/**
- * @route   GET /admin/brands/d
- * @desc    Get all global brands with details
- * @access  master admin (Ostad)
- */
-router.get('/brands/d', adminController.detailedGlobalBrands);
+const router = Router();
 
 /**
- * @route   POST /admin/brands
- * @desc    Add global brand
- * @access  master admin (Ostad)
+ * ----------------- Admin User CRUD -----------------
  */
-router.post('/brands', adminController.addGlobalBrand);
+
+/**
+ * @route   GET /admin/users
+ * @desc    Get paginated users for admin view
+ * @access  Private (admin)
+ */
+router.get('/users', adminController.getAllUsers);
+
+/**
+ * @route   GET /admin/users/:userId
+ * @desc    Get a single user by ID with full sanitized fields
+ * @access  Private (admin)
+ */
+router.get('/users/:userId', adminController.getSingleUser);
+
+/**
+ * @route   PATCH /admin/users/:userId
+ * @desc    Admin updates allowed fields for a user
+ * @access  Private (admin)
+ */
+router.patch(
+  '/users/:userId',
+  validateRequest(user.updateUserAdminSchema),
+  adminController.adminUpdateUser
+);
+
+/**
+ * @route   DELETE /admin/users/:userId
+ * @desc    Admin deletes a user (cannot delete self)
+ * @access  Private (admin)
+ */
+router.delete('/users/:userId', adminController.adminDeleteUser);
+
+/**
+ * ----------------- Admin Brands -----------------
+ */
 
 export default router;

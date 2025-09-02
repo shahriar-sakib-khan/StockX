@@ -52,6 +52,7 @@ const userSchema: Schema<IUser> = new Schema(
 
     address: {
       type: String,
+      default: '',
     },
 
     role: {

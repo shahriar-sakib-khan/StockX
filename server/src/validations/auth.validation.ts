@@ -5,18 +5,17 @@ import { z } from 'zod';
 
 /**
  * RegisterInputSchema
- * @property {string} firstName - Optional, can be added later. Only letters and spaces allowed.
- * @property {string} [lastName] - Optional, can be added later. Only letters and spaces allowed.
+ * @property {string} [firstName] - Optional. Only letters and spaces allowed.
+ * @property {string} [lastName] - Optional. Only letters and spaces allowed.
  * @property {string} username - Required. 3-30 chars, letters, numbers, underscores, no leading/trailing underscore.
  * @property {string} email - Required. Must be a valid email format.
  * @property {string} password - Required. 8-100 chars, must include at least one number.
- * @property {string} address - Optional, can be added later.
+ * @property {string} [address] - Optional.
  *
  * @description
  * Zod schema for user registration validation.
  * Validates user input on the server side to enforce business rules.
  */
-
 export const registerSchema = z
   .object({
     firstName: z
@@ -47,19 +46,14 @@ export const registerSchema = z
       .max(100, { message: 'Password must be less than 100 characters' })
       // .regex(/[a-z]/, { message: 'Password must include at least one lowercase letter' })
       // .regex(/[A-Z]/, { message: 'Password must include at least one uppercase letter' })
-      // .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, {
-      //   message: 'Password must include at least one special character',
-      // })
-      // .refine(
-      //     val => {
-      //         const common = ['password', '123456', 'qwerty', 'letmein'];
-      //         return !common.includes(val.toLowerCase());
-      //     },
-      //     { message: 'Password is too common' }
-      // )
+      // .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, { message: 'Password must include at least one special character' })
+      // .refine(val => {
+      //   const common = ['password', '123456', 'qwerty', 'letmein'];
+      //   return !common.includes(val.toLowerCase());
+      // }, { message: 'Password is too common' })
       .regex(/[0-9]/, { message: 'Password must include at least one number' }),
 
-    address: z.string().min(1, { message: 'Address is required' }),
+    address: z.string().min(1, { message: 'Address is required' }).optional(),
   })
   .strict();
 export type RegisterInput = z.infer<typeof registerSchema>;

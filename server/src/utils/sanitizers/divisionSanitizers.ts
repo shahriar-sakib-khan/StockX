@@ -1,72 +1,64 @@
-import mongoose, { HydratedDocument } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
-import resolveRef from './resolveRef';
 import { IDivision, IDivisionMembership } from '@/models';
+import resolveRef from './resolveRef';
+import listSanitizer from './listSanitizer';
 import { userSanitizer } from './userSanitizers';
 import { workspaceSanitizer } from './workspaceSanitizers';
 
-// ----------------- Division -----------------
+/**
+ * ----------------- Division -----------------
+ */
 export const divisionSanitizer = (division: IDivision | HydratedDocument<IDivision>) => ({
   id: String(division._id),
   name: division.name,
-  description: division.description,
-  workspace: division.workspace
-    ? resolveRef(division.workspace, workspaceSanitizer)
-    : division.workspace,
-  createdBy: division.createdBy
-    ? resolveRef(division.createdBy, userSanitizer)
-    : division.createdBy,
-  divisionRoles: division.divisionRoles,
+  description: division.description ?? null,
+  workspace: resolveRef(division.workspace ?? null, workspaceSanitizer),
+  createdBy: resolveRef(division.createdBy ?? null, userSanitizer),
+  divisionRoles: division.divisionRoles ?? [],
 });
+
 export type SanitizedDivision = ReturnType<typeof divisionSanitizer>;
 
-// ----------------- Division List -----------------
-export const allDivisionSanitizer = (divisions: IDivision[] | HydratedDocument<IDivision>[]) => ({
-  divisions: divisions.map(division => ({
-    id: String(division._id),
-    name: division.name,
-    description: division.description,
-  })),
+/**
+ * ----------------- Division List -----------------
+ * Can optionally select only specific fields
+ */
+export const allDivisionSanitizer = (
+  divisions: IDivision[] | HydratedDocument<IDivision>[],
+  fields?: (keyof SanitizedDivision)[]
+) => ({
+  divisions: listSanitizer(divisions, divisionSanitizer, fields),
 });
-export type SanitizedAllDivisions = ReturnType<typeof allDivisionSanitizer>;
 
-// ----------------- Division Membership -----------------
+export type SanitizedDivisions = ReturnType<typeof allDivisionSanitizer>;
+
+/**
+ * ----------------- Division Membership -----------------
+ */
 export const divisionMembershipSanitizer = (
   membership: IDivisionMembership | HydratedDocument<IDivisionMembership>
 ) => ({
   id: String(membership._id),
-  divisionRoles: membership.divisionRoles,
+  divisionRoles: membership.divisionRoles ?? [],
   status: membership.status,
-  user: membership.user ? resolveRef(membership.user, userSanitizer) : membership.user,
-  division: membership.division
-    ? resolveRef(membership.division, divisionSanitizer)
-    : membership.division,
-  workspace: membership.workspace
-    ? resolveRef(membership.workspace, workspaceSanitizer)
-    : membership.workspace,
-  invitedBy: membership.invitedBy
-    ? resolveRef(membership.invitedBy, userSanitizer)
-    : membership.invitedBy,
+  user: resolveRef(membership.user ?? null, userSanitizer),
+  division: resolveRef(membership.division ?? null, divisionSanitizer),
+  workspace: resolveRef(membership.workspace ?? null, workspaceSanitizer),
+  invitedBy: resolveRef(membership.invitedBy ?? null, userSanitizer),
 });
+
 export type SanitizedDivisionMembership = ReturnType<typeof divisionMembershipSanitizer>;
 
-// ----------------- Division Members -----------------
+/**
+ * ----------------- Division Members -----------------
+ * Can optionally select only specific fields
+ */
 export const divisionMembersSanitizer = (
-  members: IDivisionMembership[] | HydratedDocument<IDivisionMembership>[]
+  members: IDivisionMembership[] | HydratedDocument<IDivisionMembership>[],
+  fields?: (keyof SanitizedDivisionMembership)[]
 ) => ({
-  members: members.map(membership => ({
-    user: membership.user ? resolveRef(membership.user, userSanitizer) : membership.user,
-    division: membership.division
-      ? resolveRef(membership.division, divisionSanitizer)
-      : membership.division,
-    workspace: membership.workspace
-      ? resolveRef(membership.workspace, workspaceSanitizer)
-      : membership.workspace,
-    divisionRoles: membership.divisionRoles,
-    status: membership.status,
-    invitedBy: membership.invitedBy
-      ? resolveRef(membership.invitedBy, userSanitizer)
-      : membership.invitedBy,
-  })),
+  members: listSanitizer(members, divisionMembershipSanitizer, fields),
 });
+
 export type SanitizedDivisionMembers = ReturnType<typeof divisionMembersSanitizer>;

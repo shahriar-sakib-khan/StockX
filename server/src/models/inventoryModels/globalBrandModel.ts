@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IGlobalBrand extends Document {
   name: string;
+  image: string;
   regulatorTypes: string[];
   sizes: number[];
   prices: {
@@ -17,6 +18,7 @@ export interface IGlobalBrand extends Document {
 const globalBrandSchema: Schema<IGlobalBrand> = new Schema(
   {
     name: { type: String, required: true, unique: true },
+    image: { type: String, default: '' },
     regulatorTypes: { type: [String], required: true },
     sizes: { type: [Number], required: true },
     prices: [
@@ -37,5 +39,8 @@ globalBrandSchema.methods.toJSON = function (): Partial<IGlobalBrand> {
   return obj as Partial<IGlobalBrand>;
 };
 
-const GlobalBrand: Model<IGlobalBrand> = mongoose.model<IGlobalBrand>('GlobalBrand', globalBrandSchema);
+const GlobalBrand: Model<IGlobalBrand> = mongoose.model<IGlobalBrand>(
+  'GlobalBrand',
+  globalBrandSchema
+);
 export default GlobalBrand;

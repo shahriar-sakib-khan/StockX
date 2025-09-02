@@ -25,7 +25,7 @@ export const TransactionCategory = [
 
 export type TxCategoryType = (typeof TransactionCategory)[number];
 
-export const PaymentMethod = ['cash', 'bank', 'mobile', 'other'] as const;
+export const PaymentMethod = ['cash', 'bank', 'mobile', 'due', 'other'] as const;
 export type PaymentMethodType = (typeof PaymentMethod)[number];
 
 export const CounterpartyKind = ['customer', 'store', 'internal'] as const;

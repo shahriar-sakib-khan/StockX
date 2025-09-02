@@ -1,64 +1,33 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import {
-  adminDeleteUser,
-  adminUpdateUser,
-  getAllUsers,
-  getApplicationStats,
-  getCurrentUser,
-  getSingleUser,
-  getUserTransactionHistory,
-  updateUser,
-} from "@/controllers/v1/index.js";
+import { userController } from '@/controllers/v1';
+import { validateRequest } from '@/middlewares';
+import { user } from '@/validations';
 
-import {
-  requireRole ,
-  validateUpdateUserInput,
-} from "@/middlewares/index.js";
-
+/**
+ * @swagger
+ * tags:
+ *   name: User
+ *   description: User profile routes
+ */
 const router = Router();
 
 /**
- * General routes
- * Accessible by all users
+ * ----------------- User Routes -----------------
  */
-router.get("/me", getCurrentUser);
-router.patch("/me", validateUpdateUserInput, updateUser);
-
-
-router.get("/transactions", getUserTransactionHistory);
 
 /**
- * Moderator Routes
- * Accessible by: moderator, admin
+ * @route   GET /user/me
+ * @desc    Get the currently authenticated user's profile
+ * @access  Private
  */
-router.get(
-  "/admin/stats",
-  requireRole ("moderator", "admin"),
-  getApplicationStats
-);
-router.get("/admin/users", requireRole ("moderator", "admin"), getAllUsers);
-router.get(
-  "/admin/users/:id",
-  requireRole ("moderator", "admin"),
-  getSingleUser
-);
+router.get('/me', userController.getCurrentUser);
 
 /**
- * Admin Exclusive Routes
- * Accessible by: admin only
+ * @route   PUT /user/me
+ * @desc    Update the currently authenticated user's profile
+ * @access  Private
  */
-router.patch(
-  "/admin/users/:id",
-  requireRole ("admin"),
-  validateUpdateUserInput,
-  adminUpdateUser
-);
-router.delete("/admin/users/:id", requireRole ("admin"), adminDeleteUser);
-router.get(
-  "/admin/:id/transactions",
-  requireRole ("admin"),
-  getUserTransactionHistory
-);
+router.patch('/me', validateRequest(user.updateUserSchema), userController.updateUser);
 
 export default router;

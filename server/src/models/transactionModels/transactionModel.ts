@@ -11,11 +11,11 @@ export interface ITransaction extends Document {
   creditAccountId: Types.ObjectId; // e.g., Revenue:Gas, AP:StoreY, Cash, Bank
   amount: number;
 
-  category: txConstants.TxCategoryType; // business meaning
+  category: txConstants.TxCategoryType; // business meaning e.g., "cylinder-sale-cash"
   paymentMethod?: txConstants.PaymentMethodType; // 'cash' | 'bank' | 'mobile' | 'other'
 
   // Counterparty (if applicable)
-  counterpartyType?: txConstants.CounterpartyKindType; // 'customer' | 'store' | 'internal'
+  counterpartyType: txConstants.CounterpartyKindType; // 'customer' | 'store' | 'internal'
   counterpartyId?: Types.ObjectId;
 
   // Additional linkage for UX & reporting
@@ -49,9 +49,9 @@ const transactionSchema: Schema<ITransaction> = new Schema(
       index: true,
     },
 
-    paymentMethod: { type: String, enum: txConstants.PaymentMethod },
+    paymentMethod: { type: String, enum: txConstants.PaymentMethod, default: 'cash' },
 
-    counterpartyType: { type: String, enum: txConstants.CounterpartyKind },
+    counterpartyType: { type: String, enum: txConstants.CounterpartyKind, required: true },
     counterpartyId: { type: Schema.Types.ObjectId },
 
     staffId: { type: Schema.Types.ObjectId, ref: 'Staff' },

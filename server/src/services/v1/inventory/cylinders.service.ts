@@ -4,7 +4,7 @@ import { Cylinder } from '@/models';
 import { cylinderSanitizers } from '@/utils';
 
 /**
- * @function getCylinders
+ * @function getAllCylinders
  * @description Get cylinders for the given workspace and division.
  *
  * @param {number} page - The page number to retrieve.
@@ -13,7 +13,7 @@ import { cylinderSanitizers } from '@/utils';
  * @param {string} divisionId - The ID of the division to retrieve divisions for.
  * @returns {Promise<SanitizedAllCylinders & { total: number }>}
  */
-export const getCylinders = async (
+export const getAllCylinders = async (
   page: number,
   limit: number,
   workspaceId: string,
@@ -24,21 +24,60 @@ export const getCylinders = async (
     division: new Types.ObjectId(divisionId),
   });
 
-  if (total === 0) return { cylinders: [], total };
+  const cylinders = await Cylinder.aggregate([
+    {
+      $lookup: {
+        from: 'localbrands', // collection name in MongoDB
+        localField: 'brand',
+        foreignField: '_id',
+        as: 'brandInfo',
+      },
+    },
+    { $unwind: '$brandInfo' },
+    {
+      $match: {
+        division: new Types.ObjectId(divisionId),
+        'brandInfo.isActive': true,
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        workspace: 1,
+        division: 1,
+        name: 1,
+        image: 1,
+        sku: 1,
+        regulatorType: 1,
+        size: 1,
+        unit: 1,
+        isFull: 1,
+        count: 1,
+        createdBy: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        brand: {
+          _id: '$brandInfo._id',
+          name: '$brandInfo.name',
+          image: '$brandInfo.image',
+          globalBrand: '$brandInfo.globalBrand',
+        },
+      },
+    },
+  ]);
 
-  const cylinders = await Cylinder.find({
-    workspace: new Types.ObjectId(workspaceId),
-    division: new Types.ObjectId(divisionId),
-  })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .populate('workspace', 'name')
-    .populate('division', 'name')
-    .lean();
+  console.log('cylinders', cylinders);
 
-  return { cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders).cylinders, total };
+  // total count across all matched cylinders
+  const totalCount = cylinders.reduce((sum, cyl) => sum + (cyl.count || 0), 0);
+
+  return {
+    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, ['id', 'name'])
+      .cylinders,
+    total: totalCount,
+  };
 };
 
 export default {
-  getCylinders,
+  getAllCylinders,
 };

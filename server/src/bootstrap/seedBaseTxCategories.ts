@@ -5,7 +5,7 @@ import { TxCategory } from '@/models';
 const defaultTxCategoryList = [
   // ======================== Retail Sales ========================
   {
-    code: 'cylinder-sale-cash',
+    code: 'cylinder_sale_cash',
     name: 'Cylinder Sale (Cash)',
     debitAccountCode: '1000-CASH', // Asset ↑ (cash increases)
     creditAccountCode: '4100-REV-CYL', // Income ↑ (revenue recognized)
@@ -13,7 +13,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'cylinder-sale-credit',
+    code: 'cylinder_sale_credit',
     name: 'Cylinder Sale (Credit)',
     debitAccountCode: '1100-AR', // Asset ↑ (accounts receivable increases)
     creditAccountCode: '4100-REV-CYL', // Income ↑ (revenue recognized)
@@ -21,7 +21,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'cylinder-swap-retail',
+    code: 'cylinder_swap_retail',
     name: 'Cylinder Swap (Retail)',
     debitAccountCode: '1201-INVENTORY-CYL-FULL', // Asset ↑ (full inventory increases)
     creditAccountCode: '1202-INVENTORY-CYL-EMPTY', // Asset ↓ (empty inventory decreases)
@@ -31,7 +31,7 @@ const defaultTxCategoryList = [
 
   // ======================== Wholesale Purchases ========================
   {
-    code: 'cylinder-purchase-wholesale-cash',
+    code: 'cylinder_purchase_wholesale_cash',
     name: 'Cylinder Purchase (Cash)',
     debitAccountCode: '1200-INVENTORY-CYL', // Asset ↑ (inventory increases)
     creditAccountCode: '1000-CASH', // Asset ↓ (cash decreases)
@@ -39,7 +39,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'cylinder-purchase-wholesale-ap',
+    code: 'cylinder_purchase_wholesale_ap',
     name: 'Cylinder Purchase (AP)',
     debitAccountCode: '1200-INVENTORY-CYL', // Asset ↑ (inventory increases)
     creditAccountCode: '2100-AP', // Liability ↑ (accounts payable increases)
@@ -47,7 +47,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'cylinder-payment-to-supplier',
+    code: 'cylinder_payment_to_supplier',
     name: 'Payment to Supplier',
     debitAccountCode: '2100-AP', // Liability ↓ (we owe less)
     creditAccountCode: '1000-CASH', // Asset ↓ (cash decreases)
@@ -57,7 +57,7 @@ const defaultTxCategoryList = [
 
   // ======================== Expenses ========================
   {
-    code: 'salary-payment',
+    code: 'salary_payment',
     name: 'Salary Payment',
     debitAccountCode: '5000-EXP-SALARY', // Expense ↑
     creditAccountCode: '1000-CASH', // Asset ↓
@@ -65,7 +65,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'fuel-payment',
+    code: 'fuel_payment',
     name: 'Fuel Payment',
     debitAccountCode: '5001-EXP-FUEL', // Expense ↑
     creditAccountCode: '1000-CASH', // Asset ↓
@@ -73,7 +73,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'repair-payment',
+    code: 'repair_payment',
     name: 'Repair Payment',
     debitAccountCode: '5002-EXP-REPAIR', // Expense ↑
     creditAccountCode: '1000-CASH', // Asset ↓
@@ -81,7 +81,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'office-expense',
+    code: 'office_expense',
     name: 'Office Expense',
     debitAccountCode: '5003-EXP-OFFICE', // Expense ↑
     creditAccountCode: '1000-CASH', // Asset ↓
@@ -91,7 +91,7 @@ const defaultTxCategoryList = [
 
   // ======================== Owner / Withdrawal ========================
   {
-    code: 'owner-withdraw',
+    code: 'owner_withdraw',
     name: 'Owner Withdrawal',
     debitAccountCode: '3100-EQUITY-OWNER', // Equity ↓
     creditAccountCode: '1000-CASH', // Asset ↓
@@ -101,7 +101,7 @@ const defaultTxCategoryList = [
 
   // ======================== Miscellaneous ========================
   {
-    code: 'other-income',
+    code: 'other_income',
     name: 'Other Income',
     debitAccountCode: '1000-CASH', // Asset ↑
     creditAccountCode: '4200-REV-OTHER', // Income ↑
@@ -109,7 +109,7 @@ const defaultTxCategoryList = [
     isActive: true,
   },
   {
-    code: 'other-expense',
+    code: 'other_expense',
     name: 'Other Expense',
     debitAccountCode: '5004-EXP-OTHER', // Expense ↑
     creditAccountCode: '1000-CASH', // Asset ↓

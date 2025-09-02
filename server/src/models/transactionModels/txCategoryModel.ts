@@ -1,10 +1,11 @@
+import { txConstants } from '@/common/constants';
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface ITxCategory extends Document {
   workspace: Types.ObjectId;
   division: Types.ObjectId;
 
-  code: string; // e.g., "cylinder-sale-cash"
+  code: txConstants.TxCategoryType; // e.g., "cylinder-sale-cash"
   name: string; // human-readable name
   debitAccountCode: string; // '1000-CASH'
   creditAccountCode: string; // '4100-REV-CYL'

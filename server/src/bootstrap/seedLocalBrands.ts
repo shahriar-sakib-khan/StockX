@@ -11,6 +11,8 @@ const seedLocalBrands = async (
 
   const localBrands = globalBrands.map(globalBrand => ({
     globalBrand: globalBrand._id,
+    name: globalBrand.name,
+    image: globalBrand.image,
     workspace: new Types.ObjectId(workspaceId),
     division: new Types.ObjectId(divisionId),
     selectedBy: new Types.ObjectId(userId),

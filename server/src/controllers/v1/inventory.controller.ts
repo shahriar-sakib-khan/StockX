@@ -27,7 +27,22 @@ export const allLocalBrands = async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const { workspaceId, divisionId } = req.params;
 
-  const { localBrands, total } = await brandService.getLocalBrands(
+  const { localBrands, total } = await brandService.getAllLocalBrands(
+    page,
+    limit,
+    workspaceId,
+    divisionId
+  );
+
+  res.status(StatusCodes.OK).json({ total, page, limit, localBrands });
+};
+
+export const activeLocalBrands = async (req: Request, res: Response) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const { workspaceId, divisionId } = req.params;
+
+  const { localBrands, total } = await brandService.getActiveLocalBrands(
     page,
     limit,
     workspaceId,
@@ -71,7 +86,7 @@ export const allCylinders = async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 20, 100);
   const { workspaceId, divisionId } = req.params;
 
-  const { cylinders, total } = await cylinderService.getCylinders(
+  const { cylinders, total } = await cylinderService.getAllCylinders(
     page,
     limit,
     workspaceId,
@@ -84,6 +99,7 @@ export const allCylinders = async (req: Request, res: Response) => {
 export default {
   allGlobalBrands,
   allLocalBrands,
+  activeLocalBrands,
   detailedLocalBrands,
   selectBrands,
 

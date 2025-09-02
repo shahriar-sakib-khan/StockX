@@ -1,6 +1,7 @@
+import { Types } from 'mongoose';
+
 import { GlobalBrand, LocalBrand } from '@/models';
 import { brandSanitizers } from '@/utils';
-import { Types } from 'mongoose';
 
 // <============================> Global Brand Services <============================>
 /**
@@ -22,7 +23,8 @@ export const getGlobalBrands = async (
   const globalBrands = await GlobalBrand.find({}).skip(skip).limit(limit).lean();
 
   return {
-    globalBrands: brandSanitizers.allGlobalBrandSanitizer(globalBrands).globalBrands,
+    globalBrands: brandSanitizers.allGlobalBrandSanitizer(globalBrands, ['id', 'name'])
+      .globalBrands,
     total,
   };
 };
@@ -61,6 +63,43 @@ export const updateGlobalBrand = async () => {};
 export const deleteGlobalBrand = async () => {};
 
 // <============================> Local Brand Services <============================>
+
+/**
+ * @function getAllLocalBrands
+ */
+export const getAllLocalBrands = async (
+  page: number,
+  limit: number,
+  workspaceId: string,
+  divisionId: string
+): Promise<brandSanitizers.SanitizedAllLocalBrands & { total: number }> => {
+  const total: number = await LocalBrand.countDocuments({
+    workspace: new Types.ObjectId(workspaceId),
+    division: new Types.ObjectId(divisionId),
+  });
+
+  if (total === 0) return { localBrands: [], total };
+
+  const localBrands = await LocalBrand.find({
+    workspace: new Types.ObjectId(workspaceId),
+    division: new Types.ObjectId(divisionId),
+  })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .select('_id name image isActive')
+    .lean();
+
+  return {
+    localBrands: brandSanitizers.allLocalBrandSanitizer(localBrands, [
+      'id',
+      'name',
+      'image',
+      'isActive',
+    ]).localBrands,
+    total,
+  };
+};
+
 /**
  * @function getLocalBrands
  * @description Get all local brands for the given workspace, division, and user.
@@ -71,7 +110,7 @@ export const deleteGlobalBrand = async () => {};
  * @param {string} divisionId - The ID of the division to retrieve divisions for.
  * @returns {Promise<{ localBrands: any[]; total: number }>} An array of local brand documents.
  */
-export const getLocalBrands = async (
+export const getActiveLocalBrands = async (
   page: number,
   limit: number,
   workspaceId: string,
@@ -92,11 +131,12 @@ export const getLocalBrands = async (
   })
     .skip((page - 1) * limit)
     .limit(limit)
-    .populate('globalBrand', 'name')
+    .select('_id name image')
     .lean();
 
   return {
-    localBrands: brandSanitizers.allLocalBrandSanitizer(localBrands).localBrands,
+    localBrands: brandSanitizers.allLocalBrandSanitizer(localBrands, ['id', 'name', 'image'])
+      .localBrands,
     total,
   };
 };
@@ -120,9 +160,9 @@ export const detailedLocalBrands = async (
   })
     .skip((page - 1) * limit)
     .limit(limit)
-    .populate('globalBrand', 'name')
-    .populate('workspace', 'name')
-    .populate('division', 'name')
+    .populate('globalBrand')
+    .populate('workspace')
+    .populate('division')
     .lean();
 
   const sanitizedLocalBrands = localBrands.map(brand => brandSanitizers.localBrandSanitizer(brand));
@@ -136,7 +176,7 @@ export const selectLocalBrands = async (
 ): Promise<any> => {
   const operations = userData.map(brand => ({
     updateOne: {
-      filter: { _id: brand.brandId },
+      filter: { _id: new Types.ObjectId(brand.brandId) },
       update: {
         $set: {
           isActive: brand.activeStatus,
@@ -158,7 +198,8 @@ export default {
   deleteGlobalBrand,
   getDetailedGlobalBrands,
 
-  getLocalBrands,
+  getAllLocalBrands,
+  getActiveLocalBrands,
   detailedLocalBrands,
   selectLocalBrands,
 };

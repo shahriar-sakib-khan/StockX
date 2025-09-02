@@ -84,6 +84,7 @@ export const getSingleDivisionMember = async (
  * @param {string} divisionId - The ID of the division to add the user to.
  * @param {string} invitedBy - The ID of the user who invited the member.
  * @returns {Promise<SanitizedDivisionMembership>} The created division membership document.
+ * @throws {BadRequestError} If the user is not or already a member of the workspace .
  */
 export const addMemberToDivision = async (
   memberIdentifier: string,
@@ -159,7 +160,7 @@ export const removeMemberFromDivision = async (
     .populate('user', 'username email')
     .lean();
 
-  if (!divisionMembership) throw new Errors.BadRequestError('Not a member of this division');
+  if (!divisionMembership) throw new Errors.UnauthorizedError('Not a member of this division');
 
   return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
