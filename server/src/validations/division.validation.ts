@@ -9,7 +9,7 @@ import z from 'zod';
  * Zod schema for division validation.
  * Validates user input on the server side to enforce business rules.
  */
-export const divisionSchema = z
+export const divisionInputSchema = z
   .object({
     name: z
       .string()
@@ -25,7 +25,7 @@ export const divisionSchema = z
       .optional(),
   })
   .strict();
-export type DivisionInput = z.infer<typeof divisionSchema>;
+export type DivisionInput = z.infer<typeof divisionInputSchema>;
 
 /**
  * DivisionMemberInput

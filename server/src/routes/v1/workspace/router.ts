@@ -14,7 +14,9 @@ const router = Router();
  *     description: Workspace creation, management, member handling, roles, and invites for multi-tenant environment
  */
 
-// <============================> General Workspace Routes <============================>
+/**
+ * ----------------- Workspace CRUD -----------------
+ */
 
 /**
  * @route   POST /workspace
@@ -57,13 +59,15 @@ router.put(
 router.delete('/:workspaceId', workspaceScope(['admin']), workspaceController.deleteWorkspace);
 
 /**
- * @route   GET /workspace/:workspaceId/me
+ * @route   GET /workspace/:workspaceId/profile
  * @desc    Get current user’s profile in a workspace (roles, permissions)
  * @access  Authenticated (member)
  */
 router.get('/:workspaceId/profile', workspaceScope(), workspaceController.myWorkspaceProfile);
 
-// <============================> Workspace Member Routes <============================>
+/**
+ * ----------------- Workspace Member Routes -----------------
+ */
 
 /**
  * @route   GET /workspace/:workspaceId/members
@@ -94,7 +98,9 @@ router.delete(
   workspaceController.removeMember
 );
 
-// <============================> Workspace Invite Routes <============================>
+/**
+ * ----------------- Workspace Invite Routes -----------------
+ */
 
 /**
  * @route   POST /workspace/:workspaceId/invites/send
@@ -140,7 +146,9 @@ router.delete(
   workspaceController.deleteInvite
 );
 
-// <============================> Workspace Role Routes <============================>
+/**
+ * ----------------- Workspace Role Routes -----------------
+ */
 
 /**
  * @route   GET /workspace/:workspaceId/roles
@@ -184,7 +192,9 @@ router.delete(
   workspaceController.removeRole
 );
 
-// <============================> Role Assignment Routes <============================>
+/**
+ * ----------------- Role Assignment Routes -----------------
+ */
 
 /**
  * @route   POST /workspace/:workspaceId/roles/:userId/assign/:roleId
@@ -208,7 +218,9 @@ router.delete(
   workspaceController.unassignRole
 );
 
-// <============================> Division Sub-Routes <============================>
+/**
+ * ----------------- Workspace Sub-Routes -----------------
+ */
 
 /**
  * @route   api/v1/workspace/:workspaceId/divisions

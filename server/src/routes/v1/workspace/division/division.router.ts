@@ -5,6 +5,7 @@ import { workspaceScope, divisionScope, validateRequest } from '@/middlewares';
 import { division } from '@/validations';
 import inventoryRouter from './inventory.router';
 import transactionRouter from './transaction.router';
+import vehicleRouter from './vehicle.router';
 
 const router = Router({ mergeParams: true });
 
@@ -15,7 +16,9 @@ const router = Router({ mergeParams: true });
  *   description: Workspace division management
  */
 
-// ============================= General Division Routes =============================
+/**
+ * ----------------- General Division Routes -----------------
+ */
 
 /**
  * @route   POST /:workspaceId/divisions
@@ -25,7 +28,7 @@ const router = Router({ mergeParams: true });
 router.post(
   '/',
   workspaceScope(['division_admin']),
-  validateRequest(division.divisionSchema),
+  validateRequest(division.divisionInputSchema),
   divisionController.createDivision
 );
 
@@ -51,7 +54,7 @@ router.get('/:divisionId', divisionScope(), divisionController.singleDivision);
 router.put(
   '/:divisionId',
   divisionScope(['division_division_admin']),
-  validateRequest(division.divisionSchema),
+  validateRequest(division.divisionInputSchema),
   divisionController.updateDivision
 );
 
@@ -69,7 +72,9 @@ router.delete('/:divisionId', divisionScope(['division_admin']), divisionControl
  */
 router.get('/:divisionId/profile', divisionScope(), divisionController.myDivisionProfile);
 
-// ============================= Division Member Routes =============================
+/**
+ * ----------------- Division Member Routes -----------------
+ */
 
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/members
@@ -112,7 +117,9 @@ router.delete(
   divisionController.removeMember
 );
 
-// ============================= Division Role Routes =============================
+/**
+ * ----------------- Division Role Routes -----------------
+ */
 
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/roles
@@ -156,10 +163,12 @@ router.delete(
   divisionController.removeRole
 );
 
-// ============================= Role Assignment Routes =============================
+/**
+ * ----------------- Role Assignment Routes -----------------
+ */
 
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/roles/:userId/assign
+ * @route   POST /:workspaceId/divisions/:divisionId/roles/:userId/assign/:roleId
  * @desc    Assign a role to a user in the division
  * @access  Admin (division)
  */
@@ -180,12 +189,12 @@ router.delete(
   divisionController.unassignRole
 );
 
-// <============================> Sub-Routes-Inventory <============================>
+/**
+ * ----------------- Division Sub-Routes -----------------
+ */
 
 router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
-
-// <============================> Sub-Routes-Transactions <============================>
-
 router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
+router.use('/:divisionId/vehicles', divisionScope(), vehicleRouter);
 
 export default router;

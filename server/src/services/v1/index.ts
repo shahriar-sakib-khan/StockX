@@ -6,6 +6,11 @@ export * as sslService from './sslcommerzService.js';
 export { userService } from './user';
 export { adminUserService } from './admin';
 export { workspaceService, membersService, rolesService, invitesService } from './workspace';
-export { divisionService, divisionMembersService, divisionRolesService } from './division';
+export {
+  divisionService,
+  divisionMembersService,
+  divisionRolesService,
+  vehicleService,
+} from './division';
 export { brandService, cylinderService } from './inventory';
 export { transactionService } from './transaction';

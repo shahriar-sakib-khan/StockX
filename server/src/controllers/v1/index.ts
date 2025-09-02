@@ -12,5 +12,7 @@ export { default as inventoryController } from './inventory.controller';
 
 export { default as transactionController } from './transaction.controller';
 
+export { default as vehicleController } from './vehicle.controller';
+
 export * from './paymentController.js';
 export * from './transactionHistoryController.js';

@@ -22,7 +22,7 @@ const vehicleStatsSchema: Schema<IVehicleStats> = new Schema(
     totalRepairCost: { type: Number, default: 0 },
     lastUpdatedAt: { type: Date, default: () => new Date() },
   },
-  { timestamps: false }
+  { timestamps: true }
 );
 
 vehicleStatsSchema.index({ workspace: 1, division: 1, vehicleId: 1 }, { unique: true });
