@@ -1,3 +1,3 @@
 export default function CashBox() {
-  return <div> CashBox </div>;
+    return <div> CashBox </div>;
 }

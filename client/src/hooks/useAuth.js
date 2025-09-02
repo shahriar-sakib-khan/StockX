@@ -4,14 +4,14 @@ import { getUser } from "../features/authentication/services/authServices";
 export const AUTH = "user";
 
 const useAuth = (options = {}) => {
-  const { data, ...rest } = useQuery({
-    queryKey: [AUTH],
-    queryFn: getUser,
-    staleTime: Infinity, // keep cached indefinitely
-    ...options,
-  });
+    const { data, ...rest } = useQuery({
+        queryKey: [AUTH],
+        queryFn: getUser,
+        staleTime: Infinity, // keep cached indefinitely
+        ...options,
+    });
 
-  return { data, ...rest };
+    return { data, ...rest };
 };
 
 export default useAuth;

@@ -6,25 +6,25 @@ import LoadingComponent from "../ui/LoadingComponent";
 import { redirectToLogin } from "../../utils/redirectToLogin";
 
 export default function AppContainer({ children }) {
-  const user = useAuthStore((state) => state.user);
-  const initializing = useAuthStore((state) => state.initializing);
-  // let Data = { name: "Visitor" };
-  // const isLoading = true;
+    const user = useAuthStore((state) => state.user);
+    const initializing = useAuthStore((state) => state.initializing);
+    // let Data = { name: "Visitor" };
+    // const isLoading = true;
 
-  if (initializing) return <LoadingComponent />;
+    if (initializing) return <LoadingComponent />;
 
-  if (!user) return redirectToLogin(window.location.pathname);
+    if (!user) return redirectToLogin(window.location.pathname);
 
-  return (
-    <div className="grid h-full w-full">
-      <Navbar dark userMenu />
-      <div className="grid grid-cols-[auto_1fr]">
-        <Sidebar />
-        <div className="grid grid-rows-[1fr_auto]">
-          <Titlebar />
-          {children}
+    return (
+        <div className="grid h-full w-full">
+            <Navbar dark userMenu />
+            <div className="grid grid-cols-[auto_1fr]">
+                <Sidebar />
+                <div className="grid grid-rows-[1fr_auto]">
+                    <Titlebar />
+                    {children}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

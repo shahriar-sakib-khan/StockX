@@ -1,10 +1,10 @@
 import { FormInputField } from "../../../components";
 
 export default function UpdatePasswordForm() {
-  return (
-    <section className="flex min-w-150 flex-col gap-2 rounded-lg border-1 border-gray-300 p-4 text-gray-700">
-      <h2 className="font-semibold">Update Password</h2>
-      {/* <div className="flex flex-col gap-2">
+    return (
+        <section className="flex min-w-150 flex-col gap-2 rounded-lg border-1 border-gray-300 p-4 text-gray-700">
+            <h2 className="font-semibold">Update Password</h2>
+            {/* <div className="flex flex-col gap-2">
         <FormInputField
           id="password"
           type="password"
@@ -33,6 +33,6 @@ export default function UpdatePasswordForm() {
           </span>
         )}
       </div> */}
-    </section>
-  );
+        </section>
+    );
 }

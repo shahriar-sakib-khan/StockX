@@ -1,7 +1,7 @@
 import Image from "../../../assets/images/user_icon.jpeg";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
-export default function StaffCard({ staffMember, onDelete }) {
+export default function VehicleCard({ vehicleInfo, onDelete }) {
     return (
         <div className="flex flex-col rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
             {/* Top section */}
@@ -11,10 +11,10 @@ export default function StaffCard({ staffMember, onDelete }) {
                 </div>
                 <div className="flex min-w-[10ch] flex-col">
                     <span className="text-base font-normal">
-                        {staffMember?.name || "Unnamed"}
+                        {vehicleInfo?.name || "Unnamed"}
                     </span>
                     <span className="text-sm font-normal text-gray-400">
-                        {staffMember?.role || "Friend"}
+                        {vehicleInfo?.role || "Friend"}
                     </span>
                 </div>
                 <div className="h-full">
@@ -32,31 +32,25 @@ export default function StaffCard({ staffMember, onDelete }) {
                 <span className="flex items-center justify-between">
                     Salary{" "}
                     <span className="font-semibold">
-                        {staffMember?.salary || "15,000/-"}
+                        {vehicleInfo?.salary || "15,000/-"}
                     </span>
                 </span>
                 <span className="flex items-center justify-between">
                     Paid{" "}
                     <span className="font-semibold text-emerald-500">
-                        {staffMember?.paid || "0/-"}
+                        {vehicleInfo?.paid || "10,000/-"}
                     </span>
                 </span>
                 <span className="flex items-center justify-between">
                     Remaining{" "}
                     <span className="font-semibold text-red-500">
-                        {staffMember?.remaining || "15,000/-"}
+                        {vehicleInfo?.remaining || "5,000/-"}
                     </span>
                 </span>
                 <span className="flex items-center justify-between">
                     Status
                     <span className="mr-3 rounded bg-emerald-500 px-2 py-0.5 text-xs text-white">
-                        {staffMember?.salaryStatus || "Unpaid"}
-                    </span>
-                </span>
-                <span className="flex items-center justify-between gap-2">
-                    Last Paid:
-                    <span className="font-semibold">
-                        {staffMember?.lastPaidDate || "Never Paid"}
+                        {vehicleInfo?.salaryStatus || "Paid"}
                     </span>
                 </span>
             </section>
