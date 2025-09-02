@@ -171,15 +171,15 @@ export const detailedLocalBrands = async (
 };
 
 export const selectLocalBrands = async (
-  userData: { brandId: string; activeStatus: boolean }[],
+  userData: { id: string; isActive: boolean }[],
   userId: string
 ): Promise<any> => {
   const operations = userData.map(brand => ({
     updateOne: {
-      filter: { _id: new Types.ObjectId(brand.brandId) },
+      filter: { _id: new Types.ObjectId(brand.id) },
       update: {
         $set: {
-          isActive: brand.activeStatus,
+          isActive: brand.isActive,
           selectedBy: userId,
         },
       },

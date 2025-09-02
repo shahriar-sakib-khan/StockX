@@ -22,11 +22,11 @@ router.get('/brands', inventoryController.activeLocalBrands);
 router.get('/all-brands', inventoryController.allLocalBrands);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/inventory/brands/d
+ * @route   GET /:workspaceId/divisions/:divisionId/inventory/all-brands/d
  * @desc    Get all brands in a division with details
  * @access  Authenticated
  */
-router.get('/brands/d', inventoryController.detailedLocalBrands);
+router.get('/all-brands/d', inventoryController.detailedLocalBrands);
 
 /**
  * @route   PATCH /:workspaceId/divisions/:divisionId/inventory/brands
