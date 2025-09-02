@@ -5,8 +5,8 @@ import {
     useDivisionBrands,
     useSaveSelectedDivisionBrands,
 } from "../../../hooks/useBrand";
-import brandLogo from "../../../assets/images/bashundhara.webp";
 import { divisionId, workspaceId } from "../../../utils/IDS";
+import brandLogo from "../../../assets/images/bashundhara.webp";
 
 export default function BrandSelection() {
     const navigate = useNavigate();
@@ -32,13 +32,18 @@ export default function BrandSelection() {
         }
     }, [allBrands]);
 
+    useEffect(() => {
+        console.log(draftBrands);
+    }, [draftBrands]);
+
     // Toggle one brand
-    const toggleSingleBrand = (id) =>
+    const toggleSingleBrand = (id) => {
         setDraftBrands((prev) =>
             prev.map((b) =>
                 b.id === id ? { ...b, isActive: !b.isActive } : b,
             ),
         );
+    };
 
     // Select/Deselect all
     const toggleAllBrandsSelection = () => {
@@ -52,7 +57,7 @@ export default function BrandSelection() {
     const submitSelectedBrands = () => {
         if (!draftBrands.length) return;
         saveBrands(draftBrands, {
-            onSuccess: () => navigate("./initialization"),
+            onSuccess: () => navigate("./dashboard"),
         });
     };
 
@@ -113,7 +118,7 @@ export default function BrandSelection() {
                                   <SelectionCard
                                       key={brand.id}
                                       id={brand.id}
-                                      name={brandInfo?.globalBrand} // wtf
+                                      name={brandInfo?.name}
                                       logo={brandLogo}
                                       isSelected={brand.isActive}
                                       onSelect={() =>

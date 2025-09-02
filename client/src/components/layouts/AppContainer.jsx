@@ -6,10 +6,11 @@ import LoadingComponent from "../ui/LoadingComponent";
 import { redirectToLogin } from "../../utils/redirectToLogin";
 
 export default function AppContainer({ children }) {
-    const user = useAuthStore((state) => state.user);
-    const initializing = useAuthStore((state) => state.initializing);
     // let Data = { name: "Visitor" };
     // const isLoading = true;
+
+    const user = useAuthStore((state) => state.user);
+    const initializing = useAuthStore((state) => state.initializing);
 
     if (initializing) return <LoadingComponent />;
 

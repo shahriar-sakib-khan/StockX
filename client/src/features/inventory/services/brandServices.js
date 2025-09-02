@@ -9,7 +9,7 @@ import API from "../../../services/apiClient";
 // Get all brands in a division (list only)
 export const getDivisionBrands = async (workspaceId, divisionId) =>
     await API.get(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/brands`,
+        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/all-brands`,
     );
 
 // Get all brands in a division (detailed)

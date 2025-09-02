@@ -7,11 +7,11 @@ import {
 export const useAuthStore = create((set) => ({
     user: null,
     accessToken: null,
-    initializating: true,
+    initializing: true,
 
     // refresh token and fetch user
     initializeAuth: async () => {
-        set({ initializating: true });
+        set({ initializing: true });
         try {
             const data = await refreshToken();
             if (data.accessToken) {
@@ -24,7 +24,7 @@ export const useAuthStore = create((set) => ({
         } catch {
             set({ accessToken: null, user: null });
         } finally {
-            set({ initializating: false });
+            set({ initializing: false });
         }
     },
 

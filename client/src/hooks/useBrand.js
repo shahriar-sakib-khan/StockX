@@ -7,20 +7,8 @@ import {
 } from "../features/inventory/services/brandServices";
 import queryClient from "../services/queryClient";
 
-const GLOBAL_BRANDS = "globalBrands";
 const DIVISION_BRANDS = "divisionBrands";
 const DETAILED_DIVITION_BRANDS = "detailedDivisionBrands";
-
-// get all global brands
-// export const useGlobalBrands = (workspaceId, divisionId, options = {}) => {
-//     const { data, ...rest } = useQuery({
-//         queryKey: [GLOBAL_BRANDS, workspaceId, divisionId],
-//         queryFn: () => getGlobalBrands(workspaceId, divisionId),
-//         ...options,
-//     });
-
-//     return { data: data?.globalBrands || [], ...rest };
-// };
 
 // Get all brands in a division (list only)
 export const useDivisionBrands = (workspaceId, divisionId, options = {}) => {
