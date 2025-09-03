@@ -8,11 +8,12 @@ export { default as workspaceController } from './workspace.controller';
 
 export { default as divisionController } from './division.controller';
 
+export { default as vehicleController } from './vehicle.controller';
+export { default as storeController } from './store.controller';
+
 export { default as inventoryController } from './inventory.controller';
 
 export { default as transactionController } from './transaction.controller';
-
-export { default as vehicleController } from './vehicle.controller';
 
 export * from './paymentController.js';
 export * from './transactionHistoryController.js';

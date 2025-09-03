@@ -11,6 +11,7 @@ export {
   divisionMembersService,
   divisionRolesService,
   vehicleService,
+  storeService,
 } from './division';
 export { brandService, cylinderService } from './inventory';
 export { transactionService } from './transaction';

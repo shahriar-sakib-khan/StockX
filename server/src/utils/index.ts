@@ -9,4 +9,5 @@ export {
   brandSanitizers,
   cylinderSanitizers,
   vehicleSanitizers,
+  storeSanitizers,
 } from './sanitizers';

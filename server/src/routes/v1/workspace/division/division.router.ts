@@ -6,6 +6,7 @@ import { division } from '@/validations';
 import inventoryRouter from './inventory.router';
 import transactionRouter from './transaction.router';
 import vehicleRouter from './vehicle.router';
+import storeRouter from './store.router';
 
 const router = Router({ mergeParams: true });
 
@@ -196,5 +197,6 @@ router.delete(
 router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
 router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
 router.use('/:divisionId/vehicles', divisionScope(), vehicleRouter);
+router.use('/:divisionId/stores', divisionScope(), storeRouter);
 
 export default router;

@@ -30,7 +30,7 @@ const storeSchema: Schema<IStore> = new Schema(
 storeSchema.methods.toJSON = function (): Partial<IStore> {
   const obj = this.toObject();
   delete obj.__v;
-  
+
   return obj;
 };
 

@@ -5,3 +5,4 @@ export * as division from './division.validation';
 export * as transaction from './transaction.validation';
 
 export * as vehicle from './vehicle.validation';
+export * as store from './store.validation';
