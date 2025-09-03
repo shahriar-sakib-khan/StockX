@@ -10,4 +10,7 @@ export {
   cylinderSanitizers,
   vehicleSanitizers,
   storeSanitizers,
+  transactionSanitizers,
+  accountSanitizers,
+  txCategorySanitizers,
 } from './sanitizers';

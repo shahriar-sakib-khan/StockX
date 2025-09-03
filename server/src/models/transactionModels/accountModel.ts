@@ -6,7 +6,7 @@ export interface IAccount extends Document {
   workspace: Types.ObjectId;
   division: Types.ObjectId;
 
-  code: string; // e.g., 1000-CASH, 1100-AR, 2100-AP, 4100-REV-GAS
+  code: txConstants.AccountCodeType; // e.g., 1000-CASH, 1100-AR, 2100-AP, 4100-REV-GAS
   name: string; // Cash, Bank, AR, AP, Revenue-Gas, Expense-Salary, etc.
   type: txConstants.AccountTypeType; // asset | liability | equity | income | expense
   isActive: boolean;
@@ -19,7 +19,7 @@ const accountSchema: Schema<IAccount> = new Schema(
   {
     workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
     division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
-    code: { type: String, required: true },
+    code: { type: String, required: true, enum: txConstants.AccountCodes },
     name: { type: String, required: true },
     type: {
       type: String,

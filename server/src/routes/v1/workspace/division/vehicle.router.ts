@@ -62,4 +62,26 @@ router.put(
  */
 router.delete('/:vehicleId', divisionScope(['division_admin']), vehicleController.deleteVehicle);
 
+/**
+ * ----------------- Vehicle Transactions -----------------
+ */
+
+/**
+ * @route   POST /:workspaceId/divisions/:divisionId/vehicles/:vehicleId/transactions
+ * @desc    Record a transaction for a vehicle
+ * @access  Admin (division)
+ */
+router.post(
+  '/:vehicleId/transactions',
+  validateRequest(vehicle.vehicleTransactionSchema),
+  vehicleController.recordVehicleTransaction
+);
+
+/**
+ * @route   GET /:workspaceId/divisions/:divisionId/vehicles/:vehicleId/transactions
+ * @desc    Get all transactions for a vehicle
+ * @access  Admin (division)
+ */
+router.get('/:vehicleId/transactions', vehicleController.getVehicleTransactions);
+
 export default router;

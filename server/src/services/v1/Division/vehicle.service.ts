@@ -6,10 +6,12 @@
  */
 
 import { Types } from 'mongoose';
-import { Vehicle, IVehicle } from '@/models';
+
+import { Vehicle, IVehicle, Transaction } from '@/models';
 import { Errors } from '@/error';
 import { vehicle } from '@/validations';
-import { vehicleSanitizers } from '@/utils';
+import { transactionSanitizers, vehicleSanitizers } from '@/utils';
+import { transactionService } from '@/services/v1';
 
 /**
  * @function createVehicle
@@ -25,7 +27,7 @@ export const createVehicle = async (
   workspaceId: string,
   divisionId: string
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
-  const { regNumber, brand, vehicleModel } = vehicleData;
+  const { regNumber, vehicleBrand, vehicleModel } = vehicleData;
 
   // Check for duplicate regNumber in the same workspace & division
   const existing = await Vehicle.exists({
@@ -33,15 +35,18 @@ export const createVehicle = async (
     workspace: workspaceId,
     division: divisionId,
   });
-  if (existing)
+  if (existing) {
     throw new Errors.BadRequestError('Vehicle with this registration number already exists');
+  }
 
   const newVehicle = await Vehicle.create({
     regNumber,
-    brand,
+    vehicleBrand,
     vehicleModel,
     workspace: new Types.ObjectId(workspaceId),
     division: new Types.ObjectId(divisionId),
+    totalFuelCost: 0,
+    totalRepairCost: 0,
   });
 
   return vehicleSanitizers.vehicleSanitizer(newVehicle);
@@ -61,7 +66,7 @@ export const getSingleVehicle = async (
   workspaceId: string,
   divisionId: string
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
-  const vehicleDoc = await Vehicle.findOne({
+  const vehicleDoc = await Vehicle.findById({
     _id: vehicleId,
     workspace: workspaceId,
     division: divisionId,
@@ -88,9 +93,21 @@ export const updateVehicle = async (
   workspaceId: string,
   divisionId: string
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
+  const { regNumber, vehicleBrand, vehicleModel } = vehicleData;
+
+  // Check for duplicate regNumber in the same workspace & division
+  const existing = await Vehicle.exists({
+    regNumber,
+    workspace: workspaceId,
+    division: divisionId,
+    _id: { $ne: vehicleId },
+  });
+  if (existing)
+    throw new Errors.BadRequestError('Vehicle with this registration number already exists');
+
   const updatedVehicle = await Vehicle.findOneAndUpdate(
     { _id: vehicleId, workspace: workspaceId, division: divisionId },
-    vehicleData,
+    { regNumber, vehicleBrand, vehicleModel },
     { new: true, runValidators: true }
   ).lean();
 
@@ -153,17 +170,127 @@ export const getAllVehicles = async (
     vehicles: vehicleSanitizers.allVehicleSanitizer(vehicles, [
       'id',
       'regNumber',
-      'brand',
+      'vehicleBrand',
       'vehicleModel',
+      'totalFuelCost',
+      'totalRepairCost',
     ]).vehicles,
     total,
   };
 };
 
+/**
+ * ----------------- Vehicle Transactions -----------------
+ */
+
+/**
+ * @function recordVehicleTransaction
+ * @description Record a repair cost for a vehicle.
+ *
+ * @param {string} userId - User ID.
+ * @param {string} workspaceId - Workspace ID.
+ * @param {string} divisionId - Division ID.
+ * @param {number} vehicleId - Vehicle ID.
+ * @param {any} userData - User data.
+ * @returns {Promise<void>}
+ */
+export const recordVehicleTransaction = async (
+  userId: string,
+  workspaceId: string,
+  divisionId: string,
+  vehicleId: string,
+  userData: vehicle.VehicleTransactionInput
+): Promise<any> => {
+  const { amount, category, paymentMethod, ref, details } = userData;
+
+  // Map category to vehicle field
+  const categoryFieldMap: Record<string, keyof IVehicle> = {
+    fuel_payment: 'totalFuelCost',
+    repair_payment: 'totalRepairCost',
+  };
+
+  // Update vehicle states
+  const vehicle = await Vehicle.findOneAndUpdate(
+    { _id: vehicleId, workspace: workspaceId, division: divisionId },
+    { $inc: { [categoryFieldMap[category]]: amount } },
+    { new: true } // return updated document
+  )
+    .select('id regNumber vehicleBrand vehicleModel totalRepairCost totalFuelCost')
+    .lean();
+
+  if (!vehicle) throw new Errors.NotFoundError('Vehicle not found');
+
+  // Record the transaction
+  const transaction = await transactionService.recordTransaction(userId, workspaceId, divisionId, {
+    amount,
+    category,
+    paymentMethod,
+    counterpartyType: 'vehicle',
+    vehicleId,
+    ref,
+    details,
+  });
+
+  return { vehicle, transaction };
+};
+
+/**
+ * @function getVehicleTransactions
+ * @description Get all transactions for a vehicle.
+ *
+ * @param {number} page - Page number.
+ * @param {number} limit - Records per page.
+ * @param {string} workspaceId - Workspace ID.
+ * @param {string} divisionId - Division ID.
+ * @param {string} vehicleId - Vehicle ID.
+ * @returns {Promise<any>} Transactions.
+ */
+export const getVehicleTransactions = async (
+  page: number,
+  limit: number,
+  workspaceId: string,
+  divisionId: string,
+  vehicleId: string
+): Promise<transactionSanitizers.SanitizedTransactions & { total: number }> => {
+  const total = await Transaction.countDocuments({
+    vehicleId: vehicleId,
+    workspace: workspaceId,
+    division: divisionId,
+  });
+  if (total === 0) return { transactions: [], total };
+
+  const skip: number = (page - 1) * limit;
+  const transactions = await Transaction.find({
+    vehicleId: vehicleId,
+    workspace: workspaceId,
+    division: divisionId,
+  })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+
+  return {
+    transactions: transactionSanitizers.allTransactionSanitizer(transactions, [
+      'id',
+      'amount',
+      'category',
+      'paymentMethod',
+      'createdAt',
+    ]).transactions,
+    total,
+  };
+};
+
+/**
+ * ----------------- Default Export (vehicleService) -----------------
+ */
 export default {
   createVehicle,
   getSingleVehicle,
   updateVehicle,
   deleteVehicle,
   getAllVehicles,
+
+  recordVehicleTransaction,
+  getVehicleTransactions,
 };

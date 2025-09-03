@@ -6,7 +6,16 @@ import { transaction } from '@/validations';
 
 const router = Router({ mergeParams: true });
 
-// <============================> General Transaction Routes <============================>
+/**
+ * @swagger
+ * tags:
+ *   name: Transaction
+ *   description: Transaction management within workspace divisions
+ */
+
+/**
+ * ----------------- General Transaction Routes -----------------
+ */
 
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/transactions
@@ -14,6 +23,24 @@ const router = Router({ mergeParams: true });
  * @access  Authenticated
  */
 router.get('/', transactionController.allTransactions);
+
+/**
+ * @route   GET /:workspaceId/divisions/:divisionId/transactions/:transactionId
+ * @desc    Get a single transaction in a division
+ * @access  Authenticated
+ */
+router.get('/:transactionId', transactionController.singleTransaction);
+
+/**
+ * ----------------- Transaction Category Routes -----------------
+ */
+
+/**
+ * @route   GET /:workspaceId/divisions/:divisionId/transactions/categories
+ * @desc    Get all transaction categories in a division
+ * @access  Authenticated
+ */
+router.get('/categories', transactionController.allTxCategories);
 
 // <============================> Cylinder Transaction Routes <============================>
 /**

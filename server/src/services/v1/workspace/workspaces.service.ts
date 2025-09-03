@@ -45,7 +45,7 @@ export const createWorkspace = async (
   await Membership.create({
     user: new Types.ObjectId(userId),
     workspace: workspace._id,
-    workspaceRoles: ['admin'],
+    workspaceRoles: ['admin', 'creator'],
     status: 'active',
   });
 

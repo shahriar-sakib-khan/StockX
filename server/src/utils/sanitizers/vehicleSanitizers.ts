@@ -12,10 +12,12 @@ import { divisionSanitizer } from './divisionSanitizers';
 export const vehicleSanitizer = (vehicle: IVehicle | HydratedDocument<IVehicle>) => ({
   id: String(vehicle._id),
   regNumber: vehicle.regNumber,
-  brand: vehicle.brand ?? null,
+  vehicleBrand: vehicle.vehicleBrand ?? null,
   vehicleModel: vehicle.vehicleModel ?? null,
   workspace: resolveRef(vehicle.workspace ?? null, workspaceSanitizer),
   division: resolveRef(vehicle.division ?? null, divisionSanitizer),
+  totalFuelCost: vehicle.totalFuelCost,
+  totalRepairCost: vehicle.totalRepairCost,
   createdAt: vehicle.createdAt,
   updatedAt: vehicle.updatedAt,
 });

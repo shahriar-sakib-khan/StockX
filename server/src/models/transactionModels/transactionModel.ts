@@ -14,9 +14,8 @@ export interface ITransaction extends Document {
   category: txConstants.TxCategoryType; // business meaning e.g., "cylinder-sale-cash"
   paymentMethod?: txConstants.PaymentMethodType; // 'cash' | 'bank' | 'mobile' | 'other'
 
-  // Counterparty (if applicable)
-  counterpartyType: txConstants.CounterpartyKindType; // 'customer' | 'store' | 'internal'
-  counterpartyId?: Types.ObjectId;
+  // Counterparty
+  counterpartyType: txConstants.CounterpartyKindType; // 'customer' | 'store' |  'vehicle' | 'staff' | 'internal' | 'other'
 
   // Additional linkage for UX & reporting
   staffId?: Types.ObjectId; // for salary payments
@@ -52,7 +51,6 @@ const transactionSchema: Schema<ITransaction> = new Schema(
     paymentMethod: { type: String, enum: txConstants.PaymentMethod, default: 'cash' },
 
     counterpartyType: { type: String, enum: txConstants.CounterpartyKind, required: true },
-    counterpartyId: { type: Schema.Types.ObjectId },
 
     staffId: { type: Schema.Types.ObjectId, ref: 'Staff' },
     vehicleId: { type: Schema.Types.ObjectId, ref: 'Vehicle' },

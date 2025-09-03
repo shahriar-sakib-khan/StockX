@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { vehicleService } from '@/services/v1';
+import { assertAuth } from '@/common';
 
 /**
  * ----------------- Vehicle CRUD Controllers -----------------
@@ -90,7 +91,55 @@ export const deleteVehicle = async (req: Request, res: Response) => {
 };
 
 /**
- * ----------------- Vehicle Controllers (default export) -----------------
+ * ----------------- Vehicle Transaction Controllers -----------------
+ */
+
+/**
+ * @function recordVehicleTransaction
+ * @desc Record a transaction for a vehicle (repair, fuel refill etc)
+ * @route POST /:workspaceId/divisions/:divisionId/vehicles/:vehicleId/transactions
+ * @access Admin (division)
+ */
+export const recordVehicleTransaction = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { workspaceId, divisionId, vehicleId } = req.params;
+
+  const { vehicle, tsRecords } = await vehicleService.recordVehicleTransaction(
+    userId,
+    workspaceId,
+    divisionId,
+    vehicleId,
+    req.body
+  );
+
+  res.status(StatusCodes.OK).json({ vehicle, tsRecords });
+};
+
+/**
+ * @function getVehicleTransactions
+ * @desc Get all transactions for a vehicle with pagination
+ * @route GET /:workspaceId/divisions/:divisionId/vehicles/:vehicleId/transactions
+ * @access Authenticated
+ */
+export const getVehicleTransactions = async (req: Request, res: Response) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+  const { workspaceId, divisionId, vehicleId } = req.params;
+
+  const { transactions, total } = await vehicleService.getVehicleTransactions(
+    page,
+    limit,
+    workspaceId,
+    divisionId,
+    vehicleId
+  );
+
+  res.status(StatusCodes.OK).json({ total, page, limit, transactions });
+};
+
+/**
+ * ----------------- Default Exports (vehicleController) -----------------
  */
 export default {
   createVehicle, // Create a new vehicle
@@ -98,4 +147,7 @@ export default {
   getSingleVehicle, // Get a single vehicle by ID
   updateVehicle, // Update vehicle details
   deleteVehicle, // Delete a vehicle
+
+  recordVehicleTransaction, // Record a transaction for a vehicle (repair, fuel refill etc)
+  getVehicleTransactions, // Get all transactions for a vehicle
 };

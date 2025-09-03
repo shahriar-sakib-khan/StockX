@@ -36,10 +36,10 @@ const counterpartyBalanceSchema: Schema<ICounterpartyBalance> = new Schema(
   { timestamps: false }
 );
 
-// counterpartyBalanceSchema.index(
-//   { workspace: 1, division: 1, counterpartyType: 1, counterpartyId: 1 },
-//   { unique: true }
-// );
+counterpartyBalanceSchema.index(
+  { workspace: 1, division: 1, counterpartyType: 1, counterpartyId: 1 },
+  { unique: true }
+);
 
 counterpartyBalanceSchema.methods.toJSON = function (): Partial<ICounterpartyBalance> {
   const obj = this.toObject();

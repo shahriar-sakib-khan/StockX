@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 import { Division, DivisionMembership } from '@/models';
 import { DivisionInput } from '@/validations/division.validation';
 import { divisionSanitizers } from '@/utils';
@@ -27,14 +29,14 @@ const createDivision = async (
     name,
     description,
     createdBy: userId,
-    workspace: workspaceId,
+    workspace: new Types.ObjectId(workspaceId),
   });
 
   await DivisionMembership.create({
     user: userId,
     workspace: workspaceId,
     division: division._id,
-    divisionRoles: ['division_admin'],
+    divisionRoles: ['division_admin', 'division_creator'],
   });
 
   return divisionSanitizers.divisionSanitizer(division);
@@ -101,7 +103,9 @@ export const updateDivision = async (
  * @returns {Promise<SanitizedDivision>} The deleted division document.
  * @throws {Error} If division is not found.
  */
-export const deleteDivision = async (divisionId: string): Promise<divisionSanitizers.SanitizedDivision> => {
+export const deleteDivision = async (
+  divisionId: string
+): Promise<divisionSanitizers.SanitizedDivision> => {
   const division = await Division.findByIdAndDelete(divisionId)
     .select('name description')
     .populate('createdBy', 'username email')

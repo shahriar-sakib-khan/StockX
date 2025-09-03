@@ -55,9 +55,6 @@ export type { ITransaction } from './transactionModels/transactionModel.js';
 export { default as StockMovement } from './transactionModels/stockMovementModel.js';
 export type { IStockMovement } from './transactionModels/stockMovementModel.js';
 
-export { default as VehicleStats } from './transactionModels/vehicleStatModel.js';
-export type { IVehicleStats } from './transactionModels/vehicleStatModel.js';
-
 export { default as CounterpartyBalance } from './transactionModels/counterpartyBalanceModel.js';
 export type { ICounterpartyBalance } from './transactionModels/counterpartyBalanceModel.js';
 
