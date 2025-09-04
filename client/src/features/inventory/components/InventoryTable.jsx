@@ -1,9 +1,9 @@
 import { useState } from "react";
 import clsx from "clsx";
-import cylinderImg from "../../../assets/images/cylinderModel.png";
+import cylinderImg from "@/assets/images/cylinderModel.png";
 import { TableHeader } from "../utils/TableHeader";
 import { TableRow } from "../utils/TableRow";
-import SearchBar from "./Searchbar";
+import SearchBar from "./SearchBar";
 
 const brands = [
     {

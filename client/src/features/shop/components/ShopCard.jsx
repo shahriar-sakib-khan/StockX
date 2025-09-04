@@ -1,4 +1,4 @@
-import DefaultImage from "../../../assets/images/shop_icon.png";
+import DefaultImage from "@/assets/images/shop_icon.png";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
 export default function ShopCard({ shopInfo, onDelete }) {
@@ -26,24 +26,31 @@ export default function ShopCard({ shopInfo, onDelete }) {
                 </span>
                 {shopInfo?.contactName && (
                     <span className="text-sm text-gray-500">
-                        Contact: {shopInfo.contactName}
+                        Name: {shopInfo.contactName}
                     </span>
                 )}
                 {shopInfo?.phone && (
                     <span className="text-sm text-gray-500">
-                        📞 {shopInfo.phone}
+                        Phone: {shopInfo.phone}
                     </span>
                 )}
                 {shopInfo?.address && (
                     <span className="text-sm text-gray-500">
-                        {shopInfo.address}
+                        Address: {shopInfo.address}
+                    </span>
+                )}
+                {shopInfo?.due && (
+                    <span
+                        className={`text-sm ${shopInfo.due !== "0" ? "text-red-600" : "text-green-600"}`}
+                    >
+                        Due: {shopInfo.due}/-
                     </span>
                 )}
             </section>
 
             {/* Buttons Section */}
             <section className="mt-2 mb-4 flex items-center justify-center gap-3 px-4">
-                <button className="primary-button px-4 py-1">View</button>
+                <button className="primary-button px-4 py-1">Stats</button>
                 <button className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70">
                     History
                 </button>

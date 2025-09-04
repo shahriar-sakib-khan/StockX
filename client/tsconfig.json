@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "allowJs": true, // allow plain .js files
+        "checkJs": false, // enable type checking in .js
+        "noEmit": true, // don’t output .js files
+        "strict": true, // full strict mode
+        "target": "ES2022", // modern JS (good for Vite/React 19)
+        "module": "ESNext", // ESNext modules for Vite
+        "moduleResolution": "bundler", // best for Vite
+        "jsx": "react-jsx", // React 17+ JSX transform
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true, // faster, avoids type noise from deps
+
+        "baseUrl": ".", // 👈 required for "paths" to work
+        "paths": {
+            "@/*": ["src/*"] // 👈 alias @ → ./src
+        }
+    },
+    "include": ["src"]
+}

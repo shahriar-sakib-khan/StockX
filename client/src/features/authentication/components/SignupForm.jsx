@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Button, FormInputField } from "../../../components";
+import { Button, FormInputField } from "@/components";
 import { useMutation } from "@tanstack/react-query";
 import { register } from "../services/authServices";
-import useInput from "../../../hooks/useInput";
+import useInput from "@/hooks/useInput";
 
 export default function SignupForm() {
     const navigate = useNavigate();

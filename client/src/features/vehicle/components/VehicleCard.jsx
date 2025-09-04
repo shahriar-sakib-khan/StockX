@@ -1,4 +1,4 @@
-import DefaultImage from "../../../assets/images/vehicle_icon.png";
+import DefaultImage from "@/assets/images/vehicle_icon.png";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
 export default function ehicleCard({ vehicleInfo, onDelete }) {
@@ -22,13 +22,11 @@ export default function ehicleCard({ vehicleInfo, onDelete }) {
             {/* Vehicle info section */}
             <section className="flex flex-col gap-1 px-6 py-4">
                 <span className="text-lg font-semibold text-gray-700">
-                    {vehicleInfo?.regNo || "No Reg No."}
-                </span>
-                <span className="text-sm text-gray-500">
-                    {vehicleInfo?.brand || "Unknown Brand"}
-                </span>
-                <span className="text-sm text-gray-500">
+                    {vehicleInfo?.brand || "Unknown Brand"}{" "}
                     {vehicleInfo?.model || "Unknown Model"}
+                </span>
+                <span className="text-sm text-gray-500">
+                    Reg: {vehicleInfo?.regNo || "No Reg No."}
                 </span>
             </section>
 

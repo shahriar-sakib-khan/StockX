@@ -7,7 +7,7 @@ import useAuth from "../../hooks/useAuth";
 import { pagesConfig } from "../../pages/utils/pagesConfig";
 import queryClient from "../../services/queryClient";
 import { useUIStore } from "../../stores/useUIStore";
-import MenuContainer from "./MenuContainer";
+import MenuContainer from "../mini/MenuContainer";
 
 export default function UserMenu() {
     const navigate = useNavigate();
