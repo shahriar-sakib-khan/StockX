@@ -1,3 +1,4 @@
+// @ts-check
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
     getVehicles,
@@ -9,42 +10,73 @@ import {
 import queryClient from "../services/queryClient";
 import { VEHICLE, VEHICLES } from "../constants/queryKeys";
 
-// Get all vehicles in a division
-export const useVehicles = (workspaceId, divisionId, options = {}) => {
+/** @typedef {import("@/types/vehicle").Vehicle} Vehicle */
+/** @typedef {import("@/types/vehicle").NewVehicle} NewVehicle */
+/** @typedef {import("@/types/vehicle").UpdatedVehicle} UpdatedVehicle */
+/** @typedef {import("@/types/vehicle").AllVehiclesResponse} AllVehiclesResponse */
+/** @typedef {import("@/types/vehicle").SingleVehicleResponse} SingleVehicleResponse */
+/** @typedef {import("@/types/vehicle").CreateVehicleResponse} CreateVehicleResponse */
+/** @typedef {import("@/types/vehicle").UpdateVehicleResponse} UpdateVehicleResponse */
+/** @typedef {import("@/types/vehicle").DeleteVehicleResponse} DeleteVehicleResponse */
+
+/**
+ * Get all vehicles in a division.
+ *
+ * @param {string} workspaceId
+ * @param {string} divisionId
+ * @param {import("@tanstack/react-query").UseQueryOptions<AllVehiclesResponse, unknown, AllVehiclesResponse, [string, string, string]>} [options]
+ */
+export const useAllVehicles = (workspaceId, divisionId, options) => {
+    /** @type {import("@tanstack/react-query").UseQueryResult<AllVehiclesResponse, unknown>} */
     const { data, ...rest } = useQuery({
         queryKey: [VEHICLES, workspaceId, divisionId],
         queryFn: () => getVehicles(workspaceId, divisionId),
         ...options,
     });
 
-    return { data: data || [], ...rest };
+    return { data: data?.vehicles || [], ...rest };
 };
 
-// Get details of a single vehicle
+/**
+ * Get details of a single vehicle by ID.
+ *
+ * @param {string} workspaceId - The ID of the workspace.
+ * @param {string} divisionId - The ID of the division.
+ * @param {string} vehicleId - The ID of the vehicle.
+ * @param {import("@tanstack/react-query").UseQueryOptions<SingleVehicleResponse, unknown, SingleVehicleResponse, [string, string, string, string]>} [options]
+ */
 export const useSingleVehicle = (
     workspaceId,
     divisionId,
     vehicleId,
-    options = {},
+    options,
 ) => {
+    /** @type {import("@tanstack/react-query").UseQueryResult<SingleVehicleResponse, unknown>} */
     const { data, ...rest } = useQuery({
         queryKey: [VEHICLE, workspaceId, divisionId, vehicleId],
         queryFn: () => getSingleVehicle(workspaceId, divisionId, vehicleId),
-        enabled: !!vehicleId, // don’t fetch if no ID
         ...options,
     });
 
-    return { data: data || null, ...rest };
+    return { data: data?.vehicle || {}, ...rest };
 };
 
-// Create a new vehicle
-export const useCreateVehicle = (workspaceId, divisionId, options = {}) => {
+/**
+ * Create a new vehicle in a division.
+ *
+ * @param {string} workspaceId
+ * @param {string} divisionId
+ * @param {import("@tanstack/react-query").UseMutationOptions<CreateVehicleResponse, unknown, NewVehicle>} [options]
+ */
+export const useCreateVehicle = (workspaceId, divisionId, options) => {
+    /** @type {import("@tanstack/react-query").UseMutationResult<CreateVehicleResponse, unknown, NewVehicle>} */
     const { mutate, ...rest } = useMutation({
-        mutationFn: (vehicleInfo) =>
+        mutationFn: /** @param {NewVehicle} vehicleInfo */ (vehicleInfo) =>
             createVehicle(workspaceId, divisionId, vehicleInfo),
         onSuccess: () => {
-            // Refresh vehicle list after creating a new one
-            queryClient.invalidateQueries([VEHICLES, workspaceId, divisionId]);
+            queryClient.invalidateQueries({
+                queryKey: [VEHICLES, workspaceId, divisionId],
+            });
         },
         ...options,
     });
@@ -52,25 +84,33 @@ export const useCreateVehicle = (workspaceId, divisionId, options = {}) => {
     return { mutate, ...rest };
 };
 
-// Update a single vehicle
-export const useUpdateVehicle = (
-    workspaceId,
-    divisionId,
-    vehicleId,
-    options = {},
-) => {
+/**
+ * Update an existing vehicle's information.
+ *
+ * @param {string} workspaceId - The ID of the workspace.
+ * @param {string} divisionId - The ID of the division.
+ * @param {import("@tanstack/react-query").UseMutationOptions<UpdateVehicleResponse, unknown, { vehicleId: string } & UpdatedVehicle>} [options]
+ */
+export const useUpdateVehicle = (workspaceId, divisionId, options) => {
+    /** @type {import("@tanstack/react-query").UseMutationResult<UpdateVehicleResponse, unknown, { vehicleId: string } & UpdatedVehicle>} */
     const { mutate, ...rest } = useMutation({
-        mutationFn: (vehicleInfo) =>
-            updateVehicleInfo(workspaceId, divisionId, vehicleId, vehicleInfo),
-        onSuccess: () => {
-            // invalidate both the list and the single vehicle query
-            queryClient.invalidateQueries([VEHICLES, workspaceId, divisionId]);
-            queryClient.invalidateQueries([
-                VEHICLE,
+        /** @param {{ vehicleId: string } & UpdatedVehicle} payload */
+        mutationFn: (payload) => {
+            const { vehicleId, ...vehicleInfo } = payload;
+            return updateVehicleInfo(
                 workspaceId,
                 divisionId,
                 vehicleId,
-            ]);
+                vehicleInfo,
+            );
+        },
+        onSuccess: (_, payload) => {
+            queryClient.invalidateQueries({
+                queryKey: [VEHICLES, workspaceId, divisionId],
+            });
+            queryClient.invalidateQueries({
+                queryKey: [VEHICLE, workspaceId, divisionId, payload.vehicleId],
+            });
         },
         ...options,
     });
@@ -78,13 +118,22 @@ export const useUpdateVehicle = (
     return { mutate, ...rest };
 };
 
-// Delete a vehicle
-export const useDeleteVehicle = (workspaceId, divisionId, options = {}) => {
+/**
+ * Delete a vehicle from a division.
+ *
+ * @param {string} workspaceId - The ID of the workspace.
+ * @param {string} divisionId - The ID of the division.
+ * @param {import("@tanstack/react-query").UseMutationOptions<DeleteVehicleResponse, unknown, string>} [options]
+ */
+export const useDeleteVehicle = (workspaceId, divisionId, options) => {
+    /** @type {import("@tanstack/react-query").UseMutationResult<DeleteVehicleResponse, unknown, string>} */
     const { mutate, ...rest } = useMutation({
-        mutationFn: (vehicleId) =>
+        mutationFn: /** @param {string} vehicleId */ (vehicleId) =>
             deleteVehicle(workspaceId, divisionId, vehicleId),
         onSuccess: () => {
-            queryClient.invalidateQueries([VEHICLES, workspaceId, divisionId]);
+            queryClient.invalidateQueries({
+                queryKey: [VEHICLES, workspaceId, divisionId],
+            });
         },
         ...options,
     });

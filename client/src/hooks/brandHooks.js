@@ -23,13 +23,13 @@ import { BRANDS, DETAILED_BRANDS } from "../constants/queryKeys";
  */
 export const useBrands = (workspaceId, divisionId, options) => {
     /** @type {import("@tanstack/react-query").UseQueryResult<BrandsResponse, unknown>} */
-    const query = useQuery({
+    const { data, ...rest } = useQuery({
         queryKey: [BRANDS, workspaceId, divisionId],
         queryFn: () => getBrands(workspaceId, divisionId),
         ...options,
     });
 
-    return { ...query, data: query.data?.localBrands || [] };
+    return { data: data?.localBrands || [], ...rest };
 };
 
 /**
@@ -40,13 +40,13 @@ export const useBrands = (workspaceId, divisionId, options) => {
  */
 export const useDetailedBrands = (workspaceId, divisionId, options) => {
     /** @type {import("@tanstack/react-query").UseQueryResult<DetailedBrandsResponse, unknown>} */
-    const query = useQuery({
+    const { data, ...rest } = useQuery({
         queryKey: [DETAILED_BRANDS, workspaceId, divisionId],
         queryFn: () => getDetailedBrands(workspaceId, divisionId),
         ...options,
     });
 
-    return { ...query, data: query.data?.localBrands || [] };
+    return { data: data?.localBrands || [], ...rest };
 };
 
 /**
@@ -57,7 +57,7 @@ export const useDetailedBrands = (workspaceId, divisionId, options) => {
  */
 export const useSaveSelectedBrands = (workspaceId, divisionId, options) => {
     /** @type {import("@tanstack/react-query").UseMutationResult<SaveBrandsResponse, unknown, SelectedBrand[], unknown>} */
-    const mutation = useMutation({
+    const { mutate, ...rest } = useMutation({
         mutationFn: (brands) =>
             saveSelectedBrands(workspaceId, divisionId, brands),
         onSuccess: () => {
@@ -71,5 +71,5 @@ export const useSaveSelectedBrands = (workspaceId, divisionId, options) => {
         ...options,
     });
 
-    return { ...mutation, mutate: mutation.mutate };
+    return { mutate, ...rest };
 };

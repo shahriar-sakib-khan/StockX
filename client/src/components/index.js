@@ -21,3 +21,4 @@ export { default as Tabs } from "./mini/Tabs";
 export { default as Modal } from "./mini/Modal";
 export { default as Spinner } from "./mini/Spinner";
 export { default as ModalContainer } from "./mini/ModalContainer";
+export { default as ConfirmDialog } from "./mini/ConfirmDialog";

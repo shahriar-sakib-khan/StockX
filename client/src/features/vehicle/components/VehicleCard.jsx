@@ -1,9 +1,9 @@
 import DefaultImage from "@/assets/images/vehicle_icon.png";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
-export default function ehicleCard({ vehicleInfo, onDelete }) {
+export default function VehicleCard({ vehicleInfo, onDelete, onUpdate }) {
     return (
-        <div className="flex w-70 flex-col rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
+        <div className="flex w-70 flex-col overflow-hidden rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
             {/* Top section (vehicle image + delete) */}
             <section className="relative flex items-center justify-center bg-gray-100/90">
                 <img
@@ -39,6 +39,12 @@ export default function ehicleCard({ vehicleInfo, onDelete }) {
                     History
                 </button>
             </section>
+            <button
+                onClick={onUpdate}
+                className="bg-yellow-400/90 px-4 py-1 text-white transition-all duration-100 hover:bg-yellow-500/80"
+            >
+                Update
+            </button>
         </div>
     );
 }

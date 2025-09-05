@@ -27,7 +27,7 @@ export default function InventoryPage() {
                 )}
             </Tabs>
             <BrandSelection />
-            <TestBrands />
+            {/* <TestBrands /> */}
         </div>
     );
 }

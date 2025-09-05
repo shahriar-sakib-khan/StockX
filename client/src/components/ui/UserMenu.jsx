@@ -15,8 +15,8 @@ export default function UserMenu() {
     const setMenuState = useUIStore((state) => state.setMenuState);
     const toggleMenu = useUIStore((state) => state.toggleMenu);
 
-    const { data } = useAuth();
-    const { email, firstName, lastName } = data?.user || {};
+    const { data: user } = useAuth();
+    const { email, firstName, lastName } = user || {};
 
     const fullName =
         firstName && lastName

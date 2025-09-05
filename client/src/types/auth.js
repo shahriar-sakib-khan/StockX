@@ -45,4 +45,16 @@
  * @property {User} user
  */
 
+/**
+ * @typedef {Object} Workspace
+ * @property {string} id
+ * @property {string} name
+ */
+
+/**
+ * @typedef {Object} Division
+ * @property {string} id
+ * @property {string} name
+ */
+
 export {};

@@ -12,14 +12,14 @@ import { AUTH } from "../constants/queryKeys";
  */
 const useAuth = (options) => {
     /** @type {import("@tanstack/react-query").UseQueryResult<GetUserResponse, unknown>} */
-    const query = useQuery({
+    const { data, ...rest } = useQuery({
         queryKey: [AUTH],
         queryFn: getUser,
         staleTime: Infinity,
         ...options,
     });
 
-    return query;
+    return { data: data?.user || {}, ...rest };
 };
 
 export default useAuth;
