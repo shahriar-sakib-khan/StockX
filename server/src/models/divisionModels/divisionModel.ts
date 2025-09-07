@@ -6,6 +6,7 @@ export interface IDivision extends Document {
 
   name: string;
   description?: string;
+  image?: string;
   divisionRoles: { name: string; permissions: string[]; _id?: Types.ObjectId }[];
   createdBy: Types.ObjectId;
 
@@ -18,6 +19,7 @@ const divisionSchema: Schema<IDivision> = new Schema(
     workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     name: { type: String, required: [true, 'Division name is required'], trim: true },
     description: { type: String, default: '' },
+    image: { type: String },
     divisionRoles: [{ name: { type: String, required: true }, permissions: [{ type: String }] }],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },

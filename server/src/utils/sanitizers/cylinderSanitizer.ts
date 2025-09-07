@@ -14,6 +14,7 @@ import { userSanitizer } from './userSanitizers';
 export const cylinderSanitizer = (cylinder: ICylinder | HydratedDocument<ICylinder>) => ({
   id: String(cylinder._id),
   name: cylinder.name,
+  image: cylinder.image,
   sku: cylinder.sku,
   count: cylinder.count,
   regulatorType: cylinder.regulatorType,

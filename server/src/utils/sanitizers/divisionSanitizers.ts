@@ -13,6 +13,7 @@ export const divisionSanitizer = (division: IDivision | HydratedDocument<IDivisi
   id: String(division._id),
   name: division.name,
   description: division.description ?? null,
+  image: division.image ?? null,
   workspace: resolveRef(division.workspace ?? null, workspaceSanitizer),
   createdBy: resolveRef(division.createdBy ?? null, userSanitizer),
   divisionRoles: division.divisionRoles ?? [],

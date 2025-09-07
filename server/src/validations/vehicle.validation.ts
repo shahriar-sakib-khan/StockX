@@ -3,14 +3,16 @@
  *
  * @description Validation schemas for vehicle operations.
  */
-import { txConstants } from '@/common';
 import { z } from 'zod';
+
+import { txConstants } from '@/common';
 
 /**
  * VehicleInputSchema
  * @property {string} regNumber - Required. Vehicle registration number.
  * @property {string} [vehicleBrand] - Optional. Vehicle brand name.
  * @property {string} [vehicleModel] - Optional. Vehicle model name.
+ * @property {string} [image] - Optional. Vehicle image URL.
  *
  * @description
  * Zod schema for creating or updating a vehicle.
@@ -21,6 +23,7 @@ export const VehicleInputSchema = z
     regNumber: z.string().min(1, { message: 'Registration number is required' }),
     vehicleBrand: z.string().optional(),
     vehicleModel: z.string().optional(),
+    image: z.string().optional(),
   })
   .strict();
 
@@ -28,21 +31,9 @@ export type VehicleInput = z.infer<typeof VehicleInputSchema>;
 
 /**
  * UpdateVehicleInputSchema
- * @property {string} [regNumber] - Optional. Vehicle registration number.
- * @property {string} [vehicleBrand] - Optional. Vehicle brand name.
- * @property {string} [vehicleModel] - Optional. Vehicle model name.
- *
- * @description
- * Zod schema for validating vehicle update input.
- * All fields are optional to allow partial updates.
+ * @description All fields are optional to support partial updates.
  */
-export const updateVehicleSchema = z
-  .object({
-    regNumber: z.string().min(1, { message: 'Registration number is required' }).optional(),
-    vehicleBrand: z.string().optional(),
-    vehicleModel: z.string().optional(),
-  })
-  .strict();
+export const updateVehicleSchema = VehicleInputSchema.partial();
 
 export type UpdateVehicleInput = z.infer<typeof updateVehicleSchema>;
 

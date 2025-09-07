@@ -1,5 +1,7 @@
 /**
- * @file Contains Zod validation schemas for authentication-related routes
+ * @module auth.validation
+ * 
+ * @description Validation schemas for user registration and login operations.
  */
 import { z } from 'zod';
 

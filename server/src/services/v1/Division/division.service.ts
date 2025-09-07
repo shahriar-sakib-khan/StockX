@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 import { Division, DivisionMembership } from '@/models';
-import { DivisionInput } from '@/validations/division.validation';
+import { division } from '@/validations';
 import { divisionSanitizers } from '@/utils';
 import { Errors } from '@/error';
 
@@ -9,14 +9,14 @@ import { Errors } from '@/error';
  * @function createDivision
  * @description Create a new division for the given workspace and user.
  *
- * @param {DivisionInput} userData - Division creation data.
+ * @param {division.DivisionInput} userData - Division creation data.
  * @param {string} workspaceId - The ID of the workspace to create the division in.
  * @param {string} userId - The ID of the user creating the division.
  * @returns {Promise<SanitizedDivision>} The newly created division document.
  * @throws {Error} If division name already exists.
  */
 const createDivision = async (
-  userData: DivisionInput,
+  userData: division.DivisionInput,
   userId: string,
   workspaceId: string
 ): Promise<divisionSanitizers.SanitizedDivision> => {
@@ -68,13 +68,13 @@ export const getSingleDivision = async (
  * @function updateDivision
  * @description Update a division by its ID.
  *
- * @param {DivisionInput} userData - Division update data.
+ * @param {division.UpdateDivisionInput} userData - Division update data.
  * @param {string} divisionId - The ID of the division to update.
  * @returns {Promise<SanitizedDivision>} The updated division document.
  * @throws {Error} If division is not found or division name already exists.
  */
 export const updateDivision = async (
-  userData: DivisionInput,
+  userData: division.UpdateDivisionInput,
   divisionId: string
 ): Promise<divisionSanitizers.SanitizedDivision> => {
   const { name, description } = userData;

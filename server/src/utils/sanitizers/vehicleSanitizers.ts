@@ -14,11 +14,12 @@ export const vehicleSanitizer = (vehicle: IVehicle | HydratedDocument<IVehicle>)
   regNumber: vehicle.regNumber,
   vehicleBrand: vehicle.vehicleBrand ?? null,
   vehicleModel: vehicle.vehicleModel ?? null,
-  workspace: resolveRef(vehicle.workspace ?? null, workspaceSanitizer),
-  division: resolveRef(vehicle.division ?? null, divisionSanitizer),
+  image: vehicle.image ?? null,
   totalFuelCost: vehicle.totalFuelCost,
   totalRepairCost: vehicle.totalRepairCost,
   createdAt: vehicle.createdAt,
+  workspace: resolveRef(vehicle.workspace ?? null, workspaceSanitizer),
+  division: resolveRef(vehicle.division ?? null, divisionSanitizer),
   updatedAt: vehicle.updatedAt,
 });
 

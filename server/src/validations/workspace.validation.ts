@@ -1,3 +1,8 @@
+/**
+ * @module workspace.validation
+ *
+ * @description Validation schemas for workspace operations.
+ */
 import { z } from 'zod';
 
 /**
@@ -28,6 +33,20 @@ export const workspaceSchema = z
 export type WorkspaceInput = z.infer<typeof workspaceSchema>;
 
 /**
+ * WorkspaceUpdateInput
+ * @description
+ * This schema extends WorkspaceInput with partial updates.
+ * All fields are optional to allow partial updates.
+ */
+export const workspaceUpdateSchema = workspaceSchema.partial();
+
+export type WorkspaceUpdateInput = z.infer<typeof workspaceUpdateSchema>;
+
+/**
+ * ----------------- Invite Validations -----------------
+ */
+
+/**
  * InviteInput
  * @property {string} email - Required. Must be a valid email format.
  *
@@ -41,6 +60,10 @@ export const inviteSchema = z
   })
   .strict();
 export type InviteInput = z.infer<typeof inviteSchema>;
+
+/**
+ * ----------------- Role Validations -----------------
+ */
 
 /**
  * RolesInput

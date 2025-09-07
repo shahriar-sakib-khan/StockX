@@ -7,7 +7,7 @@
 
 import { Types } from 'mongoose';
 
-import { Vehicle, IVehicle, Transaction } from '@/models';
+import { Vehicle, IVehicle, Transaction, ITransaction } from '@/models';
 import { Errors } from '@/error';
 import { vehicle } from '@/validations';
 import { transactionSanitizers, vehicleSanitizers } from '@/utils';
@@ -224,14 +224,19 @@ export const recordVehicleTransaction = async (
   const transaction = await transactionService.recordTransaction(userId, workspaceId, divisionId, {
     amount,
     category,
-    paymentMethod,
+    paymentMethod: paymentMethod !== null ? paymentMethod : undefined,
     counterpartyType: 'vehicle',
     vehicleId,
     ref,
     details,
   });
 
-  return { vehicle, transaction };
+  return {
+    vehicleDoc: vehicleSanitizers.vehicleSanitizer(vehicle),
+    transactionDoc: transactionSanitizers.transactionSanitizer(
+      transaction as unknown as ITransaction
+    ),
+  };
 };
 
 /**

@@ -1,3 +1,8 @@
+/**
+ * @module transaction.validation
+ * 
+ * @description Validation schemas for transaction operations.
+ */
 import z from 'zod';
 
 import { txConstants } from '@/common/constants';

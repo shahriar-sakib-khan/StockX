@@ -7,6 +7,7 @@ export interface IVehicle extends Document {
   regNumber: string;
   vehicleBrand?: string;
   vehicleModel?: string;
+  image?: string;
   totalFuelCost: number;
   totalRepairCost: number;
 
@@ -19,6 +20,7 @@ const vehicleSchema: Schema<IVehicle> = new Schema(
     workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
     division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     regNumber: { type: String, required: true },
+    image: { type: String },
     totalFuelCost: { type: Number, default: 0 },
     totalRepairCost: { type: Number, default: 0 },
     vehicleBrand: { type: String },

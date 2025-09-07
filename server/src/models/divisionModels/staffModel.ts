@@ -7,6 +7,7 @@ export interface IStaff extends Document {
   name: string;
   phone?: string;
   role?: string;
+  image?: string;
   salaryPlan?: {
     amount: number;
     cycle: 'monthly';
@@ -22,8 +23,9 @@ const staffSchema: Schema<IStaff> = new Schema(
     workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
     division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     name: { type: String, required: true },
-    phone: String,
-    role: String,
+    phone: { type: String },
+    role: { type: String },
+    image: { type: String },
     salaryPlan: {
       amount: Number,
       cycle: { type: String, enum: ['monthly'] },
@@ -38,7 +40,7 @@ const staffSchema: Schema<IStaff> = new Schema(
 staffSchema.methods.toJSON = function (): Partial<IStaff> {
   const obj = this.toObject();
   delete obj.__v;
-  
+
   return obj;
 };
 

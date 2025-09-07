@@ -6,10 +6,11 @@
  */
 
 import { Types } from 'mongoose';
-import { Store, IStore } from '@/models';
-import { Errors } from '@/error';
+import { Store } from '@/models';
 import { store } from '@/validations';
 import { storeSanitizers } from '@/utils';
+import { Errors } from '@/error';
+import { recordTransaction } from '../transaction/transaction.service';
 
 /**
  * @function createStore
@@ -25,7 +26,7 @@ export const createStore = async (
   workspaceId: string,
   divisionId: string
 ): Promise<storeSanitizers.SanitizedStore> => {
-  const { name, contactName, phone, address } = storeData;
+  const { name, contactName, image, phone, address } = storeData;
 
   // Check for duplicate name in the same division
   const existing = await Store.exists({
@@ -38,8 +39,10 @@ export const createStore = async (
   const newStore = await Store.create({
     name,
     contactName,
+    image,
     phone,
     address,
+    balance: 0,
     workspace: new Types.ObjectId(workspaceId),
     division: new Types.ObjectId(divisionId),
   });
@@ -77,14 +80,14 @@ export const getSingleStore = async (
  * @description Update store fields.
  *
  * @param {string} storeId - Store ID.
- * @param {Partial<IStore>} storeData - Fields to update.
+ * @param {store.UpdateStoreInput} storeData - Fields to update.
  * @param {string} workspaceId - Workspace ID.
  * @param {string} divisionId - Division ID.
  * @returns {Promise<storeSanitizers.SanitizedStore>} Updated store document.
  */
 export const updateStore = async (
   storeId: string,
-  storeData: Partial<IStore>,
+  storeData: store.UpdateStoreInput,
   workspaceId: string,
   divisionId: string
 ): Promise<storeSanitizers.SanitizedStore> => {
@@ -156,10 +159,37 @@ export const getAllStores = async (
       'contactName',
       'phone',
       'address',
+      'image',
     ]).stores,
     total,
   };
 };
+
+/**
+ * ----------------- Store Transactions -----------------
+ */
+
+// export const updateStoreBalance = async (
+//   storeId: string,
+//   amount: number
+// ): Promise<storeSanitizers.SanitizedStore & { transaction: ITransaction }> => {
+//   const newStore = await Store.findOneAndUpdate(
+//     { _id: storeId },
+//     { $inc: { balance: amount } },
+//     { new: true }
+//   ).lean();
+
+//   if (!newStore) throw new Errors.NotFoundError('Store not found');
+
+//   const transaction = await recordTransaction(
+//     // 'JFEO',
+//     // newStore.workspace,
+//     // newStore.division,
+//     // { amount, category: 'balance', paymentMethod: 'balance' }
+//   );
+
+//   return { ...storeSanitizers.storeSanitizer(newStore), transaction };
+// };
 
 /**
  * ----------------- Store Services (default export) -----------------

@@ -18,7 +18,7 @@ const router = Router({ mergeParams: true });
  */
 
 /**
- * ----------------- General Division Routes -----------------
+ * ----------------- Division CRUD -----------------
  */
 
 /**
@@ -103,7 +103,7 @@ router.get(
 router.post(
   '/:divisionId/members',
   divisionScope(['division_admin']),
-  validateRequest(division.divisionMemberSchema),
+  // validateRequest(division.divisionMemberSchema),
   divisionController.addMember
 );
 

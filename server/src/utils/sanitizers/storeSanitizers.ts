@@ -15,6 +15,8 @@ export const storeSanitizer = (store: IStore | HydratedDocument<IStore>) => ({
   contactName: store.contactName ?? null,
   phone: store.phone ?? null,
   address: store.address ?? null,
+  image: store.image ?? null,
+  balance: store.balance,
   workspace: resolveRef(store.workspace ?? null, workspaceSanitizer),
   division: resolveRef(store.division ?? null, divisionSanitizer),
   createdAt: store.createdAt,

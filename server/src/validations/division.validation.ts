@@ -1,9 +1,15 @@
+/**
+ * @module division.validation
+ * 
+ * @description Validation schemas for division operations.
+ */
 import z from 'zod';
 
 /**
  * DivisionInput
  * @property {string} name - Required. Must be between 3 and 50 characters.
  * @property {string} [description] - Optional. Must be less than 200 characters.
+ * @property {string} [image] - Optional. Must be a valid image URL.
  *
  * @description
  * Zod schema for division validation.
@@ -23,25 +29,22 @@ export const divisionInputSchema = z
       .string()
       .max(200, { message: 'Description must be less than 200 characters' })
       .optional(),
+    image: z.string().optional(),
   })
   .strict();
+  
 export type DivisionInput = z.infer<typeof divisionInputSchema>;
 
-/**
- * DivisionMemberInput
- * @property {string} memberIdentifier - Required. Must be a valid user identifier.
- *
- * @description
- * Zod schema for division member validation.
- * Validates user input on the server side to enforce business rules.
+/**UpdateDivision
+ * @description All fields are optional to support partial updates.
  */
-export const divisionMemberSchema = z
-  .object({
-    memberIdentifier: z.string().min(1, { message: 'User identifier is required' }),
-  })
-  .strict();
-export type DivisionMemberInput = z.infer<typeof divisionMemberSchema>;
+export const updateDivisionSchema = divisionInputSchema.partial();
 
+export type UpdateDivisionInput = z.infer<typeof updateDivisionSchema>;
+
+/**
+ * ----------------- Division Role Validations -----------------
+ */
 /**
  * DivisionRoleInput
  * @property {string} name - Required. Must be between 3 and 50 characters.
@@ -61,20 +64,7 @@ export type DivisionRoleInput = z.infer<typeof divisionRoleSchema>;
 
 /**
  * DivisionUpdateRoleInput
- * @property {string} [name] - Optional. Role name.
- * @property {string[]} [permissions] - Optional. At least one permission is required if provided.
- *
- * @description
- * Zod schema for division update role validation.
- * Validates user input on the server side to enforce business rules.
+ * @description All fields are optional to support partial updates.
  */
-export const divisionUpdateRoleSchema = z
-  .object({
-    name: z.string().min(1, { message: 'Role name is required' }).optional(),
-    permissions: z
-      .array(z.string())
-      .min(1, { message: 'At least one permission is required' })
-      .optional(),
-  })
-  .strict();
+export const divisionUpdateRoleSchema = divisionRoleSchema.partial();
 export type DivisionUpdateRoleInput = z.infer<typeof divisionUpdateRoleSchema>;

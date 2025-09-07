@@ -58,6 +58,14 @@ export const updateUserSchema = z
   .strict();
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 
+/**
+ * UpdateUserAdminInputSchema
+ * @description
+ * This schema extends UpdateUserInputSchema with additional admin-only fields.
+ * All fields are optional to allow partial updates.
+ *
+ * @property {string} [role] - Optional. Must be one of the defined super roles.
+ */
 export const updateUserAdminSchema = updateUserSchema
   .extend({
     role: z.enum(roleConstants.SuperRoles).optional(),
@@ -66,4 +74,5 @@ export const updateUserAdminSchema = updateUserSchema
     // lastLogin: z.date().optional(),
   })
   .strict();
+
 export type UpdateUserAdminInput = z.infer<typeof updateUserAdminSchema>;

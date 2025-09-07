@@ -8,6 +8,7 @@ export interface IStore extends Document {
   contactName?: string;
   phone?: string;
   address?: string;
+  image?: string;
   balance: number; // quick-access, + they owe you (AR), - you owe them (AP)
 
   createdAt: Date;
@@ -22,6 +23,7 @@ const storeSchema: Schema<IStore> = new Schema(
     contactName: { type: String },
     phone: { type: String },
     address: { type: String },
+    image: { type: String },
     balance: { type: Number, default: 0 },
   },
   { timestamps: true }

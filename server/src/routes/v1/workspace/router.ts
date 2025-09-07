@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { workspaceScope, validateRequest } from '@/middlewares';
 import { workspaceController } from '@/controllers/v1';
 import { workspace } from '@/validations';
-import divisionRouter from './division/division.router';
+import divisionRouter from './division/router';
 
 const router = Router();
 
@@ -69,34 +69,7 @@ router.get('/:workspaceId/profile', workspaceScope(), workspaceController.myWork
  * ----------------- Workspace Member Routes -----------------
  */
 
-/**
- * @route   GET /workspace/:workspaceId/members
- * @desc    Get all members in a workspace
- * @access  Member/Admin
- */
-router.get('/:workspaceId/members', workspaceScope(), workspaceController.allMembers);
 
-/**
- * @route   GET /workspace/:workspaceId/members/:memberId
- * @desc    Get a single member in a workspace
- * @access  Admin
- */
-router.get(
-  '/:workspaceId/members/:memberId',
-  workspaceScope(['admin']),
-  workspaceController.getMember
-);
-
-/**
- * @route   DELETE /workspace/:workspaceId/members/:memberId
- * @desc    Remove a member from the workspace
- * @access  Admin
- */
-router.delete(
-  '/:workspaceId/members/:memberId',
-  workspaceScope(['admin']),
-  workspaceController.removeMember
-);
 
 /**
  * ----------------- Workspace Invite Routes -----------------
