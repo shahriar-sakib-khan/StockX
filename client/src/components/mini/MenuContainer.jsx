@@ -16,11 +16,14 @@ export default function MenuContainer({
 
     // close on outside click
     useClickOutside(
-        menuRef, // pass ref
+        // pass reference
+        menuRef,
+        // pass click handler
         () => {
             if (isOpen) onClose?.();
-        }, // pass handler
-        !backdrop && !!isOpen, // pass permission
+        },
+        // pass permission to use handler
+        !backdrop && !!isOpen,
     );
 
     return (
@@ -29,10 +32,16 @@ export default function MenuContainer({
             {trigger}
 
             {/* Backdrop */}
-            {backdrop && isOpen && (
+            {backdrop && (
                 <div
                     onClick={onClose}
-                    className={`fixed inset-0 z-[90] ${backdropColor}`}
+                    className={clsx(
+                        "fixed inset-0 z-[90] transition-opacity duration-300 ease-in-out",
+                        backdropColor,
+                        isOpen
+                            ? "pointer-events-auto opacity-100"
+                            : "pointer-events-none opacity-0",
+                    )}
                     aria-hidden="true"
                 />
             )}

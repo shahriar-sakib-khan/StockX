@@ -1,17 +1,25 @@
+// @ts-check
 import { useQuery } from "@tanstack/react-query";
 import { getUser } from "../features/authentication/services/authServices";
+import { AUTH } from "../constants/queryKeys";
 
-export const AUTH = "user";
+/** @typedef {import("@/types/auth").GetUserResponse} GetUserResponse */
+/** @typedef {import("@/constants/queryKeys").QueryKey} QueryKey */
 
-const useAuth = (options = {}) => {
+/**
+ * Custom hook to fetch the currently authenticated user.
+ * @param {Partial<import("@tanstack/react-query").UseQueryOptions<GetUserResponse, unknown, GetUserResponse, [QueryKey]>>} [options] - Optional query options
+ */
+const useAuth = (options) => {
+    /** @type {import("@tanstack/react-query").UseQueryResult<GetUserResponse, unknown>} */
     const { data, ...rest } = useQuery({
         queryKey: [AUTH],
         queryFn: getUser,
-        staleTime: Infinity, // keep cached indefinitely
+        staleTime: Infinity,
         ...options,
     });
 
-    return { data, ...rest };
+    return { data: data?.user || {}, ...rest };
 };
 
 export default useAuth;

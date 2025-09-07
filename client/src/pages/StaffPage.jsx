@@ -14,7 +14,7 @@ export default function StaffPage() {
             lastPaidDate: "12 August, 2025",
         },
         {
-            id: Date.now(),
+            id: Date.now() + 1,
             name: "Sakib bro",
             role: "Friend",
             salary: "18,000/-",

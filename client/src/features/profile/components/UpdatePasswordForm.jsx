@@ -1,4 +1,4 @@
-import { FormInputField } from "../../../components";
+import { FormInputField } from "@/components";
 
 export default function UpdatePasswordForm() {
     return (

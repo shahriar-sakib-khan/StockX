@@ -1,4 +1,4 @@
-import DefaultImage from "../../../assets/images/user_icon.jpeg";
+import DefaultImage from "@/assets/images/user_icon.jpeg";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
 export default function StaffCard({ staffMember, onDelete }) {

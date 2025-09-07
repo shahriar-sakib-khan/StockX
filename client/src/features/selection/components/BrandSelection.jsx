@@ -1,24 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import SelectionCard from "./SelectionCard";
 import { useEffect, useState } from "react";
-import {
-    useDivisionBrands,
-    useSaveSelectedDivisionBrands,
-} from "../../../hooks/useBrand";
-import { divisionId, workspaceId } from "../../../utils/IDS";
-import brandLogo from "../../../assets/images/bashundhara.webp";
+import { useBrands, useSaveSelectedBrands } from "@/hooks/brandHooks";
+import brandLogo from "@/assets/images/bashundhara.webp";
+import { divisionId, workspaceId } from "@/constants/ids";
 
 export default function BrandSelection() {
     const navigate = useNavigate();
 
     // Fetch brands
-    const { data: allBrands = [], isLoading: loadingAll } = useDivisionBrands(
+    const { data: allBrands = [], isLoading: loadingAll } = useBrands(
         workspaceId,
         divisionId,
     );
 
-    const { mutate: saveBrands, isLoading: isSaving } =
-        useSaveSelectedDivisionBrands(workspaceId, divisionId);
+    const { mutate: saveBrands, isLoading: isSaving } = useSaveSelectedBrands(
+        workspaceId,
+        divisionId,
+    );
 
     // Local draft: [{id, isActive}]
     const [draftBrands, setDraftBrands] = useState([]);
@@ -33,9 +32,9 @@ export default function BrandSelection() {
         }
     }, [allBrands]);
 
-    useEffect(() => {
-        console.log(draftBrands);
-    }, [draftBrands]);
+    // useEffect(() => {
+    //     console.log(draftBrands);
+    // }, [draftBrands]);
 
     // Toggle one brand
     const toggleSingleBrand = (id) => {

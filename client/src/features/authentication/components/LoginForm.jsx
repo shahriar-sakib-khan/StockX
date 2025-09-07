@@ -1,9 +1,9 @@
-import { Button, Divider, FormInputField } from "../../../components";
+import { Button, Divider, FormInputField } from "@/components";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/authServices";
-import useInput from "../../../hooks/useInput";
-import { useAuthStore } from "../../../stores/useAuthStore";
+import useInput from "@/hooks/useInput";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { FcGoogle as GoogleIcon } from "react-icons/fc";
 
 export default function LoginForm() {

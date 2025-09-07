@@ -1,5 +1,5 @@
 import QuickActionCard from "./QuickActionCard";
-import images from "../../../assets/nav_icons/Images";
+import images from "@/assets/nav_icons/Images";
 import { Section } from "../utils/Section";
 import { Heading } from "../utils/Heading";
 

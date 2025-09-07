@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+// helper function
 const getLocalValue = (key, initialValue) => {
     // SSR (e.g. Next.js)
     if (typeof window === "undefined") return initialValue;

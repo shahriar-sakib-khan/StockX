@@ -1,4 +1,4 @@
-import pfp from "../../../assets/images/user_icon.jpeg";
+import pfp from "@/assets/images/user_icon.jpeg";
 
 export default function Profile({ data, toggleEditOpen = () => {} }) {
     const { username, firstName, lastName, email, address } = data?.user || {};

@@ -1,15 +1,12 @@
 import { useEffect } from "react";
-import {
-    getDetailedDivisionBrands,
-    getDivisionBrands,
-} from "../services/brandServices";
-import { divisionId, workspaceId } from "../../../utils/IDS";
+import { getDetailedBrands, getBrands } from "../services/brandServices";
+import { divisionId, workspaceId } from "@/constants/ids";
 
 export default function TestBrands() {
     useEffect(() => {
         async function fetchBrands() {
             try {
-                const data = await getDivisionBrands(workspaceId, divisionId);
+                const data = await getBrands(workspaceId, divisionId);
 
                 console.log("Server response:", data);
             } catch (err) {
@@ -17,10 +14,7 @@ export default function TestBrands() {
             }
 
             try {
-                const dataD = await getDetailedDivisionBrands(
-                    workspaceId,
-                    divisionId,
-                );
+                const dataD = await getDetailedBrands(workspaceId, divisionId);
 
                 console.log("Server response2:", dataD);
             } catch (err) {
@@ -29,7 +23,7 @@ export default function TestBrands() {
         }
 
         fetchBrands();
-    }, [workspaceId, divisionId]);
+    }, []);
 
     return (
         <div className="rounded border bg-gray-50 p-4">

@@ -3,7 +3,7 @@ import { MdExpandMore as ExpandIcon } from "react-icons/md";
 import { IoAdd as AddIcon } from "react-icons/io5";
 import { useUIStore } from "../../stores/useUIStore";
 import { pagesConfig } from "../../pages/utils/pagesConfig";
-import MenuContainer from "./MenuContainer";
+import MenuContainer from "../mini/MenuContainer";
 
 export default function DivisionMenu() {
     const navigate = useNavigate();
@@ -51,7 +51,7 @@ export default function DivisionMenu() {
                 </button>
             }
         >
-            <section className="flex min-w-50 gap-2 border-b border-gray-300 p-2">
+            <section className="flex min-w-50 gap-2 border-b border-gray-200 p-2">
                 <span className="rounded bg-gray-300 p-5"></span>
                 <div className="flex flex-col gap-0">
                     <span className="text-base font-semibold text-gray-700">
@@ -80,7 +80,7 @@ export default function DivisionMenu() {
                     }}
                 />
             </section>
-            <section className="flex flex-col border-t border-gray-300 p-2 text-gray-600">
+            <section className="flex flex-col border-t border-gray-200 p-2 text-gray-600">
                 <button className="flex items-center rounded-sm px-2 py-1 text-start hover:bg-gray-100">
                     <AddIcon className="mr-2 size-7 rounded bg-gray-100 p-1 text-lg" />{" "}
                     Create Division
