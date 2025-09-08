@@ -22,7 +22,7 @@ const router = Router({ mergeParams: true });
  */
 
 /**
- * @route   POST /:workspaceId/divisions
+ * @route   POST /workspace/:workspaceId/divisions
  * @desc    Create a new division within a workspace
  * @access  Admin (workspace)
  */
@@ -34,21 +34,21 @@ router.post(
 );
 
 /**
- * @route   GET /:workspaceId/divisions
+ * @route   GET /workspace/:workspaceId/divisions
  * @desc    Get all divisions in the workspace
  * @access  Authenticated (workspace)
  */
 router.get('/', workspaceScope(), divisionController.allDivisions);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId
+ * @route   GET /workspace/:workspaceId/divisions/:divisionId
  * @desc    Get a single division by ID
  * @access  Authenticated (division)
  */
 router.get('/:divisionId', divisionScope(), divisionController.singleDivision);
 
 /**
- * @route   PUT /:workspaceId/divisions/:divisionId
+ * @route   PUT /workspace/:workspaceId/divisions/:divisionId
  * @desc    Update a division
  * @access  Admin (division)
  */
@@ -60,14 +60,14 @@ router.put(
 );
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId
+ * @route   DELETE /workspace/:workspaceId/divisions/:divisionId
  * @desc    Delete a division
  * @access  Admin (division)
  */
 router.delete('/:divisionId', divisionScope(['division_admin']), divisionController.deleteDivision);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/profile
+ * @route   GET /workspace/:workspaceId/divisions/:divisionId/profile
  * @desc    Get current user’s profile in a division (roles, permissions)
  * @access  Authenticated (division)
  */
@@ -78,14 +78,14 @@ router.get('/:divisionId/profile', divisionScope(), divisionController.myDivisio
  */
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/members
+ * @route   GET /workspace/:workspaceId/divisions/:divisionId/members
  * @desc    Get all members of a division
  * @access  Authenticated
  */
 router.get('/:divisionId/members', divisionScope(), divisionController.allMembers);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/members/:memberId
+ * @route   GET /workspace/:workspaceId/divisions/:divisionId/members/:memberId
  * @desc    Get a single member of a division
  * @access  Admin (division)
  */
@@ -96,24 +96,24 @@ router.get(
 );
 
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/members
+ * @route   POST /workspace/:workspaceId/divisions/:divisionId/members/:memberId
  * @desc    Add a member to the division
  * @access  Admin (division)
  */
 router.post(
-  '/:divisionId/members',
+  '/:divisionId/members/:memberId',
   divisionScope(['division_admin']),
   // validateRequest(division.divisionMemberSchema),
   divisionController.addMember
 );
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId/members
+ * @route   DELETE /workspace/:workspaceId/divisions/:divisionId/members/:memberId
  * @desc    Remove a member from the division
  * @access  Admin (division)
  */
 router.delete(
-  '/:divisionId/members',
+  '/:divisionId/members/:memberId',
   divisionScope(['division_admin']),
   divisionController.removeMember
 );
@@ -123,14 +123,14 @@ router.delete(
  */
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/roles
+ * @route   GET /workspace/:workspaceId/divisions/:divisionId/roles
  * @desc    Get all roles defined in the division
  * @access  Admin (division)
  */
 router.get('/:divisionId/roles', divisionScope(['division_admin']), divisionController.getRoles);
 
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/roles
+ * @route   POST /workspace/:workspaceId/divisions/:divisionId/roles
  * @desc    Add a new role to the division
  * @access  Admin (division)
  */
@@ -142,7 +142,7 @@ router.post(
 );
 
 /**
- * @route   PUT /:workspaceId/divisions/:divisionId/roles/:roleId
+ * @route   PUT /workspace/:workspaceId/divisions/:divisionId/roles/:roleId
  * @desc    Update a division role
  * @access  Admin (division)
  */
@@ -154,7 +154,7 @@ router.put(
 );
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId/roles/:roleId
+ * @route   DELETE /workspace/:workspaceId/divisions/:divisionId/roles/:roleId
  * @desc    Remove a division role
  * @access  Admin (division)
  */
@@ -169,7 +169,7 @@ router.delete(
  */
 
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/roles/:userId/assign/:roleId
+ * @route   POST /workspace/:workspaceId/divisions/:divisionId/roles/:userId/assign/:roleId
  * @desc    Assign a role to a user in the division
  * @access  Admin (division)
  */
@@ -180,7 +180,7 @@ router.post(
 );
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId/roles/:userId/unassign/:roleId
+ * @route   DELETE /workspace/:workspaceId/divisions/:divisionId/roles/:userId/unassign/:roleId
  * @desc    Unassign a role from a user in the division
  * @access  Admin (division)
  */
@@ -191,12 +191,23 @@ router.delete(
 );
 
 /**
- * ----------------- Division Sub-Routes -----------------
+ * ----------------- Division Vehicle Sub-Routes -----------------
  */
-
-router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
-router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
 router.use('/:divisionId/vehicles', divisionScope(), vehicleRouter);
+
+/**
+ * ----------------- Division Store Sub-Routes -----------------
+ */
 router.use('/:divisionId/stores', divisionScope(), storeRouter);
+
+/**
+ * ----------------- Division Inventory Sub-Routes -----------------
+ */
+router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
+
+/**
+ * ----------------- Division Transaction Sub-Routes -----------------
+ */
+router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
 
 export default router;

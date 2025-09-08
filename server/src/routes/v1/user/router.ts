@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { userController } from '@/controllers/v1';
 import { validateRequest } from '@/middlewares';
 import { user } from '@/validations';
+import userInviteRouter from './userInvite.router';
 
 /**
  * @swagger
@@ -29,5 +30,10 @@ router.get('/me', userController.getCurrentUser);
  * @access  Private
  */
 router.patch('/me', validateRequest(user.updateUserSchema), userController.updateUser);
+
+/**
+ * ----------------- User Invite Sub-routes -----------------
+ */
+router.use('/invites', userInviteRouter);
 
 export default router;

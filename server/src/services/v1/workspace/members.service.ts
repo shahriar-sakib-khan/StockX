@@ -1,77 +1,160 @@
-import { HydratedDocument } from 'mongoose';
+import { Types } from 'mongoose';
 
+import { Membership, Workspace } from '@/models';
+import { workspaceMembershipSanitizers } from '@/utils';
 import { Errors } from '@/error';
-import { IUser, Membership } from '@/models';
-import { workspaceSanitizers } from '@/utils';
 
 /**
  * All active workspace members.
  *
- * @param {string} workspaceId - Workspace's ID.
+ * @param {string} workspaceId - Workspace ID.
  * @param {number} page - Page number.
  * @param {number} limit - Number of items per page.
- * @returns {Promise<HydratedDocument<IUser>[]>} List of active user of this workspaces.
+ * @returns {Promise<SanitizedUsers & { total: number }>} List of active user of this workspaces.
  */
 export const getAllWorkspaceMembers = async (
-  workspaceId: string,
   page: number,
-  limit: number
-): Promise<{ members: { user: HydratedDocument<IUser>; roles: string[] }[]; total: number }> => {
+  limit: number,
+  workspaceId: string
+): Promise<workspaceMembershipSanitizers.SanitizedMemberships & { total: number }> => {
   const total: number = await Membership.countDocuments({
-    workspace: workspaceId,
+    workspace: new Types.ObjectId(workspaceId),
     status: 'active',
   });
 
-  if (total === 0) return { members: [], total };
+  if (total === 0) return { memberships: [], total };
 
   const skip: number = (page - 1) * limit;
   const memberships = await Membership.find({ workspace: workspaceId, status: 'active' })
     .skip(skip)
     .limit(limit)
-    .populate('user', 'username email');
+    .populate('user', 'username email')
+    .lean();
 
-  const members = memberships.map(m => ({
-    user: m.user as unknown as HydratedDocument<IUser>,
-    roles: m.workspaceRoles,
-  }));
-
-  return { members, total };
+  return {
+    memberships: workspaceMembershipSanitizers.allMembershipSanitizer(memberships, [
+      'id',
+      'user',
+      'workspaceRoles',
+    ]).memberships,
+    total,
+  };
 };
 
 export const getWorkspaceMember = async (
   workspace: string,
   memberId: string
-): Promise<workspaceSanitizers.SanitizedMembership> => {
-  const member = await Membership.findOne({ workspace, user: memberId }).populate(
-    'user',
-    'username email'
-  );
-  if (!member) throw new Errors.BadRequestError('Member does not exist.');
+): Promise<workspaceMembershipSanitizers.SanitizedMembership> => {
+  const member = await Membership.findOne({
+    workspace: new Types.ObjectId(workspace),
+    user: new Types.ObjectId(memberId),
+  })
+    .populate('user', 'username email')
+    .lean();
 
-  return workspaceSanitizers.membershipSanitizer(member);
+  if (!member) throw new Errors.BadRequestError('Membership does not exist.');
+
+  return workspaceMembershipSanitizers.membershipSanitizer(member);
 };
 
 /**
  * Remove a member from a workspace.
  *
- * @param {string} workspace - Workspace's ID.
- * @param {string} memberId - Member's ID.
- * @returns {Promise<workspaceSanitizers.SanitizedMembership>} Sanitized workspace member.
+ * @param {string} workspace - Workspace ID.
+ * @param {string} memberId - Member ID.
+ * @returns {Promise<workspaceMembershipSanitizers.SanitizedMembership>} Sanitized workspace member.
  */
 export const removeWorkspaceMember = async (
   userId: string,
   workspace: string,
   memberId: string
-): Promise<workspaceSanitizers.SanitizedMembership> => {
+): Promise<workspaceMembershipSanitizers.SanitizedMembership> => {
   if (userId === memberId) throw new Errors.BadRequestError('You cannot remove yourself.');
 
-  const member = await Membership.findOneAndDelete({ workspace, user: memberId }).populate(
-    'user',
-    'username email'
-  );
+  const member = await Membership.findOneAndDelete({ workspace, user: memberId })
+    .populate('user', 'username email')
+    .lean();
+
   if (!member) throw new Errors.BadRequestError('Member does not exist.');
 
-  return workspaceSanitizers.membershipSanitizer(member);
+  return workspaceMembershipSanitizers.membershipSanitizer(member);
 };
 
-export default { getAllWorkspaceMembers, getWorkspaceMember, removeWorkspaceMember };
+/**
+ * ----------------- Workspace Member Roles Assignments -----------------
+ */
+
+/**
+ * Assigns a role to a user in the workspace.
+ *
+ * @param {string} workspaceId - Workspace ID.
+ * @param {string} memberId - Member ID.
+ * @param {string} roleId - Role ID.
+ * @returns {Promise<SanitizedMembership>} Sanitized membership.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const assignRoleToUser = async (
+  workspaceId: string,
+  memberId: string,
+  roleId: string
+): Promise<workspaceMembershipSanitizers.SanitizedMembership> => {
+  const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  const role = workspace.workspaceRoles.find(r => r._id?.equals(roleId));
+  if (!role) throw new Errors.NotFoundError('Role not found in workspace');
+
+  const membership = await Membership.findOneAndUpdate(
+    { user: memberId, workspace: workspaceId },
+    { $addToSet: { workspaceRoles: role.name } },
+    { new: true }
+  )
+    .populate('user', 'username email')
+    .lean();
+
+  if (!membership) throw new Errors.NotFoundError('Membership not found');
+
+  return workspaceMembershipSanitizers.membershipSanitizer(membership);
+};
+
+/**
+ * Unassign a role from a user in the workspace.
+ *
+ * @param {string} workspaceId - Workspace ID.
+ * @param {string} memberId - Member ID.
+ * @param {string} roleId - Role ID.
+ * @returns {Promise<SanitizedMembership>} Sanitized membership.
+ * @throws {Errors.NotFoundError} If workspace not found.
+ */
+export const unassignRoleFromUser = async (
+  workspaceId: string,
+  memberId: string,
+  roleId: string
+): Promise<workspaceMembershipSanitizers.SanitizedMembership> => {
+  const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
+  if (!workspace) throw new Errors.NotFoundError('Workspace not found');
+
+  const role = workspace.workspaceRoles.find(r => r._id?.equals(roleId));
+  if (!role) throw new Errors.NotFoundError('Role not found in workspace');
+
+  const membership = await Membership.findOneAndUpdate(
+    { user: memberId, workspace: workspaceId },
+    { $pull: { workspaceRoles: role.name } },
+    { new: true }
+  )
+    .populate('user', 'username email')
+    .lean();
+
+  if (!membership) throw new Errors.NotFoundError('Membership not found');
+
+  return workspaceMembershipSanitizers.membershipSanitizer(membership);
+};
+
+export default {
+  getAllWorkspaceMembers,
+  getWorkspaceMember,
+  removeWorkspaceMember,
+
+  assignRoleToUser,
+  unassignRoleFromUser,
+};

@@ -9,19 +9,13 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { userService } from '@/services/v1';
+import { inviteService, userService } from '@/services/v1';
 import { assertAuth } from '@/common';
 
 /**
  * ----------------- User CRUD -----------------
  */
 
-/**
- * @function getCurrentUser
- * @desc Retrieves the current authenticated user by ID and returns sanitized user data.
- * @route GET /api/v1/user/me
- * @access Private
- */
 export const getCurrentUser = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
@@ -31,12 +25,6 @@ export const getCurrentUser = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ user });
 };
 
-/**
- * @function updateUser
- * @desc Updates the current authenticated user's allowed profile fields and returns sanitized updated user.
- * @route PATCH /api/v1/user/me
- * @access Private
- */
 export const updateUser = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
@@ -49,9 +37,57 @@ export const updateUser = async (req: Request, res: Response) => {
 };
 
 /**
+ * ----------------- User Invites -----------------
+ */
+
+export const myInvites = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+  const { invites, total } = await inviteService.getAllMyInvites(userId, page, limit);
+
+  res.status(StatusCodes.OK).json({ total, page, limit, invites });
+};
+
+export const acceptInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { token } = req.params;
+
+  const invite = await inviteService.acceptWorkspaceInvite(token, userId);
+
+  res.status(StatusCodes.OK).json({
+    message: 'Invite accepted successfully',
+    invite,
+  });
+};
+
+export const declineInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { token } = req.params;
+
+  const invite = await inviteService.declineWorkspaceInvite(token, userId);
+
+  res.status(StatusCodes.OK).json({
+    message: 'Invite declined successfully',
+    invite,
+  });
+};
+
+/**
  * ----------------- Default export (user controllers) -----------------
  */
 export default {
+  // User CRUD
   getCurrentUser, // Fetches current user by ID, returns sanitized user object
   updateUser, // Updates allowed fields of current user, validates email, returns sanitized user
+
+  // User Invites
+  myInvites, // Fetches current user's invites, returns sanitized invites
+  acceptInvite, // Accepts invite, returns sanitized invite
+  declineInvite, // Declines invite, returns sanitized invite
 };

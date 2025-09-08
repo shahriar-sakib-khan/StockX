@@ -1,12 +1,14 @@
 import { HydratedDocument } from 'mongoose';
 
 import { ICylinder } from '@/models';
-import resolveRef from './resolveRef';
-import listSanitizer from './listSanitizer';
-import { localBrandSanitizer } from './brandSanitizers';
-import { workspaceSanitizer } from './workspaceSanitizers';
-import { divisionSanitizer } from './divisionSanitizers';
-import { userSanitizer } from './userSanitizers';
+import {
+  resolveRef,
+  listSanitizer,
+  userSanitizer,
+  workspaceSanitizer,
+  divisionSanitizer,
+  localBrandSanitizer,
+} from '@/utils/sanitizers';
 
 /**
  * ----------------- Cylinder -----------------

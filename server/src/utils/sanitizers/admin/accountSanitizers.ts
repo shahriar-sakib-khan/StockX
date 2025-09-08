@@ -1,10 +1,12 @@
 import { HydratedDocument } from 'mongoose';
 
 import { IAccount } from '@/models';
-import resolveRef from './resolveRef';
-import listSanitizer from './listSanitizer';
-import { workspaceSanitizer } from './workspaceSanitizers';
-import { divisionSanitizer } from './divisionSanitizers';
+import {
+  resolveRef,
+  listSanitizer,
+  workspaceSanitizer,
+  divisionSanitizer,
+} from '@/utils/sanitizers';
 
 /**
  * ----------------- Account -----------------

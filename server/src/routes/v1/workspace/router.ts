@@ -3,6 +3,8 @@ import { Router } from 'express';
 import { workspaceScope, validateRequest } from '@/middlewares';
 import { workspaceController } from '@/controllers/v1';
 import { workspace } from '@/validations';
+import workspaceMemberRouter from './member.router';
+import workspaceInviteRouter from './invite.router';
 import divisionRouter from './division/router';
 
 const router = Router();
@@ -66,60 +68,6 @@ router.delete('/:workspaceId', workspaceScope(['admin']), workspaceController.de
 router.get('/:workspaceId/profile', workspaceScope(), workspaceController.myWorkspaceProfile);
 
 /**
- * ----------------- Workspace Member Routes -----------------
- */
-
-
-
-/**
- * ----------------- Workspace Invite Routes -----------------
- */
-
-/**
- * @route   POST /workspace/:workspaceId/invites/send
- * @desc    Send a workspace invite to a user
- * @access  Admin
- */
-router.post(
-  '/:workspaceId/invites/send',
-  workspaceScope(['admin']),
-  validateRequest(workspace.inviteSchema),
-  workspaceController.sendInvite
-);
-
-/**
- * @route   GET /workspace/:workspaceId/invites
- * @desc    Get all invites sent for a workspace
- * @access  Admin
- */
-router.get('/:workspaceId/invites', workspaceScope(['admin']), workspaceController.allInvites);
-
-/**
- * @route   PUT /workspace/invites/:token/accept
- * @desc    Accept a workspace invite
- * @access  Public (via token)
- */
-router.put('/invites/:token/accept', workspaceController.acceptInvite);
-
-/**
- * @route   PUT /workspace/invites/:token/decline
- * @desc    Decline a workspace invite
- * @access  Public (via token)
- */
-router.put('/invites/:token/decline', workspaceController.declineInvite);
-
-/**
- * @route   DELETE /workspace/:workspaceId/invites/:token
- * @desc    Delete a sent invite from a workspace
- * @access  Admin
- */
-router.delete(
-  '/:workspaceId/invites/:token',
-  workspaceScope(['admin']),
-  workspaceController.deleteInvite
-);
-
-/**
  * ----------------- Workspace Role Routes -----------------
  */
 
@@ -166,39 +114,17 @@ router.delete(
 );
 
 /**
- * ----------------- Role Assignment Routes -----------------
+ * ----------------- Workspace Member Sub-Routes -----------------
  */
+router.use('/:workspaceId/members', workspaceScope(), workspaceMemberRouter);
 
 /**
- * @route   POST /workspace/:workspaceId/roles/:userId/assign/:roleId
- * @desc    Assign a custom role to a user in the workspace
- * @access  Admin
+ * ----------------- Workspace Invite Sub-Routes -----------------
  */
-router.post(
-  '/:workspaceId/roles/:userId/assign/:roleId',
-  workspaceScope(['admin']),
-  workspaceController.assignRole
-);
+router.use('/:workspaceId/invites', workspaceScope(['admin']), workspaceInviteRouter);
 
 /**
- * @route   DELETE /workspace/:workspaceId/roles/:userId/unassign/:roleId
- * @desc    Unassign a custom role from a user in the workspace
- * @access  Admin
- */
-router.delete(
-  '/:workspaceId/roles/:userId/unassign/:roleId',
-  workspaceScope(['admin']),
-  workspaceController.unassignRole
-);
-
-/**
- * ----------------- Workspace Sub-Routes -----------------
- */
-
-/**
- * @route   api/v1/workspace/:workspaceId/divisions
- * @desc    Division routes nested under workspace
- * @access  All (Belongs to workspace)
+ * ----------------- Workspace Division Sub-Routes -----------------
  */
 router.use('/:workspaceId/divisions', workspaceScope(), divisionRouter);
 

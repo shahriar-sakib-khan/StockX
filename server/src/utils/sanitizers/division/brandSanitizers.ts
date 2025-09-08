@@ -1,11 +1,13 @@
 import { HydratedDocument } from 'mongoose';
 
 import { IGlobalBrand, ILocalBrand } from '@/models';
-import resolveRef from './resolveRef';
-import listSanitizer from './listSanitizer';
-import { divisionSanitizer } from './divisionSanitizers';
-import { workspaceSanitizer } from './workspaceSanitizers';
-import { userSanitizer } from './userSanitizers';
+import {
+  resolveRef,
+  listSanitizer,
+  userSanitizer,
+  workspaceSanitizer,
+  divisionSanitizer,
+} from '@/utils/sanitizers';
 
 /**
  * ----------------- Global Brand -----------------

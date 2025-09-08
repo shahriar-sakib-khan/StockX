@@ -11,12 +11,6 @@ export const DefaultWorkspaceRoles = ['user', 'moderator', 'manager', 'admin'] a
 export type DefaultWorkspaceRoleType = (typeof DefaultWorkspaceRoles)[number]; // "user" | "moderator" | "manager" | "admin"
 
 /**
- * Workspace status — scoped per workspace instance
- */
-export const WorkspaceStatuses = ['active', 'invited'] as const;
-export type WorkspaceStatusType = (typeof WorkspaceStatuses)[number]; // "active" | "invited" | "pending"
-
-/**
  * Permissions map per workspace role
  * Use "*" as wildcard to allow all permissions
  */

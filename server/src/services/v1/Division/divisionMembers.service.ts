@@ -1,6 +1,15 @@
+/**
+ * @module divisionMembers
+ * @description Services for division members
+ */
+
+import { Division, DivisionMembership } from '@/models';
+import { divisionMembershipSanitizers } from '@/utils';
 import { Errors } from '@/error';
-import { Division, DivisionMembership, Membership, User } from '@/models';
-import { divisionSanitizers } from '@/utils';
+
+/**
+ * ----------------- Division Members CRUD -----------------
+ */
 
 /**
  * @function getDivisionMembers
@@ -10,18 +19,14 @@ import { divisionSanitizers } from '@/utils';
  * @param {string} workspaceId - The ID of the workspace the division is in.
  * @param {number} page - The page number for pagination.
  * @param {number} limit - The number of members to retrieve per page.
- * @returns {Promise<SanitizedDivisionMembers & { total: number }>} An array of user documents.
+ * @returns {Promise<SanitizedDivisionMemberships & { total: number }>} An array of user documents.
  */
 export const getAllDivisionMembers = async (
-  divisionId: string,
-  workspaceId: string,
   page: number,
-  limit: number
-): Promise<divisionSanitizers.SanitizedDivisionMembers & { total: number }> => {
-  // Check if division exists
-  const divisionExist = await Division.exists({ _id: divisionId, workspace: workspaceId });
-  if (!divisionExist) throw new Errors.NotFoundError('Division not found');
-
+  limit: number,
+  workspaceId: string,
+  divisionId: string
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMemberships & { total: number }> => {
   // Check if division has members
   const total: number = await DivisionMembership.countDocuments({
     division: divisionId,
@@ -30,7 +35,6 @@ export const getAllDivisionMembers = async (
   });
   if (total === 0) return { members: [], total };
 
-  // Get all members of the division
   const skip: number = (page - 1) * limit;
   const members = await DivisionMembership.find({
     division: divisionId,
@@ -40,10 +44,17 @@ export const getAllDivisionMembers = async (
     .skip(skip)
     .limit(limit)
     .populate('user', 'username email')
-    .populate('invitedBy', 'username')
     .lean();
 
-  return { members: divisionSanitizers.divisionMembersSanitizer(members).members, total };
+  return {
+    members: divisionMembershipSanitizers.allDivisionMembershipSanitizer(members, [
+      'id',
+      'user',
+      'divisionRoles',
+      'addedBy',
+    ]).members,
+    total,
+  };
 };
 
 /**
@@ -57,11 +68,10 @@ export const getAllDivisionMembers = async (
  * @throws {NotFoundError} If the division membership is not found.
  */
 export const getSingleDivisionMember = async (
-  memberId: string,
+  workspaceId: string,
   divisionId: string,
-  workspaceId: string
-): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
-  // Check if member exists
+  memberId: string
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMembership> => {
   const divisionMembership = await DivisionMembership.findOne({
     user: memberId,
     division: divisionId,
@@ -70,104 +80,81 @@ export const getSingleDivisionMember = async (
     .populate('user', 'username email')
     .lean();
 
-  if (!divisionMembership) throw new Errors.NotFoundError('Member not found');
+  if (!divisionMembership) throw new Errors.NotFoundError('Division member not found');
 
-  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionMembershipSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 /**
  * @function addMemberToDivision
  * @description Add a member to a division.
  *
- * @param {string} memberIdentifier - The ID of the user to add to the division.
+ * @param {string} userId - The ID of the user who added the member.
  * @param {string} workspaceId - The ID of the workspace the division is in.
  * @param {string} divisionId - The ID of the division to add the user to.
- * @param {string} invitedBy - The ID of the user who invited the member.
+ * @param {string} memberId - The ID of the user to add to the division.
  * @returns {Promise<SanitizedDivisionMembership>} The created division membership document.
  * @throws {BadRequestError} If the user is not or already a member of the workspace .
  */
 export const addMemberToDivision = async (
-  memberIdentifier: string,
+  userId: string,
   workspaceId: string,
   divisionId: string,
-  invitedBy: string
-): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
-  // Check if the member identifier is an email or user ID
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberIdentifier);
-  const memberId = isEmail
-    ? await User.findOne({ email: memberIdentifier }).select('_id').lean()
-    : memberIdentifier;
-
-  // Check if user is a member of the workspace
-  const isWorkspaceMember = await Membership.exists({
-    user: memberId,
-    workspace: workspaceId,
-    status: 'active',
-  });
-  if (!isWorkspaceMember)
-    throw new Errors.BadRequestError('User is not a member of this workspace');
-
-  // Check if user is already a member of the division
-  const existingMembership = await DivisionMembership.exists({
+  memberId: string
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMembership> => {
+  const existingMember = await DivisionMembership.exists({
     user: memberId,
     division: divisionId,
     workspace: workspaceId,
-    status: 'active',
-  });
-  if (existingMembership)
-    throw new Errors.BadRequestError('User already a member of this division');
+  }).lean();
+  if (existingMember) throw new Errors.BadRequestError('User is already a member of the division.');
 
   const divisionMembership = await DivisionMembership.create({
     user: memberId,
     division: divisionId,
     workspace: workspaceId,
     divisionRoles: ['division_member'],
-    status: 'active',
-    invitedBy,
+    addedBy: userId,
   });
 
-  await divisionMembership.populate('user', 'username email');
-
-  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionMembershipSanitizers.divisionMembershipSanitizer(divisionMembership);
 };
 
 /**
  * @function removeMemberFromDivision
  * @description Remove a member from a division.
  *
- * @param {string} memberIdentifier - The ID of the user to remove from the division.
- * @param {string} workspaceId - The ID of the workspace the division is in.
- * @param {string} divisionId - The ID of the division to remove the user from.
+ * @param {string} userId - The ID of the user who removed the member.
+ * @param {string} workspace - The ID of the workspace the division is in.
+ * @param {string} division - The ID of the division to remove the user from.
+ * @param {string} memberId - The ID of the user to remove from the division.
  * @returns {Promise<SanitizedDivisionMembership>} The removed division membership document.
+ * @throws {BadRequestError} If the user is not or already a member of the workspace .
  */
 export const removeMemberFromDivision = async (
-  memberIdentifier: string,
-  workspaceId: string,
-  divisionId: string
-): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
-  // Check if the member identifier is an email or user ID
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberIdentifier);
-  const memberId = isEmail
-    ? await User.findOne({ email: memberIdentifier }).select('_id').lean()
-    : memberIdentifier;
+  userId: string,
+  workspace: string,
+  division: string,
+  memberId: string
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMembership> => {
+  if (userId === memberId) throw new Errors.BadRequestError('You cannot remove yourself.');
 
-  //Delete the division membership
-  const divisionMembership = await DivisionMembership.findOneAndDelete({
-    user: memberId,
-    workspace: workspaceId,
-    division: divisionId,
-  })
+  const member = await DivisionMembership.findOneAndDelete({ workspace, division, user: memberId })
     .populate('user', 'username email')
     .lean();
 
-  if (!divisionMembership) throw new Errors.UnauthorizedError('Not a member of this division');
+  if (!member) throw new Errors.BadRequestError('Not a member of the division.');
 
-  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionMembershipSanitizers.divisionMembershipSanitizer(member);
 };
 
+/**
+ * ----------------- Division Members Services (default export) -----------------
+ */
 export default {
   getAllDivisionMembers,
   getSingleDivisionMember,
+
   addMemberToDivision,
   removeMemberFromDivision,
 };

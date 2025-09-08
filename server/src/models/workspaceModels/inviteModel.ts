@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
+import { constants } from '@/common/constants';
+
 export interface IInvite extends Document {
   workspace: Types.ObjectId;
 
@@ -7,7 +9,7 @@ export interface IInvite extends Document {
   user?: Types.ObjectId | null;
   role: string;
   invitedBy: Types.ObjectId;
-  status: 'pending' | 'sent' | 'accepted' | 'declined' | 'expired';
+  status: constants.InviteStatusType;
   token: string;
   expiresAt: Date;
 
@@ -17,33 +19,12 @@ export interface IInvite extends Document {
 
 const inviteSchema = new Schema<IInvite>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    workspace: {
-      type: Schema.Types.ObjectId,
-      ref: 'Workspace',
-      required: true,
-    },
-    role: {
-      type: String,
-      required: true,
-    },
-    invitedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'sent', 'accepted', 'declined', 'expired'],
-      default: 'pending',
-    },
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    email: { type: String, required: true },
+    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
+    role: { type: String, required: true },
+    invitedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    status: { type: String, enum: constants.InviteStatus, default: 'pending' },
     token: { type: String, required: true },
     expiresAt: { type: Date, required: true },
   },

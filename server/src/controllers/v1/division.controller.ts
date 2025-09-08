@@ -101,15 +101,16 @@ export const myDivisionProfile = async (req: Request, res: Response) => {
 // <============================> Division Members Controllers <============================>
 
 export const allMembers = async (req: Request, res: Response) => {
+  const { workspaceId, divisionId } = req.params;
+
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const { divisionId, workspaceId } = req.params;
 
   const { members, total } = await divisionMembersService.getAllDivisionMembers(
-    divisionId,
-    workspaceId,
     page,
-    limit
+    limit,
+    workspaceId,
+    divisionId
   );
 
   res.status(StatusCodes.OK).json({ total, page, limit, members });
@@ -119,9 +120,9 @@ export const getMember = async (req: Request, res: Response) => {
   const { memberId, divisionId, workspaceId } = req.params;
 
   const member = await divisionMembersService.getSingleDivisionMember(
-    memberId,
+    workspaceId,
     divisionId,
-    workspaceId
+    memberId
   );
 
   res.status(StatusCodes.OK).json({ member });
@@ -129,32 +130,60 @@ export const getMember = async (req: Request, res: Response) => {
 
 export const addMember = async (req: Request, res: Response) => {
   assertAuth(req);
-
   const { userId } = req.user;
-  const { workspaceId, divisionId } = req.params;
-  const { memberIdentifier } = req.body;
+  const { workspaceId, divisionId, memberId } = req.params;
 
   const member = await divisionMembersService.addMemberToDivision(
-    memberIdentifier,
+    userId,
     workspaceId,
     divisionId,
-    userId
+    memberId
   );
 
   res.status(StatusCodes.CREATED).json({ message: 'Member added successfully', member });
 };
 
 export const removeMember = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId } = req.params;
-  const { memberIdentifier } = req.body;
+  assertAuth(req);
+  const { userId } = req.user;
+  const { workspaceId, divisionId, memberId } = req.params;
 
   const member = await divisionMembersService.removeMemberFromDivision(
-    memberIdentifier,
+    userId,
     workspaceId,
-    divisionId
+    divisionId,
+    memberId
   );
 
   res.status(StatusCodes.OK).json({ message: 'Member removed successfully', member });
+};
+
+// <============================> Role Assignment Controllers <============================>
+
+export const assignRole = async (req: Request, res: Response) => {
+  const { roleId, userId, workspaceId, divisionId } = req.params;
+
+  const divisionMember = await divisionRolesService.assignRoleToUser(
+    roleId,
+    userId,
+    divisionId,
+    workspaceId
+  );
+
+  res.status(StatusCodes.CREATED).json({ message: 'Role assigned successfully', divisionMember });
+};
+
+export const unassignRole = async (req: Request, res: Response) => {
+  const { roleId, userId, workspaceId, divisionId } = req.params;
+
+  const divisionMember = await divisionRolesService.unassignRoleFromUser(
+    roleId,
+    userId,
+    divisionId,
+    workspaceId
+  );
+
+  res.status(StatusCodes.OK).json({ message: 'Role unassigned successfully', divisionMember });
 };
 
 // <============================> Division Roles Controllers <============================>
@@ -214,34 +243,6 @@ export const removeRole = async (req: Request, res: Response) => {
   });
 };
 
-// <============================> Role Assignment Controllers <============================>
-
-export const assignRole = async (req: Request, res: Response) => {
-  const { roleId, userId, workspaceId, divisionId } = req.params;
-
-  const divisionMember = await divisionRolesService.assignRoleToUser(
-    roleId,
-    userId,
-    divisionId,
-    workspaceId
-  );
-
-  res.status(StatusCodes.CREATED).json({ message: 'Role assigned successfully', divisionMember });
-};
-
-export const unassignRole = async (req: Request, res: Response) => {
-  const { roleId, userId, workspaceId, divisionId } = req.params;
-
-  const divisionMember = await divisionRolesService.unassignRoleFromUser(
-    roleId,
-    userId,
-    divisionId,
-    workspaceId
-  );
-
-  res.status(StatusCodes.OK).json({ message: 'Role unassigned successfully', divisionMember });
-};
-
 // <============================> Default Export <============================>
 
 export default {
@@ -257,11 +258,11 @@ export default {
   addMember,
   removeMember,
 
+  assignRole,
+  unassignRole,
+
   getRoles,
   addRole,
   updateRole,
   removeRole,
-
-  assignRole,
-  unassignRole,
 };

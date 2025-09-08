@@ -1,7 +1,7 @@
 import { HydratedDocument } from 'mongoose';
 
 import { IUser } from '@/models';
-import listSanitizer from './listSanitizer';
+import { listSanitizer } from '@/utils/sanitizers';
 
 /**
  * ----------------- User Sanitizer -----------------
@@ -12,7 +12,7 @@ export const userSanitizer = (user: IUser | HydratedDocument<IUser>) => ({
   lastName: user.lastName,
   email: user.email,
   username: user.username,
-  address: user.address ?? null,
+  address: user.address,
   role: user.role,
 });
 export type SanitizedUser = ReturnType<typeof userSanitizer>;
@@ -23,7 +23,7 @@ export const adminUserSanitizer = (user: IUser | HydratedDocument<IUser>) => ({
   lastName: user.lastName,
   email: user.email,
   username: user.username,
-  address: user.address ?? null,
+  address: user.address,
   role: user.role,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,

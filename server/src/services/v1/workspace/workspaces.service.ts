@@ -10,6 +10,7 @@ import { IWorkspace, Membership, Workspace } from '@/models';
 import { WorkspaceInput } from '@/validations/workspace.validation';
 import { Errors } from '@/error';
 import { workspaceSanitizers } from '@/utils';
+import { workspaceMembershipSanitizers } from '@/utils/sanitizers';
 
 /**
  * @function createWorkspace
@@ -69,14 +70,15 @@ export const getAllWorkspaces = async (
   const memberships = await Membership.find({ user: userId, status: 'active' })
     .skip(skip)
     .limit(limit)
-    .populate<{ workspace: HydratedDocument<IWorkspace> }>('workspace');
+    .populate<{ workspace: HydratedDocument<IWorkspace> }>('workspace')
+    .lean();
 
-  const workspaces = memberships.map(m => m.workspace as HydratedDocument<IWorkspace>);
+  const allWorkspaces = memberships.map(m => m.workspace as HydratedDocument<IWorkspace>);
 
   const total: number = await Membership.countDocuments({ user: userId, status: 'active' });
 
   return {
-    workspaces: workspaceSanitizers.allWorkspaceSanitizer(workspaces, ['id', 'name']).workspaces,
+    workspaces: workspaceSanitizers.allWorkspaceSanitizer(allWorkspaces, ['id', 'name']).workspaces,
     total,
   };
 };
@@ -158,7 +160,7 @@ export const deleteWorkspace = async (
 export const getMyWorkspaceProfile = async (
   userId: string,
   workspaceId: string
-): Promise<workspaceSanitizers.SanitizedMembership> => {
+): Promise<workspaceMembershipSanitizers.SanitizedMembership> => {
   const membership = await Membership.findOne({ user: userId, workspace: workspaceId })
     .populate('workspace', 'name')
     .populate('user', 'username email')
@@ -166,7 +168,7 @@ export const getMyWorkspaceProfile = async (
 
   if (!membership) throw new Errors.NotFoundError('Not a member of the workspace');
 
-  return workspaceSanitizers.membershipSanitizer(membership);
+  return workspaceMembershipSanitizers.membershipSanitizer(membership);
 };
 
 export default {

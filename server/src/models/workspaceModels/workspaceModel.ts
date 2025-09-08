@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
+
 import Membership from './membershipModel';
 
 export interface IWorkspace extends Document {
@@ -16,21 +17,9 @@ const workspaceSchema: Schema<IWorkspace> = new Schema(
       unique: true,
       trim: true,
     },
-    description: {
-      type: String,
-      default: '',
-    },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    workspaceRoles: [
-      {
-        name: { type: String, required: true },
-        permissions: [{ type: String }],
-      },
-    ],
+    description: { type: String, default: '' },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    workspaceRoles: [{ name: { type: String, required: true }, permissions: [{ type: String }] }],
   },
   { timestamps: true }
 );

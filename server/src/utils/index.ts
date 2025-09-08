@@ -5,14 +5,13 @@ export * as Tokens from './token.util.js';
 export {
   userSanitizers,
   workspaceSanitizers,
+  workspaceMembershipSanitizers,
   divisionSanitizers,
-  
+  divisionMembershipSanitizers,
   brandSanitizers,
   cylinderSanitizers,
-
   vehicleSanitizers,
   storeSanitizers,
-
   transactionSanitizers,
   accountSanitizers,
   txCategorySanitizers,

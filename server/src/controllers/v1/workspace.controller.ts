@@ -1,5 +1,5 @@
 /**
- * Workspace Controller
+ * ----------------- Workspace Controller -----------------
  *
  * Handles all logic for workspace CRUD, members, invites, roles, and role assignments.
  *
@@ -9,12 +9,12 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { workspaceService, membersService, rolesService, invitesService } from '@/services/v1';
-import { assertAuth } from '@/common/assertions';
+import { workspaceService, memberService, roleService, inviteService } from '@/services/v1';
+import { assertAuth } from '@/common';
 
-// ---------------------------
-// Workspace CRUD
-// ---------------------------
+/**
+ * ----------------- Workspace CRUD -----------------
+ */
 
 export const createWorkspace = async (req: Request, res: Response) => {
   assertAuth(req);
@@ -30,10 +30,10 @@ export const createWorkspace = async (req: Request, res: Response) => {
 
 export const myWorkspaces = async (req: Request, res: Response) => {
   assertAuth(req);
+  const { userId } = req.user;
 
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const { userId } = req.user;
 
   const { workspaces, total } = await workspaceService.getAllWorkspaces(userId, page, limit);
 
@@ -80,56 +80,16 @@ export const myWorkspaceProfile = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ workspaceProfile });
 };
 
-// ---------------------------
-// Workspace Members
-// ---------------------------
-
-export const allMembers = async (req: Request, res: Response) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const { workspaceId } = req.params;
-
-  const { members, total } = await membersService.getAllWorkspaceMembers(workspaceId, page, limit);
-
-  res.status(StatusCodes.OK).json({
-    total,
-    page,
-    limit,
-    workspaceMembers: members,
-  });
-};
-
-export const getMember = async (req: Request, res: Response) => {
-  const { workspaceId, memberId } = req.params;
-
-  const member = await membersService.getWorkspaceMember(workspaceId, memberId);
-
-  res.status(StatusCodes.OK).json({ member });
-};
-
-export const removeMember = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-  const { workspaceId, memberId } = req.params;
-
-  const member = await membersService.removeWorkspaceMember(userId, workspaceId, memberId);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Member removed successfully',
-    member,
-  });
-};
-
-// ---------------------------
-// Workspace Invites
-// ---------------------------
+/**
+ * ----------------- Workspace Invites -----------------
+ */
 
 export const sendInvite = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
-  const { workspace } = req.membership;
+  const { workspaceId } = req.params;
 
-  const invite = await invitesService.sendWorkspaceInvite(req.body, userId, workspace);
+  const invite = await inviteService.sendWorkspaceInvite(req.body, userId, workspaceId);
 
   res.status(StatusCodes.OK).json({
     message: 'Invite sent successfully',
@@ -137,52 +97,31 @@ export const sendInvite = async (req: Request, res: Response) => {
   });
 };
 
-export const acceptInvite = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-
-  const invite = await invitesService.acceptWorkspaceInvite(req.params.token, userId);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Invite accepted successfully',
-    invite,
-  });
-};
-
-export const declineInvite = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-  const { token } = req.params;
-
-  const invite = await invitesService.declineWorkspaceInvite(token, userId);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Invite declined successfully',
-    invite,
-  });
-};
-
 export const allInvites = async (req: Request, res: Response) => {
-  assertAuth(req);
+  const { workspaceId } = req.params;
 
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const { workspace } = req.membership;
 
-  const { SanitizedWorkspaceInvites: allInvites, total } = await invitesService.getAllInvites(
-    workspace,
-    page,
-    limit
-  );
+  const { invites, total } = await inviteService.getAllInvites(workspaceId, page, limit);
 
-  res.status(StatusCodes.OK).json({ total, page, limit, allInvites });
+  res.status(StatusCodes.OK).json({ total, page, limit, invites });
+};
+
+export const singleInvite = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { inviteId } = req.params;
+
+  const invite = await inviteService.getSingleInvite(inviteId);
+
+  res.status(StatusCodes.OK).json({ invite });
 };
 
 export const deleteInvite = async (req: Request, res: Response) => {
   assertAuth(req);
-  const { token } = req.params;
+  const { inviteId } = req.params;
 
-  const invite = await invitesService.deleteWorkspaceInvite(token);
+  const invite = await inviteService.deleteWorkspaceInvite(inviteId);
 
   res.status(StatusCodes.OK).json({
     message: 'Invitation deleted successfully',
@@ -190,14 +129,85 @@ export const deleteInvite = async (req: Request, res: Response) => {
   });
 };
 
-// ---------------------------
-// Workspace Roles
-// ---------------------------
+/**
+ * ----------------- Workspace Members -----------------
+ */
+
+export const allMembers = async (req: Request, res: Response) => {
+  const { workspaceId } = req.params;
+
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+  const { memberships, total } = await memberService.getAllWorkspaceMembers(
+    page,
+    limit,
+    workspaceId
+  );
+
+  res.status(StatusCodes.OK).json({
+    total,
+    page,
+    limit,
+    members: memberships,
+  });
+};
+
+export const getMember = async (req: Request, res: Response) => {
+  const { workspaceId, memberId } = req.params;
+
+  const membership = await memberService.getWorkspaceMember(workspaceId, memberId);
+
+  res.status(StatusCodes.OK).json({ member: membership });
+};
+
+export const removeMember = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { workspaceId, memberId } = req.params;
+
+  const member = await memberService.removeWorkspaceMember(userId, workspaceId, memberId);
+
+  res.status(StatusCodes.OK).json({
+    message: 'Member removed successfully',
+    member,
+  });
+};
+
+/**
+ * ----------------- Roles Assignments -----------------
+ */
+
+export const assignRole = async (req: Request, res: Response) => {
+  const { workspaceId, memberId, roleId } = req.params;
+
+  const membership = await memberService.assignRoleToUser(workspaceId, memberId, roleId);
+
+  res.status(StatusCodes.OK).json({
+    message: 'Role assigned successfully',
+    membership,
+  });
+};
+
+export const unassignRole = async (req: Request, res: Response) => {
+  const { workspaceId, memberId, roleId } = req.params;
+
+  const membership = await memberService.unassignRoleFromUser(workspaceId, memberId, roleId);
+
+  res.status(StatusCodes.OK).json({
+    message: 'Role unassigned successfully',
+    membership,
+  });
+};
+
+/**
+ * ----------------- Workspace Roles -----------------
+ */
 
 export const allRoles = async (req: Request, res: Response) => {
   const { workspaceId } = req.params;
 
-  const workspaceRoles = await rolesService.getWorkspaceRoles(workspaceId);
+  const workspaceRoles = await roleService.getWorkspaceRoles(workspaceId);
   const totalRoles = workspaceRoles.length;
 
   res.status(StatusCodes.OK).json({ totalRoles, workspaceRoles });
@@ -206,7 +216,7 @@ export const allRoles = async (req: Request, res: Response) => {
 export const addRole = async (req: Request, res: Response) => {
   const { workspaceId } = req.params;
 
-  const workspaceRoles = await rolesService.addWorkspaceRole(req.body, workspaceId);
+  const workspaceRoles = await roleService.addWorkspaceRole(req.body, workspaceId);
 
   res.status(StatusCodes.OK).json({
     message: 'Role added successfully',
@@ -217,7 +227,7 @@ export const addRole = async (req: Request, res: Response) => {
 export const updateRole = async (req: Request, res: Response) => {
   const { workspaceId, roleId } = req.params;
 
-  const workspaceRoles = await rolesService.updateWorkspaceRole(req.body, roleId, workspaceId);
+  const workspaceRoles = await roleService.updateWorkspaceRole(req.body, roleId, workspaceId);
 
   res.status(StatusCodes.OK).json({
     message: 'Role updated successfully',
@@ -228,7 +238,7 @@ export const updateRole = async (req: Request, res: Response) => {
 export const removeRole = async (req: Request, res: Response) => {
   const { workspaceId, roleId } = req.params;
 
-  const workspaceRoles = await rolesService.removeWorkspaceRole(roleId, workspaceId);
+  const workspaceRoles = await roleService.removeWorkspaceRole(roleId, workspaceId);
 
   res.status(StatusCodes.OK).json({
     message: 'Role removed successfully',
@@ -236,55 +246,37 @@ export const removeRole = async (req: Request, res: Response) => {
   });
 };
 
-export const assignRole = async (req: Request, res: Response) => {
-  const { userId, roleId, workspaceId } = req.params;
-
-  const membership = await rolesService.assignRoleToUser(userId, roleId, workspaceId);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Role assigned successfully',
-    membership,
-  });
-};
-
-export const unassignRole = async (req: Request, res: Response) => {
-  const { userId, roleId, workspaceId } = req.params;
-
-  const membership = await rolesService.unassignRoleFromUser(userId, roleId, workspaceId);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Role unassigned successfully',
-    membership,
-  });
-};
-
-// ---------------------------
-// Exports
-// ---------------------------
+/**
+ * ----------------- Default export (workspace controllers) -----------------
+ */
 
 export default {
-  createWorkspace,
-  myWorkspaces,
-  singleWorkspace,
-  updateWorkspace,
-  deleteWorkspace,
-  myWorkspaceProfile,
+  // Workspace CRUD
+  createWorkspace, // Create new workspace
+  myWorkspaces, // List all workspaces for current user
+  singleWorkspace, // Get single workspace details
+  updateWorkspace, // Update workspace details
+  deleteWorkspace, // Delete workspace
+  myWorkspaceProfile, // Get current user's profile within a workspace
 
-  allMembers,
-  getMember,
-  removeMember,
+  // Workspace Invites
+  sendInvite, // Send workspace invite
+  allInvites, // List all invites in a workspace
+  singleInvite, // Get details of a single invite
+  deleteInvite, // Delete an invite
 
-  sendInvite,
-  acceptInvite,
-  declineInvite,
-  allInvites,
-  deleteInvite,
+  // Workspace Members
+  allMembers, // List all members of a workspace
+  getMember, // Get details of a single member
+  removeMember, // Remove a member from a workspace
 
-  allRoles,
-  addRole,
-  updateRole,
-  removeRole,
+  // Roles Assignments
+  assignRole, // Assign role to a member
+  unassignRole, // Remove role from a member
 
-  assignRole,
-  unassignRole,
+  // Workspace Roles
+  allRoles, // List all workspace roles
+  addRole, // Add new role
+  updateRole, // Update role details
+  removeRole, // Delete a role
 };

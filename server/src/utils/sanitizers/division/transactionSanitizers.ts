@@ -1,14 +1,16 @@
 import { HydratedDocument } from 'mongoose';
 
 import { ITransaction } from '@/models';
-import resolveRef from './resolveRef';
-import listSanitizer from './listSanitizer';
-import { workspaceSanitizer } from './workspaceSanitizers';
-import { divisionSanitizer } from './divisionSanitizers';
-import { userSanitizer } from './userSanitizers';
-import { vehicleSanitizer } from './vehicleSanitizers';
-import { storeSanitizer } from './storeSanitizers';
-import { accountSanitizer } from './accountSanitizers';
+import {
+  resolveRef,
+  listSanitizer,
+  userSanitizer,
+  workspaceSanitizer,
+  divisionSanitizer,
+  accountSanitizer,
+  vehicleSanitizer,
+  storeSanitizer,
+} from '@/utils/sanitizers';
 
 /**
  * ----------------- Transaction -----------------

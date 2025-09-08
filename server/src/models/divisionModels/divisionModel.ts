@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+
 import DivisionMembership from './divisionMembershipModel';
 
 export interface IDivision extends Document {

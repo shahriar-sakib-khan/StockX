@@ -56,7 +56,12 @@ export type WorkspaceUpdateInput = z.infer<typeof workspaceUpdateSchema>;
  */
 export const inviteSchema = z
   .object({
-    email: z.string().email({ message: 'Invalid email format' }),
+    email: z.email({ message: 'Invalid email format' }),
+    // role: z
+    //   .enum(roleConstants.DefaultWorkspaceRoles, {
+    //     message: 'Invalid role provided',
+    //   })
+    //   .optional(),
   })
   .strict();
 export type InviteInput = z.infer<typeof inviteSchema>;

@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 import { Division, DivisionMembership } from '@/models';
 import { division } from '@/validations';
-import { divisionSanitizers } from '@/utils';
+import { divisionMembershipSanitizers, divisionSanitizers } from '@/utils';
 import { Errors } from '@/error';
 
 /**
@@ -134,9 +134,12 @@ export const getAllDivisions = async (
   if (total === 0) return { divisions: [], total };
 
   const skip: number = (page - 1) * limit;
-  const divisions = await Division.find({ workspace: workspaceId }).skip(skip).limit(limit).lean();
+  const allDivisions = await Division.find({ workspace: workspaceId })
+    .skip(skip)
+    .limit(limit)
+    .lean();
 
-  return { divisions: divisionSanitizers.allDivisionSanitizer(divisions).divisions, total };
+  return { divisions: divisionSanitizers.allDivisionSanitizer(allDivisions).divisions, total };
 };
 
 /**
@@ -152,7 +155,7 @@ export const getMyDivisionProfile = async (
   userId: string,
   divisionId: string,
   workspaceId: string
-): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMembership> => {
   const division = await DivisionMembership.findOne({
     user: userId,
     division: divisionId,
@@ -164,7 +167,7 @@ export const getMyDivisionProfile = async (
     .lean();
   if (!division) throw new Errors.NotFoundError('Division not found');
 
-  return divisionSanitizers.divisionMembershipSanitizer(division);
+  return divisionMembershipSanitizers.divisionMembershipSanitizer(division);
 };
 
 export default {

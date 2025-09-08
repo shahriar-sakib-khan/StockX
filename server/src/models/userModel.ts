@@ -21,45 +21,13 @@ export interface IUser extends Document {
 
 const userSchema: Schema<IUser> = new Schema(
   {
-    firstName: {
-      type: String,
-      default: '',
-    },
-
-    lastName: {
-      type: String,
-      default: '',
-    },
-
-    username: {
-      type: String,
-      required: [true, 'Username is required'],
-      unique: true,
-    },
-
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      lowercase: true,
-    },
-
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      select: false,
-    },
-
-    address: {
-      type: String,
-      default: '',
-    },
-
-    role: {
-      type: String,
-      enum: roleConstants.SuperRoles,
-      default: 'user',
-    },
+    firstName: { type: String, default: '' },
+    lastName: { type: String, default: '' },
+    username: { type: String, required: [true, 'Username is required'], unique: true },
+    email: { type: String, required: [true, 'Email is required'], unique: true, lowercase: true },
+    password: { type: String, required: [true, 'Password is required'], select: false },
+    address: { type: String, default: '' },
+    role: { type: String, enum: roleConstants.SuperRoles, default: 'user' },
   },
   { timestamps: true }
 );
