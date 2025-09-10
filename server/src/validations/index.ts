@@ -6,3 +6,4 @@ export * as transaction from './transaction.validation';
 
 export * as vehicle from './vehicle.validation';
 export * as store from './store.validation';
+export * as staff from './staff.validation';

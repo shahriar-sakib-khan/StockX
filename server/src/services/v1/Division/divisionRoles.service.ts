@@ -1,128 +1,160 @@
+/**
+ * @module divisionRoles.service
+ *
+ * @description Services for managing roles within a specific division.
+ * Handles adding, updating, removing, and assigning roles to users.
+ */
+
+import { Types } from 'mongoose';
+
 import { Division, DivisionMembership } from '@/models';
+import { division } from '@/validations';
+import { divisionMembershipSanitizers, roleSanitizers } from '@/utils/sanitizers';
 import { Errors } from '@/error';
-import { DivisionRoleInput, DivisionUpdateRoleInput } from '@/validations/division.validation';
-import { divisionSanitizers } from '@/utils';
 
 /**
  * @function getDivisionRoles
  * @description Get all roles for a division.
  *
  * @param {string} divisionId - The ID of the division to retrieve roles for.
- * @returns {Promise<{ name: string; permissions: string[] }[]>} An array of role objects.
+ * @returns {Promise<roleSanitizers.SanitizedRoles>} Sanitized roles list.
+ * @throws {NotFoundError} If division not found.
  */
-export const getDivisionRoles = async (
-  divisionId: string
-): Promise<{ name: string; permissions: string[] }[]> => {
-  const division = await Division.findById(divisionId).select('divisionRoles').lean();
+const getDivisionRoles = async (divisionId: string): Promise<roleSanitizers.SanitizedRoles> => {
+  const divisionDoc = await Division.findById(divisionId).select('divisionRoles').lean();
+  if (!divisionDoc) throw new Errors.NotFoundError('Division not found');
 
-  if (!division) throw new Error('Division not found');
-
-  return division.divisionRoles;
+  return roleSanitizers.allRolesSanitizer(
+    divisionDoc.divisionRoles as unknown as roleSanitizers.IRole[]
+  );
 };
 
 /**
  * @function addRoleToDivision
- * @description Add a role to a division.
+ * @description Add a new role to a division.
  *
- * @param {DivisionRoleInput} role - The name of the role to add.
- * @param {string} divisionId - The ID of the division to add the role to.
- * @returns {Promise<{ name: string; permissions: string[]}[] >} The updated division document.
+ * @param {division.divisionRoleInputSchema} roleData - Role creation data.
+ * @param {string} divisionId - Division ID.
+ * @returns {Promise<roleSanitizers.SanitizedRoles>} Updated roles list with total count.
+ * @throws {NotFoundError} If division not found.
  */
-export const addRoleToDivision = async (
-  role: DivisionRoleInput,
+const addRoleToDivision = async (
+  roleData: division.DivisionRoleInput,
   divisionId: string
-): Promise<{ name: string; permissions: string[] }[]> => {
-  const division = await Division.findById(divisionId).select('divisionRoles');
+): Promise<roleSanitizers.SanitizedRoles> => {
+  const { name, permissions } = roleData;
 
-  if (!division) throw new Error('Division not found');
+  const divisionDoc = await Division.findById(divisionId);
+  if (!divisionDoc) throw new Errors.NotFoundError('Division not found');
 
-  if (division.divisionRoles.find(r => r.name === role.name))
-    throw new Error('Role already exists');
+  // Check for duplicate role name
+  const isDuplicate = divisionDoc.divisionRoles.some(
+    role => role.name.toLowerCase() === name.toLowerCase()
+  );
+  if (isDuplicate) throw new Errors.BadRequestError('Role with this name already exists');
 
-  division.divisionRoles.push(role);
-  division.save();
+  divisionDoc.divisionRoles.push({
+    name,
+    permissions: permissions ?? [],
+    _id: new Types.ObjectId(),
+  });
 
-  return division.divisionRoles;
+  await divisionDoc.save();
+
+  return roleSanitizers.allRolesSanitizer(
+    divisionDoc.divisionRoles as unknown as roleSanitizers.IRole[]
+  );
 };
 
 /**
  * @function updateRoleInDivision
- * @description Update a role in a division.
+ * @description Update an existing role's name or permissions in a division.
  *
- * @param {DivisionRoleInput} role - The name of the role to update.
- * @param {string} roleId - The ID of the role to update.
- * @param {string} divisionId - The ID of the division to update the role in.
- * @returns {Promise<{ name: string; permissions: string[]}, { name: string; permissions: string[] }[] >} The updated division document.
+ * @param {division.divisionRoleInputSchema} roleData - Role update data.
+ * @param {string} divisionId - Division ID.
+ * @param {string} roleId - Role ID.
+ * @returns {Promise<{ roleToUpdate: SanitizedRole; divisionRoles: SanitizedRoles;}>} Updated role and full list.
+ * @throws {NotFoundError} If division or role not found.
  */
-export const updateRoleInDivision = async (
-  role: DivisionUpdateRoleInput,
-  roleId: string,
-  divisionId: string
+const updateRoleInDivision = async (
+  roleData: division.DivisionRoleInput,
+  divisionId: string,
+  roleId: string
 ): Promise<{
-  roleToUpdate: { name: string; permissions: string[] };
-  divisionRoles: { name: string; permissions: string[] }[];
+  roleToUpdate: roleSanitizers.SanitizedRole;
+  divisionRoles: roleSanitizers.SanitizedRoles;
 }> => {
-  const division = await Division.findById(divisionId).select('divisionRoles');
+  const divisionDoc = await Division.findById(divisionId);
+  if (!divisionDoc) throw new Errors.NotFoundError('Division not found');
 
-  if (!division) throw new Error('Division not found');
+  const role = divisionDoc.divisionRoles.find(r => r?._id?.equals(roleId));
+  if (!role) throw new Errors.NotFoundError('Role not found');
 
-  const roleToUpdate = division.divisionRoles.find(r => r._id?.toString() === roleId);
+  // Validate duplicate name if updating role name
+  if (roleData.name && roleData.name !== role.name) {
+    const duplicate = divisionDoc.divisionRoles.some(
+      r => r.name.toLowerCase() === roleData.name.toLowerCase() && !r._id?.equals(roleId)
+    );
+    if (duplicate) throw new Errors.BadRequestError('Another role with this name already exists');
+  }
 
-  if (!roleToUpdate) throw new Error('Role not found');
+  role.name = roleData.name ?? role.name;
+  role.permissions = roleData.permissions ?? role.permissions;
 
-  if (role.name) roleToUpdate.name = role.name;
-  if (role.permissions) roleToUpdate.permissions = role.permissions;
-  division.save();
+  await divisionDoc.save();
 
-  return { roleToUpdate, divisionRoles: division.divisionRoles };
+  return {
+    roleToUpdate: roleSanitizers.roleSanitizer(role as unknown as roleSanitizers.IRole),
+    divisionRoles: roleSanitizers.allRolesSanitizer(
+      divisionDoc.divisionRoles as unknown as roleSanitizers.IRole[]
+    ),
+  };
 };
 
 /**
  * @function removeRoleFromDivision
  * @description Remove a role from a division.
  *
- * @param {string} roleId - The name of the role to remove.
- * @param {string} divisionId - The ID of the division to remove the role from.
- * @returns {Promise<{ name: string; permissions: string[]}, { name: string; permissions: string[] }[] >} The updated division document.
+ * @param {string} roleId - Role ID to remove.
+ * @param {string} divisionId - Division ID.
+ * @returns {Promise<SanitizedRoles>} Removed role and updated list.
+ * @throws {Error} If division or role not found.
  */
-export const removeRoleFromDivision = async (
+const removeRoleFromDivision = async (
   roleId: string,
   divisionId: string
-): Promise<{
-  roleToRemove: { name: string; permissions: string[] };
-  divisionRoles: { name: string; permissions: string[] }[];
-}> => {
-  const division = await Division.findById(divisionId).select('divisionRoles');
+): Promise<roleSanitizers.SanitizedRoles> => {
+  const divisionDoc = await Division.findByIdAndUpdate(divisionId, {
+    $pull: { divisionRoles: { _id: roleId } },
+  })
+    .select('divisionRoles')
+    .lean();
 
-  if (!division) throw new Error('Division not found');
+  if (!divisionDoc) throw new Errors.NotFoundError('Division not found');
 
-  const roleToRemove = division.divisionRoles.find(r => r._id?.toString() === roleId);
-
-  if (!roleToRemove) throw new Error('Role not found');
-
-  division.divisionRoles = division.divisionRoles.filter(r => r._id?.toString() !== roleId);
-  division.save();
-
-  return { roleToRemove, divisionRoles: division.divisionRoles };
+  return roleSanitizers.allRolesSanitizer(
+    divisionDoc.divisionRoles as unknown as roleSanitizers.IRole[]
+  );
 };
 
 /**
  * @function assignRoleToUser
- * @description Assign a role to a user.
+ * @description Assign a role to a division member.
  *
- * @param {string} roleId - The ID of the role to assign.
- * @param {string} userId - The ID of the user to assign the role to.
- * @param {string} workspaceId - The ID of the workspace the division is in.
- * @param {string} divisionId - The ID of the division to assign the role to.
- * @returns {Promise<SanitizedDivisionMembership>} The updated division membership document.
+ * @param {string} roleId - Role ID to assign.
+ * @param {string} userId - User ID to assign the role to.
+ * @param {string} workspaceId - Workspace ID.
+ * @param {string} divisionId - Division ID.
+ * @returns {Promise<SanitizedDivisionMembership>} Updated division membership document.
+ * @throws {Error} If division membership not found or role already assigned.
  */
-export const assignRoleToUser = async (
+const assignRoleToUser = async (
   roleId: string,
   userId: string,
-  divisionId: string,
-  workspaceId: string
-): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
-  const divisionMembership = await DivisionMembership.findOne({
+  workspaceId: string,
+  divisionId: string
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMembership> => {
+  const membership = await DivisionMembership.findOne({
     user: userId,
     workspace: workspaceId,
     division: divisionId,
@@ -131,73 +163,73 @@ export const assignRoleToUser = async (
     .populate('division', 'name')
     .populate('workspace', 'name');
 
-  if (!divisionMembership) throw new Errors.NotFoundError('Not a member of division');
+  if (!membership) throw new Errors.NotFoundError('Not a member of division');
 
-  const division = await Division.findById(divisionId).select('divisionRoles').lean();
-  if (!division) throw new Errors.NotFoundError('Division not found');
+  const divisionDoc = await Division.findById(divisionId).select('divisionRoles').lean();
+  if (!divisionDoc) throw new Errors.NotFoundError('Division not found');
 
-  const role = division.divisionRoles.find(r => r._id?.toString() === roleId);
+  const role = divisionDoc.divisionRoles.find(r => r._id?.toString() === roleId);
   if (!role) throw new Errors.BadRequestError('Invalid role');
 
-  const roleToAdd = role.name;
+  const roleName = role.name;
 
-  if (divisionMembership.divisionRoles.some(r => r === roleToAdd))
+  if (membership.divisionRoles.includes(roleName))
     throw new Errors.BadRequestError('Role already assigned');
 
-  divisionMembership.divisionRoles.push(roleToAdd);
-  await divisionMembership.save();
+  membership.divisionRoles.push(roleName);
+  await membership.save();
 
-  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionMembershipSanitizers.divisionMembershipSanitizer(membership);
 };
 
 /**
  * @function unassignRoleFromUser
- * @description Unassign a role from a user.
+ * @description Remove a role from a division member.
  *
- * @param {string} roleId - The ID of the role to unassign.
- * @param {string} userId - The ID of the user to unassign the role from.
- * @param {string} divisionId - The ID of the division the user is in.
- * @param {string} workspaceId - The ID of the workspace the division is in.
- * @returns {Promise<SanitizedDivisionMembership>} The updated division membership document.
+ * @param {string} roleId - Role ID to unassign.
+ * @param {string} userId - User ID to unassign from.
+ * @param {string} workspaceId - Workspace ID.
+ * @param {string} divisionId - Division ID.
+ * @returns {Promise<SanitizedDivisionMembership>} Updated division membership document.
+ * @throws {Error} If division membership not found or role not assigned.
  */
-export const unassignRoleFromUser = async (
+const unassignRoleFromUser = async (
   roleId: string,
   userId: string,
-  divisionId: string,
-  workspaceId: string
-): Promise<divisionSanitizers.SanitizedDivisionMembership> => {
-  const divisionMembership = await DivisionMembership.findOne({
+  workspaceId: string,
+  divisionId: string
+): Promise<divisionMembershipSanitizers.SanitizedDivisionMembership> => {
+  const membership = await DivisionMembership.findOne({
     user: userId,
-    division: divisionId,
     workspace: workspaceId,
+    division: divisionId,
   })
     .populate('user', 'username email')
     .populate('division', 'name')
     .populate('workspace', 'name');
 
-  if (!divisionMembership) throw new Errors.NotFoundError('Not a member of division');
+  if (!membership) throw new Errors.NotFoundError('Not a member of division');
 
-  const division = await Division.findById(divisionId).select('divisionRoles').lean();
-  if (!division) throw new Errors.NotFoundError('Division not found');
+  const divisionDoc = await Division.findById(divisionId).select('divisionRoles').lean();
+  if (!divisionDoc) throw new Errors.NotFoundError('Division not found');
 
-  const role = division.divisionRoles.find(r => r._id?.toString() === roleId);
+  const role = divisionDoc.divisionRoles.find(r => r._id?.toString() === roleId);
   if (!role) throw new Errors.BadRequestError('Invalid role');
 
-  const roleToRemove = role.name;
+  const roleName = role.name;
 
-  if (!divisionMembership.divisionRoles.some(r => r === roleToRemove))
+  if (!membership.divisionRoles.includes(roleName))
     throw new Errors.BadRequestError('Role not assigned');
 
-  divisionMembership.divisionRoles = divisionMembership.divisionRoles.filter(
-    r => r !== roleToRemove
-  );
-  await divisionMembership.save();
+  membership.divisionRoles = membership.divisionRoles.filter(r => r !== roleName);
+  await membership.save();
 
-  return divisionSanitizers.divisionMembershipSanitizer(divisionMembership);
+  return divisionMembershipSanitizers.divisionMembershipSanitizer(membership);
 };
 
-// <============================> Exports <============================>
-
+/**
+ * ----------------- Division Roles Service (default export) -----------------
+ */
 export default {
   getDivisionRoles,
   addRoleToDivision,

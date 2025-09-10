@@ -10,7 +10,6 @@ import { Store } from '@/models';
 import { store } from '@/validations';
 import { storeSanitizers } from '@/utils';
 import { Errors } from '@/error';
-import { recordTransaction } from '../transaction/transaction.service';
 
 /**
  * @function createStore
@@ -164,32 +163,6 @@ export const getAllStores = async (
     total,
   };
 };
-
-/**
- * ----------------- Store Transactions -----------------
- */
-
-// export const updateStoreBalance = async (
-//   storeId: string,
-//   amount: number
-// ): Promise<storeSanitizers.SanitizedStore & { transaction: ITransaction }> => {
-//   const newStore = await Store.findOneAndUpdate(
-//     { _id: storeId },
-//     { $inc: { balance: amount } },
-//     { new: true }
-//   ).lean();
-
-//   if (!newStore) throw new Errors.NotFoundError('Store not found');
-
-//   const transaction = await recordTransaction(
-//     // 'JFEO',
-//     // newStore.workspace,
-//     // newStore.division,
-//     // { amount, category: 'balance', paymentMethod: 'balance' }
-//   );
-
-//   return { ...storeSanitizers.storeSanitizer(newStore), transaction };
-// };
 
 /**
  * ----------------- Store Services (default export) -----------------

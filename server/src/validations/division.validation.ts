@@ -1,6 +1,6 @@
 /**
  * @module division.validation
- * 
+ *
  * @description Validation schemas for division operations.
  */
 import z from 'zod';
@@ -32,7 +32,7 @@ export const divisionInputSchema = z
     image: z.string().optional(),
   })
   .strict();
-  
+
 export type DivisionInput = z.infer<typeof divisionInputSchema>;
 
 /**UpdateDivision
@@ -54,17 +54,17 @@ export type UpdateDivisionInput = z.infer<typeof updateDivisionSchema>;
  * Zod schema for division role validation.
  * Validates user input on the server side to enforce business rules.
  */
-export const divisionRoleSchema = z
+export const divisionRoleInputSchema = z
   .object({
     name: z.string().min(1, { message: 'Role name is required' }),
     permissions: z.array(z.string()).min(1, { message: 'At least one permission is required' }),
   })
   .strict();
-export type DivisionRoleInput = z.infer<typeof divisionRoleSchema>;
+export type DivisionRoleInput = z.infer<typeof divisionRoleInputSchema>;
 
 /**
  * DivisionUpdateRoleInput
  * @description All fields are optional to support partial updates.
  */
-export const divisionUpdateRoleSchema = divisionRoleSchema.partial();
+export const divisionUpdateRoleSchema = divisionRoleInputSchema.partial();
 export type DivisionUpdateRoleInput = z.infer<typeof divisionUpdateRoleSchema>;

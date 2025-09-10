@@ -4,3 +4,4 @@ export { default as divisionRolesService } from './divisionRoles.service';
 
 export { default as vehicleService } from './vehicle.service';
 export { default as storeService } from './store.service';
+export { default as staffService } from './staff.service';

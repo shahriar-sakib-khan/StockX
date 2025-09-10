@@ -38,14 +38,16 @@ export const updateVehicleSchema = VehicleInputSchema.partial();
 export type UpdateVehicleInput = z.infer<typeof updateVehicleSchema>;
 
 /**
+* ----------------- Vehicle Transaction Validation -----------------
+*/
+
+/**
  * VehicleTransactionInput
  * @property {number} amount - Required. Transaction amount, must be greater than 0.
  * @property {VehicleCategoryType} category - Required. Must be one of vehicle-related categories.
  * @property {PaymentMethodType} [paymentMethod] - Optional. One of 'cash', 'bank', 'mobile', 'due', 'other'.
  * @property {string} [ref] - Optional. Reference string such as invoice or voucher number.
  * @property {object} [details] - Optional. Additional metadata for the transaction.
- * @property {string} workspace - Required. Workspace ObjectId string.
- * @property {string} division - Required. Division ObjectId string.
  *
  * @description
  * Zod schema for validating vehicle transaction creation input.

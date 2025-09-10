@@ -191,11 +191,11 @@ export const unassignRole = async (req: Request, res: Response) => {
 export const getRoles = async (req: Request, res: Response) => {
   const { divisionId } = req.params;
 
-  const roles = await divisionRolesService.getDivisionRoles(divisionId);
+  const { roles } = await divisionRolesService.getDivisionRoles(divisionId);
 
   const total = roles.length;
 
-  res.status(StatusCodes.OK).json({ total, roles });
+  res.status(StatusCodes.OK).json({ total, divisionRoles: roles });
 };
 
 export const addRole = async (req: Request, res: Response) => {
@@ -203,42 +203,34 @@ export const addRole = async (req: Request, res: Response) => {
 
   const divisionRoles = await divisionRolesService.addRoleToDivision(req.body, divisionId);
 
-  const total = divisionRoles.length;
-
-  res
-    .status(StatusCodes.CREATED)
-    .json({ message: 'Role added successfully', total, divisionRoles });
+  res.status(StatusCodes.CREATED).json({
+    message: 'Role added successfully',
+    divisionRoles,
+  });
 };
 
 export const updateRole = async (req: Request, res: Response) => {
   const { roleId, divisionId } = req.params;
+
   const { roleToUpdate, divisionRoles } = await divisionRolesService.updateRoleInDivision(
     req.body,
     roleId,
     divisionId
   );
 
-  const total = divisionRoles.length;
-
   res.status(StatusCodes.OK).json({
     message: `Role '${roleToUpdate.name}' was updated successfully`,
-    total,
     divisionRoles,
   });
 };
 
 export const removeRole = async (req: Request, res: Response) => {
   const { roleId, divisionId } = req.params;
-  const { roleToRemove, divisionRoles } = await divisionRolesService.removeRoleFromDivision(
-    roleId,
-    divisionId
-  );
 
-  const totalDivisionRoles = divisionRoles.length;
+  const divisionRoles = await divisionRolesService.removeRoleFromDivision(roleId, divisionId);
 
   res.status(StatusCodes.OK).json({
-    message: `Role '${roleToRemove.name}' was removed successfully`,
-    totalDivisionRoles,
+    message: `Role was removed successfully`,
     divisionRoles,
   });
 };

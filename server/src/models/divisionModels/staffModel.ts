@@ -5,14 +5,11 @@ export interface IStaff extends Document {
   division: Types.ObjectId;
 
   name: string;
-  phone?: string;
-  role?: string;
+  phone: string;
+  role: string;
   image?: string;
-  salaryPlan?: {
-    amount: number;
-    cycle: 'monthly';
-    effectiveFrom: Date;
-  };
+  salary: number;
+  joiningDate: Date;
 
   createdAt: Date;
   updatedAt: Date;
@@ -23,14 +20,11 @@ const staffSchema: Schema<IStaff> = new Schema(
     workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
     division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
     name: { type: String, required: true },
-    phone: { type: String },
-    role: { type: String },
+    phone: { type: String, required: true },
+    role: { type: String, required: true },
     image: { type: String },
-    salaryPlan: {
-      amount: Number,
-      cycle: { type: String, enum: ['monthly'] },
-      effectiveFrom: Date,
-    },
+    salary: { type: Number, required: true },
+    joiningDate: { type: Date, required: true },
   },
   { timestamps: true }
 );

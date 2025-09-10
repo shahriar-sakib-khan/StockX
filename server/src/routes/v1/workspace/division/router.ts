@@ -7,6 +7,7 @@ import inventoryRouter from './inventory.router';
 import transactionRouter from './transaction.router';
 import vehicleRouter from './vehicle.router';
 import storeRouter from './store.router';
+import staffRouter from './staff.router';
 
 const router = Router({ mergeParams: true });
 
@@ -137,7 +138,7 @@ router.get('/:divisionId/roles', divisionScope(['division_admin']), divisionCont
 router.post(
   '/:divisionId/roles',
   divisionScope(['division_admin']),
-  validateRequest(division.divisionRoleSchema),
+  validateRequest(division.divisionRoleInputSchema),
   divisionController.addRole
 );
 
@@ -209,5 +210,10 @@ router.use('/:divisionId/inventory', divisionScope(), inventoryRouter);
  * ----------------- Division Transaction Sub-Routes -----------------
  */
 router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
+
+/**
+ * ----------------- Division Staff Sub-Routes -----------------
+ */
+router.use('/:divisionId/staff', divisionScope(), staffRouter);
 
 export default router;
