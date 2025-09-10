@@ -1,25 +1,12 @@
 // @ts-check
 import API from "@/services/apiClient";
 
-/** @typedef {import("@/types/vehicle").Vehicle} Vehicle */
-/** @typedef {import("@/types/vehicle").NewVehicle} NewVehicle */
-/** @typedef {import("@/types/vehicle").UpdatedVehicle} UpdatedVehicle */
-/** @typedef {import("@/types/vehicle").AllVehiclesResponse} AllVehiclesResponse */
-/** @typedef {import("@/types/vehicle").SingleVehicleResponse} SingleVehicleResponse */
-/** @typedef {import("@/types/vehicle").CreateVehicleResponse} CreateVehicleResponse */
-/** @typedef {import("@/types/vehicle").UpdateVehicleResponse} UpdateVehicleResponse */
-/** @typedef {import("@/types/vehicle").DeleteVehicleResponse} DeleteVehicleResponse */
-
-/** @typedef {import("@/types/vehicle").VehicleTransactionInput} VehicleTransactionInput */
-/** @typedef {import("@/types/vehicle").VehicleTransactionResponse} VehicleTransactionResponse */
-/** @typedef {import("@/types/vehicle").AllVehicleTransactionsResponse} AllVehicleTransactionsResponse */
-
 /**
  * Get all vehicles in a specific division.
  *
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
- * @returns {Promise<AllVehiclesResponse>} - A promise that resolves to an array of vehicle objects with total count.
+ * @returns {Promise<import("../types/vehicle").AllVehiclesResponse>} - A promise that resolves to an array of vehicle objects with total count.
  */
 export const getVehicles = async (workspaceId, divisionId) =>
     await API.get(`/workspace/${workspaceId}/divisions/${divisionId}/vehicles`);
@@ -30,7 +17,7 @@ export const getVehicles = async (workspaceId, divisionId) =>
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
  * @param {string} vehicleId - The ID of the vehicle.
- * @returns {Promise<SingleVehicleResponse>} - A promise that resolves to a single vehicle object.
+ * @returns {Promise<import("../types/vehicle").SingleVehicleResponse>} - A promise that resolves to a single vehicle object.
  */
 export const getSingleVehicle = async (workspaceId, divisionId, vehicleId) =>
     await API.get(
@@ -42,8 +29,8 @@ export const getSingleVehicle = async (workspaceId, divisionId, vehicleId) =>
  *
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
- * @param {NewVehicle} vehicleInfo - The vehicle data to create.
- * @returns {Promise<CreateVehicleResponse>} A promise that resolves to the created vehicle object.
+ * @param {import("../types/vehicle").NewVehicle} vehicleInfo - The vehicle data to create.
+ * @returns {Promise<import("../types/vehicle").CreateVehicleResponse>} A promise that resolves to the created vehicle object.
  */
 export const createVehicle = async (workspaceId, divisionId, vehicleInfo) =>
     await API.post(
@@ -57,8 +44,8 @@ export const createVehicle = async (workspaceId, divisionId, vehicleInfo) =>
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
  * @param {string} vehicleId - The ID of the vehicle to update.
- * @param {UpdatedVehicle} vehicleInfo - The new vehicle data.
- * @returns {Promise<UpdateVehicleResponse>} A promise that resolves to the updated vehicle object.
+ * @param {import("../types/vehicle").UpdatedVehicle} vehicleInfo - The new vehicle data.
+ * @returns {Promise<import("../types/vehicle").UpdateVehicleResponse>} A promise that resolves to the updated vehicle object.
  */
 export const updateVehicleInfo = async (
     workspaceId,
@@ -77,7 +64,7 @@ export const updateVehicleInfo = async (
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
  * @param {string} vehicleId - The ID of the vehicle to delete.
- * @returns {Promise<DeleteVehicleResponse>} A promise that resolves to the deleted vehicle object.
+ * @returns {Promise<import("../types/vehicle").DeleteVehicleResponse>} A promise that resolves to the deleted vehicle object.
  */
 export const deleteVehicle = async (workspaceId, divisionId, vehicleId) =>
     await API.delete(
@@ -92,8 +79,8 @@ export const deleteVehicle = async (workspaceId, divisionId, vehicleId) =>
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
  * @param {string} vehicleId - The ID of the vehicle.
- * @param {VehicleTransactionInput} data - The new transaction data.
- * @returns {Promise<VehicleTransactionResponse>} - A promise that resolves to the vehicle object and the created transaction.
+ * @param {import("../types/vehicle").VehicleTransactionInput} data - The new transaction data.
+ * @returns {Promise<import("../types/vehicle").VehicleTransactionResponse>} - A promise that resolves to the vehicle object and the created transaction.
  */
 export const recordVehicleTransaction = async (
     workspaceId,
@@ -112,7 +99,7 @@ export const recordVehicleTransaction = async (
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
  * @param {string} vehicleId - The ID of the vehicle.
- * @returns {Promise<AllVehicleTransactionsResponse>} - A promise that resolves to all the previous transactions for given vehicle.
+ * @returns {Promise<import("../types/vehicle").AllVehicleTransactionsResponse>} - A promise that resolves to all the previous transactions for given vehicle.
  */
 export const getVehicleTransactions = async (
     workspaceId,

@@ -4,16 +4,16 @@ import {
     getDetailedBrands,
     getBrands,
     saveSelectedBrands,
-} from "../features/inventory/services/brandServices";
-import queryClient from "../services/queryClient";
-import { BRANDS, DETAILED_BRANDS } from "../constants/queryKeys";
+} from "../services/brandServices";
+import queryClient from "@/services/queryClient";
+import { BRANDS, DETAILED_BRANDS } from "../constants/brandQueryKeys";
 
-/** @typedef {import("@/types/brands").Brand} Brand */
-/** @typedef {import("@/types/brands").DetailedBrand} DetailedBrand */
-/** @typedef {import("@/types/brands").BrandsResponse} BrandsResponse */
-/** @typedef {import("@/types/brands").DetailedBrandsResponse} DetailedBrandsResponse */
-/** @typedef {import("@/types/brands").SaveBrandsResponse} SaveBrandsResponse */
-/** @typedef {import("@/types/brands").SelectedBrand} SelectedBrand */
+/** @typedef {import("@/features/brands/types/brands").Brand} Brand */
+/** @typedef {import("@/features/brands/types/brands").DetailedBrand} DetailedBrand */
+/** @typedef {import("@/features/brands/types/brands").BrandsResponse} BrandsResponse */
+/** @typedef {import("@/features/brands/types/brands").DetailedBrandsResponse} DetailedBrandsResponse */
+/** @typedef {import("@/features/brands/types/brands").SaveBrandsResponse} SaveBrandsResponse */
+/** @typedef {import("@/features/brands/types/brands").SelectedBrand} SelectedBrand */
 
 /**
  * Get all brands in a division (basic list view).

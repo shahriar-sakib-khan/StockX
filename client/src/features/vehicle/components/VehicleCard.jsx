@@ -3,10 +3,10 @@ import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
 export default function VehicleCard({
     vehicleInfo,
-    onDelete,
     onUpdate,
-    onRecordTransaction,
+    onDelete,
     onShowHistory,
+    onRecordTransaction,
 }) {
     return (
         <div className="flex w-70 flex-col overflow-hidden rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">

@@ -1,19 +1,12 @@
 // @ts-check
 import API from "@/services/apiClient";
 
-/** @typedef {import("@/types/brands").Brand} Brand */
-/** @typedef {import("@/types/brands").DetailedBrand} DetailedBrand */
-/** @typedef {import("@/types/brands").BrandsResponse} BrandsResponse */
-/** @typedef {import("@/types/brands").DetailedBrandsResponse} DetailedBrandsResponse */
-/** @typedef {import("@/types/brands").SaveBrandsResponse} SaveBrandsResponse */
-/** @typedef {import("@/types/brands").SelectedBrand} SelectedBrand */
-
 /**
  * Get all brands in a division (basic list view).
  *
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
- * @returns {Promise<BrandsResponse>} A promise that resolves to an array of brand objects with total count.
+ * @returns {Promise<import("../types/brands").BrandsResponse>} A promise that resolves to an array of brand objects with total count.
  */
 export const getBrands = async (workspaceId, divisionId) =>
     API.get(
@@ -25,7 +18,7 @@ export const getBrands = async (workspaceId, divisionId) =>
  *
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
- * @returns {Promise<DetailedBrandsResponse>} A promise that resolves to an array of detailed brand objects with total count.
+ * @returns {Promise<import("../types/brands").DetailedBrandsResponse>} A promise that resolves to an array of detailed brand objects with total count.
  */
 export const getDetailedBrands = async (workspaceId, divisionId) =>
     API.get(
@@ -37,8 +30,8 @@ export const getDetailedBrands = async (workspaceId, divisionId) =>
  *
  * @param {string} workspaceId - The ID of the workspace.
  * @param {string} divisionId - The ID of the division.
- * @param {SelectedBrand[]} brands - Array of brand objects to save or select (only id and isActive).
- * @returns {Promise<SaveBrandsResponse>} A promise that resolves to the server response.
+ * @param {import("../types/brands").SelectedBrand[]} brands - Array of brand objects to save or select (only id and isActive).
+ * @returns {Promise<import("../types/brands").SaveBrandsResponse>} A promise that resolves to the server response.
  */
 export const saveSelectedBrands = async (workspaceId, divisionId, brands) =>
     API.patch(

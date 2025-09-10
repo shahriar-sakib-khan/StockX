@@ -1,5 +1,8 @@
 import { useEffect } from "react";
-import { getDetailedBrands, getBrands } from "../services/brandServices";
+import {
+    getDetailedBrands,
+    getBrands,
+} from "../../brands/services/brandServices";
 import { divisionId, workspaceId } from "@/constants/ids";
 
 export default function TestBrands() {

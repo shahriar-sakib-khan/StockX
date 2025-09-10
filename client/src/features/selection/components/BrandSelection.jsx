@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import SelectionCard from "./SelectionCard";
 import { useEffect, useState } from "react";
-import { useBrands, useSaveSelectedBrands } from "@/hooks/brandHooks";
+import {
+    useBrands,
+    useSaveSelectedBrands,
+} from "../../brands/hooks/brandHooks";
 import brandLogo from "@/assets/images/bashundhara.webp";
 import { divisionId, workspaceId } from "@/constants/ids";
 

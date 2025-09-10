@@ -1,11 +1,8 @@
 // @ts-check
 
 /**
- * @typedef {"user" | "brands" | "detailed_brands"} QueryKey
+ * @typedef {"brands" | "detailed_brands"} QueryKey
  */
-
-/** @type {QueryKey} */
-export const AUTH = "user";
 
 /** @type {QueryKey} */
 export const BRANDS = "brands";

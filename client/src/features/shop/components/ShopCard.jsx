@@ -1,9 +1,14 @@
 import DefaultImage from "@/assets/images/shop_icon.png";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
-export default function ShopCard({ shopInfo, onDelete }) {
+export default function ShopCard({
+    shopInfo,
+    onUpdate,
+    onDelete,
+    onShowHistory,
+}) {
     return (
-        <div className="flex w-65 flex-col rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
+        <div className="flex w-70 flex-col overflow-hidden rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
             {/* Top section (shop image + delete) */}
             <section className="relative flex items-center justify-center bg-gray-100/90 py-2">
                 <img
@@ -49,12 +54,23 @@ export default function ShopCard({ shopInfo, onDelete }) {
             </section>
 
             {/* Buttons Section */}
-            <section className="mt-2 mb-4 flex items-center justify-center gap-3 px-4">
-                <button className="primary-button px-4 py-1">Stats</button>
-                <button className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70">
+            <section className="mb-4 flex items-center justify-center gap-3 px-4">
+                <button className="primary-button px-4 py-1">
+                    Due payment
+                </button>
+                <button
+                    onClick={onShowHistory}
+                    className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
+                >
                     History
                 </button>
             </section>
+            <button
+                onClick={onUpdate}
+                className="bg-gray-200 px-4 py-1 font-semibold text-gray-400 transition-all duration-100 hover:bg-gray-300/70"
+            >
+                Update
+            </button>
         </div>
     );
 }

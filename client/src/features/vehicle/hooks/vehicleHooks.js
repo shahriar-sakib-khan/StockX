@@ -8,22 +8,29 @@ import {
     createVehicle,
     recordVehicleTransaction,
     getVehicleTransactions,
-} from "../features/vehicle/services/vehicleServices";
-import queryClient from "../services/queryClient";
-import { VEHICLE, VEHICLE_TRANSACTION, VEHICLES } from "../constants/queryKeys";
+} from "../services/vehicleServices";
+import queryClient from "@/services/queryClient";
+import {
+    VEHICLE,
+    VEHICLE_TRANSACTION,
+    VEHICLES,
+} from "../constants/vehicleQueryKeys";
 
-/** @typedef {import("@/types/vehicle").Vehicle} Vehicle */
-/** @typedef {import("@/types/vehicle").NewVehicle} NewVehicle */
-/** @typedef {import("@/types/vehicle").UpdatedVehicle} UpdatedVehicle */
-/** @typedef {import("@/types/vehicle").AllVehiclesResponse} AllVehiclesResponse */
-/** @typedef {import("@/types/vehicle").SingleVehicleResponse} SingleVehicleResponse */
-/** @typedef {import("@/types/vehicle").CreateVehicleResponse} CreateVehicleResponse */
-/** @typedef {import("@/types/vehicle").UpdateVehicleResponse} UpdateVehicleResponse */
-/** @typedef {import("@/types/vehicle").DeleteVehicleResponse} DeleteVehicleResponse */
+/** type imports
+ * @typedef {import("../types/vehicle").Vehicle} Vehicle
+ * @typedef {import("../types/vehicle").NewVehicle} NewVehicle
+ * @typedef {import("../types/vehicle").UpdatedVehicle} UpdatedVehicle
+ * @typedef {import("../types/vehicle").AllVehiclesResponse} AllVehiclesResponse
+ * @typedef {import("../types/vehicle").SingleVehicleResponse} SingleVehicleResponse
+ * @typedef {import("../types/vehicle").CreateVehicleResponse} CreateVehicleResponse
+ * @typedef {import("../types/vehicle").UpdateVehicleResponse} UpdateVehicleResponse
+ * @typedef {import("../types/vehicle").DeleteVehicleResponse} DeleteVehicleResponse
+ * @typedef {import("../types/vehicle").VehicleTransactionInput} VehicleTransactionInput
+ * @typedef {import("../types/vehicle").VehicleTransactionResponse} VehicleTransactionResponse
+ * @typedef {import("../types/vehicle").AllVehicleTransactionsResponse} AllVehicleTransactionsResponse
+ */
 
-/** @typedef {import("@/types/vehicle").VehicleTransactionInput} VehicleTransactionInput */
-/** @typedef {import("@/types/vehicle").VehicleTransactionResponse} VehicleTransactionResponse */
-/** @typedef {import("@/types/vehicle").AllVehicleTransactionsResponse} AllVehicleTransactionsResponse */
+/** Vehicle CRUD query hooks */
 
 /**
  * Get all vehicles in a division.
@@ -148,6 +155,8 @@ export const useDeleteVehicle = (workspaceId, divisionId, options) => {
 };
 
 /** ----------------------------------------------------------------------------------------------------------------- */
+
+/** Vehicle transaction query hooks */
 
 /**
  * Record a new vehicle transaction.

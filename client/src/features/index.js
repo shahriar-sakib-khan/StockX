@@ -28,3 +28,4 @@ export { default as VehicleTransactionModal } from "./vehicle/components/Vehicle
 
 // shop
 export { default as ShopCard } from "./shop/components/ShopCard";
+export { default as ShopleInfoModal } from "./shop/components/ShopleInfoModal";

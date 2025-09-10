@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     VehicleCard,
     VehicleInfoModal,
@@ -12,7 +12,7 @@ import {
     useDeleteVehicle,
     useRecordVehicleTransaction,
     useVehicleTransactions,
-} from "@/hooks/vehicleHooks";
+} from "@/features/vehicle/hooks/vehicleHooks";
 import { workspaceId, divisionId } from "@/constants/ids";
 
 export default function VehiclePage() {
@@ -66,9 +66,9 @@ export default function VehiclePage() {
         details: {},
     });
 
-    useEffect(() => {
-        console.log(transactionData);
-    }, [transactionData]);
+    // useEffect(() => {
+    //     console.log(transactionData);
+    // }, [transactionData]);
 
     // Vehicle Handlers: CRUD
     const handleChange = (e) => {
@@ -161,9 +161,9 @@ export default function VehiclePage() {
             enabled: !!historyVehicleId, // only fetch when a vehicle is selected
         });
 
-    useEffect(() => {
-        console.log(transactionsHistory);
-    }, [transactionsHistory]);
+    // useEffect(() => {
+    //     console.log(transactionsHistory);
+    // }, [transactionsHistory]);
 
     // Open transaction modal for a specific vehicle
     const openTransactionModal = /** @param {string} vehicleId */ (
@@ -209,7 +209,7 @@ export default function VehiclePage() {
     };
 
     return (
-        <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-6 bg-gray-100 pt-5 text-gray-700">
+        <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-6 overflow-y-auto bg-gray-100 pt-5 text-gray-700">
             <div className="flex items-center justify-between px-4">
                 <h2 className="text-2xl font-semibold text-gray-500">
                     Vehicle List
@@ -228,7 +228,7 @@ export default function VehiclePage() {
             ) : isError ? (
                 <p className="text-red-500">Error: {error.message}</p>
             ) : (
-                <div className="flex flex-wrap gap-5">
+                <div className="mb-10 flex flex-wrap gap-5">
                     {vehicles.map((vehicle) => (
                         <VehicleCard
                             key={vehicle.id}

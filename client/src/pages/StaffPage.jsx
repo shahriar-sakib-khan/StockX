@@ -44,7 +44,7 @@ export default function StaffPage() {
     };
 
     return (
-        <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-6 bg-gray-100 pt-5 text-gray-700">
+        <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-6 overflow-y-auto bg-gray-100 pt-5 text-gray-700">
             <div className="flex items-center justify-between px-4">
                 <h2 className="text-2xl font-semibold text-gray-500">
                     Staff Salary
@@ -58,7 +58,7 @@ export default function StaffPage() {
                 </button>
             </div>
 
-            <div className="flex flex-wrap gap-5">
+            <div className="mb-10 flex flex-wrap gap-5">
                 {staffList.map((staff) => {
                     return (
                         <StaffCard
