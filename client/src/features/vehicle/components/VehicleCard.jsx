@@ -1,7 +1,13 @@
 import DefaultImage from "@/assets/images/vehicle_icon.png";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
-export default function VehicleCard({ vehicleInfo, onDelete, onUpdate }) {
+export default function VehicleCard({
+    vehicleInfo,
+    onDelete,
+    onUpdate,
+    onRecordTransaction,
+    onShowHistory,
+}) {
     return (
         <div className="flex w-70 flex-col overflow-hidden rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
             {/* Top section (vehicle image + delete) */}
@@ -32,16 +38,22 @@ export default function VehicleCard({ vehicleInfo, onDelete, onUpdate }) {
 
             {/* Buttons Section */}
             <section className="mt-2 mb-4 flex items-center justify-center gap-3 px-4">
-                <button className="primary-button px-4 py-1">
+                <button
+                    onClick={onRecordTransaction}
+                    className="primary-button px-4 py-1"
+                >
                     Fuel / Repair
                 </button>
-                <button className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70">
+                <button
+                    onClick={onShowHistory}
+                    className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
+                >
                     History
                 </button>
             </section>
             <button
                 onClick={onUpdate}
-                className="bg-yellow-400/90 px-4 py-1 text-white transition-all duration-100 hover:bg-yellow-500/80"
+                className="bg-gray-200 px-4 py-1 font-semibold text-gray-400 transition-all duration-100 hover:bg-gray-300/70"
             >
                 Update
             </button>

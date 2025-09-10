@@ -23,6 +23,8 @@ export { default as StaffCard } from "./staff/components/StaffCard";
 
 // vehicle
 export { default as VehicleCard } from "./vehicle/components/VehicleCard";
+export { default as VehicleInfoModal } from "./vehicle/components/VehicleInfoModal";
+export { default as VehicleTransactionModal } from "./vehicle/components/VehicleTransactionModal";
 
 // shop
 export { default as ShopCard } from "./shop/components/ShopCard";

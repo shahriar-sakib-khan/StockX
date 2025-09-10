@@ -1,16 +1,22 @@
-import { useState } from "react";
-import { VehicleCard } from "../features";
+import { useEffect, useState } from "react";
+import {
+    VehicleCard,
+    VehicleInfoModal,
+    VehicleTransactionModal,
+} from "../features";
 import { ConfirmDialog, ModalContainer, Spinner } from "../components";
 import {
     useAllVehicles,
     useCreateVehicle,
     useUpdateVehicle,
     useDeleteVehicle,
+    useRecordVehicleTransaction,
+    useVehicleTransactions,
 } from "@/hooks/vehicleHooks";
 import { workspaceId, divisionId } from "@/constants/ids";
 
 export default function VehiclePage() {
-    // Fetch all vehicles
+    // Fetch: all vehicles
     const {
         data: vehicles = [],
         isLoading,
@@ -18,7 +24,9 @@ export default function VehiclePage() {
         error,
     } = useAllVehicles(workspaceId, divisionId);
 
-    // Mutations
+    // Fetch: transactions of a vehicle
+
+    // Vehicle Mutations: CRUD
     const { mutate: createVehicle, isLoading: isCreating } = useCreateVehicle(
         workspaceId,
         divisionId,
@@ -31,16 +39,38 @@ export default function VehiclePage() {
 
     const { mutate: deleteVehicle } = useDeleteVehicle(workspaceId, divisionId);
 
-    // Modal state
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    // Vehicle Mutations: Transaction
+
+    // Vehicle States: CRUD
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         brand: "",
         model: "",
         regNo: "",
     });
     const [editingVehicle, setEditingVehicle] = useState(null);
-    const [deleteTargetId, setDeleteTargetId] = useState(null);
+    const [deletingVehicleId, setDeletingVehicleId] = useState(null);
 
+    // Vehicle States: Transaction
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [IshistoryModalOpen, setIshistoryModalOpen] = useState(false);
+    const [transactionVehicleId, setTransactionVehicleId] = useState(null);
+    const [historyVehicleId, setHistoryVehicleId] = useState(null);
+    const [transactionData, setTransactionData] = useState({
+        amount: "",
+        /** @type {'fuel_payment' | 'repair_payment'} category */
+        category: "fuel_payment",
+        /** @type {'cash' | 'bank' | 'mobile' | 'due' | 'other'} paymentMethod */
+        paymentMethod: "cash",
+        ref: "",
+        details: {},
+    });
+
+    useEffect(() => {
+        console.log(transactionData);
+    }, [transactionData]);
+
+    // Vehicle Handlers: CRUD
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -49,7 +79,7 @@ export default function VehiclePage() {
     const openAddModal = () => {
         setEditingVehicle(null);
         setFormData({ brand: "", model: "", regNo: "" });
-        setIsModalOpen(true);
+        setIsInfoModalOpen(true);
     };
 
     const openEditModal = (vehicle) => {
@@ -59,7 +89,7 @@ export default function VehiclePage() {
             model: vehicle.model,
             regNo: vehicle.regNo,
         });
-        setIsModalOpen(true);
+        setIsInfoModalOpen(true);
     };
 
     const handleSubmit = (e) => {
@@ -75,7 +105,7 @@ export default function VehiclePage() {
                 },
                 {
                     onSuccess: () => {
-                        setIsModalOpen(false);
+                        setIsInfoModalOpen(false);
                         setEditingVehicle(null);
                     },
                     onError: (err) =>
@@ -93,7 +123,7 @@ export default function VehiclePage() {
                 {
                     onSuccess: () => {
                         setFormData({ brand: "", model: "", regNo: "" });
-                        setIsModalOpen(false);
+                        setIsInfoModalOpen(false);
                     },
                     onError: (err) =>
                         console.error("Error creating vehicle:", err),
@@ -102,30 +132,80 @@ export default function VehiclePage() {
         }
     };
 
-    // const handleDelete = (id) => {
-    //     deleteVehicle(id, {
-    //         onError: (err) => console.error("Error deleting vehicle:", err),
-    //     });
-    // };
-
-    // const handleDelete = (id) => {
-    //     const confirmed = window.confirm(
-    //         "Are you sure you want to delete this vehicle?",
-    //     );
-    //     if (!confirmed) return;
-
-    //     deleteVehicle(id, {
-    //         onError: (err) => console.error("Error deleting vehicle:", err),
-    //     });
-    // };
-
     const handleConfirmDelete = () => {
-        if (deleteTargetId) {
-            deleteVehicle(deleteTargetId, {
+        if (deletingVehicleId) {
+            deleteVehicle(deletingVehicleId, {
                 onError: (err) => console.error("Error deleting vehicle:", err),
             });
         }
-        setDeleteTargetId(null); // close dialog
+        setDeletingVehicleId(null); // close dialog
+    };
+
+    /** -------------------------------------------------------------------------------------------- */
+    // Vehicle Handlers: Transaction
+
+    // Transaction mutation
+    const { mutate: recordTransaction, isLoading: isRecording } =
+        useRecordVehicleTransaction(
+            workspaceId,
+            divisionId,
+            transactionVehicleId,
+            {
+                enabled: !!transactionVehicleId,
+            },
+        );
+
+    // Fetch transactions for selected vehicle
+    const { data: transactionsHistory, isLoading: isTransactionsLoading } =
+        useVehicleTransactions(workspaceId, divisionId, historyVehicleId, {
+            enabled: !!historyVehicleId, // only fetch when a vehicle is selected
+        });
+
+    useEffect(() => {
+        console.log(transactionsHistory);
+    }, [transactionsHistory]);
+
+    // Open transaction modal for a specific vehicle
+    const openTransactionModal = /** @param {string} vehicleId */ (
+        vehicleId,
+    ) => {
+        setTransactionVehicleId(vehicleId);
+        setTransactionData({
+            amount: "",
+            category: "fuel_payment",
+            paymentMethod: "cash",
+            ref: "",
+            details: {},
+        });
+        setIsTransactionModalOpen(true);
+    };
+
+    const openHistoryModal = /** @param {string} vehicleId */ (vehicleId) => {
+        setHistoryVehicleId(vehicleId);
+        setIshistoryModalOpen(true);
+    };
+
+    // Handle transaction form input
+    const handleTransactionChange = (e) => {
+        const { name, value } = e.target;
+        setTransactionData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    // Submit transaction
+    const handleTransactionSubmit = (e) => {
+        e.preventDefault();
+        if (transactionVehicleId) {
+            recordTransaction(
+                {
+                    ...transactionData,
+                    amount: Number(transactionData.amount) || 0,
+                },
+                {
+                    onSuccess: () => setIsTransactionModalOpen(false),
+                    onError: (err) => console.error(err),
+                },
+            );
+        }
     };
 
     return (
@@ -158,7 +238,7 @@ export default function VehiclePage() {
                                 regNo: vehicle.regNumber,
                                 id: vehicle.id,
                             }}
-                            onDelete={() => setDeleteTargetId(vehicle.id)}
+                            onDelete={() => setDeletingVehicleId(vehicle.id)}
                             onUpdate={() =>
                                 openEditModal({
                                     brand: vehicle.vehicleBrand,
@@ -167,124 +247,81 @@ export default function VehiclePage() {
                                     id: vehicle.id,
                                 })
                             }
+                            onRecordTransaction={() =>
+                                openTransactionModal(vehicle.id)
+                            }
+                            onShowHistory={() => openHistoryModal(vehicle.id)}
                         />
                     ))}
                 </div>
             )}
 
-            {/* Modal */}
-            {isModalOpen && (
-                <ModalContainer
-                    backdropColor="bg-black/50"
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                >
-                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-                        <h3 className="mb-4 text-xl font-semibold text-gray-600">
-                            {editingVehicle
-                                ? "Edit Vehicle"
-                                : "Add New Vehicle"}
-                        </h3>
-                        <form
-                            onSubmit={handleSubmit}
-                            className="flex flex-col gap-4"
-                        >
-                            {/* Brand */}
-                            <div className="flex items-center gap-3">
-                                <label
-                                    htmlFor="brand"
-                                    className="text-sm font-medium text-gray-600"
-                                >
-                                    Brand
-                                </label>
-                                <input
-                                    id="brand"
-                                    type="text"
-                                    name="brand"
-                                    value={formData.brand}
-                                    onChange={handleChange}
-                                    placeholder="Brand"
-                                    className="flex-1 rounded border border-gray-300 px-3 py-2"
-                                    required
-                                />
-                            </div>
-
-                            {/* Model */}
-                            <div className="flex items-center gap-3">
-                                <label
-                                    htmlFor="model"
-                                    className="text-sm font-medium text-gray-600"
-                                >
-                                    Model
-                                </label>
-                                <input
-                                    id="model"
-                                    type="text"
-                                    name="model"
-                                    value={formData.model}
-                                    onChange={handleChange}
-                                    placeholder="Model"
-                                    className="flex-1 rounded border border-gray-300 px-3 py-2"
-                                    required
-                                />
-                            </div>
-
-                            {/* Registration No */}
-                            <div className="flex items-center gap-3">
-                                <label
-                                    htmlFor="regNo"
-                                    className="text-sm font-medium text-gray-600"
-                                >
-                                    Registration No
-                                </label>
-                                <input
-                                    id="regNo"
-                                    type="text"
-                                    name="regNo"
-                                    value={formData.regNo}
-                                    onChange={handleChange}
-                                    placeholder="Registration No"
-                                    className="flex-1 rounded border border-gray-300 px-3 py-2"
-                                    required
-                                />
-                            </div>
-
-                            {/* Buttons */}
-                            <div className="flex justify-end gap-3 pt-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="rounded bg-gray-200 px-4 py-2 text-gray-600 hover:bg-gray-300"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isCreating || isUpdating}
-                                    className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                                >
-                                    {editingVehicle
-                                        ? isUpdating
-                                            ? "Updating..."
-                                            : "Update"
-                                        : isCreating
-                                          ? "Adding..."
-                                          : "Add"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </ModalContainer>
+            {/* Vehicle Info Modal */}
+            {isInfoModalOpen && (
+                <VehicleInfoModal
+                    isOpen={isInfoModalOpen}
+                    onClose={() => setIsInfoModalOpen(false)}
+                    editingVehicle={editingVehicle}
+                    formData={formData}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                    isCreating={isCreating}
+                    isUpdating={isUpdating}
+                />
             )}
 
             {/* Confirm Delete Modal */}
             <ConfirmDialog
-                isOpen={!!deleteTargetId}
+                isOpen={!!deletingVehicleId}
                 title="Confirm Delete"
                 message="Are you sure you want to delete this vehicle? This action cannot be undone."
                 onConfirm={handleConfirmDelete}
-                onCancel={() => setDeleteTargetId(null)}
+                onCancel={() => setDeletingVehicleId(null)}
             />
+
+            {isTransactionModalOpen && (
+                <VehicleTransactionModal
+                    isOpen={isTransactionModalOpen}
+                    onClose={() => setIsTransactionModalOpen(false)}
+                    transactionVehicle={transactionVehicleId}
+                    transactionData={transactionData}
+                    handleTransactionChange={handleTransactionChange}
+                    handleTransactionSubmit={handleTransactionSubmit}
+                    isRecording={isRecording}
+                />
+            )}
+
+            {IshistoryModalOpen && (
+                <ModalContainer onClose={() => setIshistoryModalOpen(false)}>
+                    <div className="p-4">
+                        <h2 className="mb-4 text-lg font-semibold">
+                            Transaction History
+                        </h2>
+
+                        {isTransactionsLoading ? (
+                            <p>Loading...</p>
+                        ) : transactionsHistory?.data?.length ? (
+                            <ul className="space-y-2">
+                                {transactionsHistory.data.map((txn) => (
+                                    <li
+                                        key={txn.id}
+                                        className="rounded border p-2 text-sm text-gray-600"
+                                    >
+                                        <span className="font-medium">
+                                            {txn.category}
+                                        </span>{" "}
+                                        - {txn.amount} ({txn.paymentMethod})
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500">
+                                No transactions found.
+                            </p>
+                        )}
+                    </div>
+                </ModalContainer>
+            )}
         </div>
     );
 }

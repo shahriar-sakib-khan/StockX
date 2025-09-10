@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @typedef {"user" | "vehicles" | "vehicle" | "brands" | "detailed_brands" | "shops" | "shop"} QueryKey
+ * @typedef {"user" | "vehicles" | "vehicle" | "vehicle_transaction" | "vehicle_transactions" | "brands" | "detailed_brands" | "shops" | "shop"} QueryKey
  */
 
 /** @type {QueryKey} */
@@ -11,6 +11,10 @@ export const AUTH = "user";
 export const VEHICLES = "vehicles";
 /** @type {QueryKey} */
 export const VEHICLE = "vehicle";
+/** @type {QueryKey} */
+export const VEHICLE_TRANSACTION = "vehicle_transaction";
+/** @type {QueryKey} */
+export const VEHICLE_TRANSACTIONS = "vehicle_transactions";
 
 /** @type {QueryKey} */
 export const BRANDS = "brands";
