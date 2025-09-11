@@ -6,9 +6,9 @@
 
 import { Types } from 'mongoose';
 
-import { Account, Transaction, TxCategory } from '@/models';
-import { Errors } from '@/error';
+import { Account, ITransaction, Transaction, TxCategory } from '@/models';
 import { transactionSanitizers, txCategorySanitizers } from '@/utils';
+import { Errors } from '@/error';
 
 /**
  * ----------------- Transactions Generals -----------------
@@ -107,7 +107,7 @@ export const recordTransaction = async (
   workspaceId: string,
   divisionId: string,
   userData: any
-): Promise<transactionSanitizers.SanitizedTransaction> => {
+): Promise<ITransaction> => {
   const {
     amount,
     category,
@@ -178,7 +178,7 @@ export const recordTransaction = async (
     details: { description, ...otherDetails },
   });
 
-  return transactionSanitizers.transactionSanitizer(tx);
+  return tx;
 };
 
 /**

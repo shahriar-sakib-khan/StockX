@@ -69,7 +69,7 @@ export const recordVehicleTransaction = async (req: Request, res: Response) => {
   const { userId } = req.user;
   const { workspaceId, divisionId, vehicleId } = req.params;
 
-  const { vehicle, tsRecords } = await vehicleService.recordVehicleTransaction(
+  const { vehicle, transaction } = await vehicleService.recordVehicleTransaction(
     userId,
     workspaceId,
     divisionId,
@@ -77,7 +77,7 @@ export const recordVehicleTransaction = async (req: Request, res: Response) => {
     req.body
   );
 
-  res.status(StatusCodes.OK).json({ vehicle, tsRecords });
+  res.status(StatusCodes.OK).json({ vehicle, transaction });
 };
 
 export const getVehicleTransactions = async (req: Request, res: Response) => {

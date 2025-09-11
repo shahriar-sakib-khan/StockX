@@ -7,7 +7,7 @@ import inventoryRouter from './inventory.router';
 import transactionRouter from './transaction.router';
 import vehicleRouter from './vehicle.router';
 import storeRouter from './store.router';
-import { staffRouter } from '@/feats/routers';
+import { staffRouter, cycleRouter } from '@/feats/routers';
 
 const router = Router({ mergeParams: true });
 
@@ -192,6 +192,11 @@ router.delete(
 );
 
 /**
+ * ----------------- Division Cycle Sub-Routes -----------------
+ */
+router.use('/:divisionId/', divisionScope(), cycleRouter);
+
+/**
  * ----------------- Division Vehicle Sub-Routes -----------------
  */
 router.use('/:divisionId/vehicles', divisionScope(), vehicleRouter);
@@ -214,6 +219,6 @@ router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
 /**
  * ----------------- Division Staff Sub-Routes -----------------
  */
-router.use('/:divisionId/staff', divisionScope(), staffRouter);
+router.use('/:divisionId/', divisionScope(), staffRouter);
 
 export default router;

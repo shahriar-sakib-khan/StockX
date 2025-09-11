@@ -22,7 +22,7 @@ const router = Router({ mergeParams: true });
  * @access  Admin (division)
  */
 router.post(
-  '/',
+  '/staff',
   divisionScope(['division_admin']),
   validateRequest(staffValidator.staffInputSchema),
   staffController.createStaff
@@ -33,14 +33,14 @@ router.post(
  * @desc    Get all staff members in a division
  * @access  Authenticated
  */
-router.get('/', staffController.getAllStaff);
+router.get('/staff', staffController.getAllStaff);
 
 /**
  * @route   GET /:workspaceId/divisions/:divisionId/staff/:staffId
  * @desc    Get details of a single staff member
  * @access  Authenticated
  */
-router.get('/:staffId', staffController.getSingleStaff);
+router.get('/staff/:staffId', staffController.getSingleStaff);
 
 /**
  * @route   PUT /:workspaceId/divisions/:divisionId/staff/:staffId
@@ -48,7 +48,7 @@ router.get('/:staffId', staffController.getSingleStaff);
  * @access  Admin (division)
  */
 router.put(
-  '/:staffId',
+  '/staff/:staffId',
   divisionScope(['division_admin']),
   validateRequest(staffValidator.updateStaffSchema),
   staffController.updateStaff
@@ -59,6 +59,6 @@ router.put(
  * @desc    Remove a staff member
  * @access  Admin (division)
  */
-router.delete('/:staffId', divisionScope(['division_admin']), staffController.deleteStaff);
+router.delete('/staff/:staffId', divisionScope(['division_admin']), staffController.deleteStaff);
 
 export default router;

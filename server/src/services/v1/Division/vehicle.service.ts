@@ -232,10 +232,8 @@ export const recordVehicleTransaction = async (
   });
 
   return {
-    vehicleDoc: vehicleSanitizers.vehicleSanitizer(vehicle),
-    transactionDoc: transactionSanitizers.transactionSanitizer(
-      transaction as unknown as ITransaction
-    ),
+    vehicle: vehicleSanitizers.vehicleSanitizer(vehicle),
+    transaction: transactionSanitizers.transactionSanitizer(transaction),
   };
 };
 
