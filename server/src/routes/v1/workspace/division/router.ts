@@ -7,7 +7,7 @@ import inventoryRouter from './inventory.router';
 import transactionRouter from './transaction.router';
 import vehicleRouter from './vehicle.router';
 import storeRouter from './store.router';
-import staffRouter from './staff.router';
+import { staffRouter } from '@/feats/routers';
 
 const router = Router({ mergeParams: true });
 

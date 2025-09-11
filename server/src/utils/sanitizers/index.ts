@@ -44,7 +44,6 @@ export * as cylinderSanitizers from './division/cylinderSanitizer';
 
 export * as vehicleSanitizers from './division/vehicleSanitizers';
 export * as storeSanitizers from './division/storeSanitizers';
-export * as staffSanitizers from './division/staffSanitizers';
 
 export * as transactionSanitizers from './division/transactionSanitizers';
 

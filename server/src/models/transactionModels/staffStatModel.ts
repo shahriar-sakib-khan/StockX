@@ -5,6 +5,7 @@ export interface IStaffStats extends Document {
   division: Types.ObjectId;
 
   staffId: Types.ObjectId;
+  salary: number;
   totalSalaryPaid: number;
   lastPaidAt?: Date;
   lastUpdatedAt: Date;

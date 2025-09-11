@@ -1,5 +1,5 @@
 /**
- * @module staff.service
+ * @module staffValidator.service
  *
  * @description Services for staff-related operations within workspace divisions.
  * Handles CRUD, salary plans, attendance tracking, and payments.
@@ -7,10 +7,8 @@
 
 import { Types } from 'mongoose';
 
-import { Staff } from '@/models';
 import { Errors } from '@/error';
-import { staff } from '@/validations';
-import { staffSanitizers } from '@/utils';
+import { Staff, staffValidator, staffSanitizers } from '@/feats/staff';
 
 /**
  * ----------------- Staff CRUD -----------------
@@ -20,13 +18,13 @@ import { staffSanitizers } from '@/utils';
  * @function createStaff
  * @description Create a new staff member within a division and workspace.
  *
- * @param {staff.StaffInput} staffData - Staff creation data.
+ * @param {staffValidator.StaffInput} staffData - Staff creation data.
  * @param {string} workspaceId - Workspace ID.
  * @param {string} divisionId - Division ID.
  * @returns {Promise<staffSanitizers.SanitizedStaff>} Created staff document.
  */
 export const createStaff = async (
-  staffData: staff.CreateStaffInput,
+  staffData: staffValidator.CreateStaffInput,
   workspaceId: string,
   divisionId: string
 ): Promise<staffSanitizers.SanitizedStaff> => {
@@ -81,14 +79,14 @@ export const getSingleStaff = async (
  * @function updateStaff
  * @description Update staff member information.
  *
- * @param {staff.UpdateStaffInput} staffData - Fields to update.
+ * @param {staffValidator.UpdateStaffInput} staffData - Fields to update.
  * @param {string} workspaceId - Workspace ID.
  * @param {string} divisionId - Division ID.
  * @param {string} staffId - Staff ID.
  * @returns {Promise<staffSanitizers.SanitizedStaff>} Updated staff document.
  */
 export const updateStaff = async (
-  staffData: staff.UpdateStaffInput,
+  staffData: staffValidator.UpdateStaffInput,
   workspaceId: string,
   divisionId: string,
   staffId: string
@@ -151,7 +149,7 @@ export const deleteStaff = async (
  * @param {number} limit - Records per page.
  * @returns {Promise<staffSanitizers.SanitizedStaffs & { total: number }>} Paginated staff list.
  */
-export const getAllStaff = async (
+export const getAllStaffs = async (
   workspaceId: string,
   divisionId: string,
   page: number,
@@ -187,5 +185,5 @@ export default {
   getSingleStaff, // Get details of a single staff member
   updateStaff, // Update staff member details
   deleteStaff, // Delete a staff member
-  getAllStaff, // Get all staff members in a division
+  getAllStaffs, // Get all staff members in a division
 };

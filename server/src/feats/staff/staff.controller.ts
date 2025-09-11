@@ -7,8 +7,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { staffService } from '@/services/v1';
-import { assertAuth } from '@/common';
+import { staffService } from '@/feats/staff';
 
 /**
  * ----------------- Staff CRUD Controllers -----------------
@@ -27,7 +26,7 @@ export const getAllStaff = async (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
 
-  const { staff, total } = await staffService.getAllStaff(workspaceId, divisionId, page, limit);
+  const { staff, total } = await staffService.getAllStaffs(workspaceId, divisionId, page, limit);
 
   res.status(StatusCodes.OK).json({ total, page, limit, staff });
 };
@@ -57,42 +56,6 @@ export const deleteStaff = async (req: Request, res: Response) => {
 };
 
 /**
- * ----------------- Staff Transaction Controllers -----------------
- */
-
-// export const recordStaffTransaction = async (req: Request, res: Response) => {
-//   assertAuth(req);
-//   const { userId } = req.user;
-//   const { workspaceId, divisionId, staffId } = req.params;
-
-//   const payment = await staffService.recordStaffTransaction(
-//     userId,
-//     workspaceId,
-//     divisionId,
-//     staffId,
-//     req.body
-//   );
-
-//   res.status(StatusCodes.CREATED).json({ message: 'Payment recorded successfully', payment });
-// };
-
-// export const getStaffTransactions = async (req: Request, res: Response) => {
-//   const { workspaceId, divisionId, staffId } = req.params;
-//   const page = Math.max(Number(req.query.page) || 1, 1);
-//   const limit = Math.min(Number(req.query.limit) || 20, 100);
-
-//   const { payments, total } = await staffService.getStaffTransactions(
-//     workspaceId,
-//     divisionId,
-//     staffId,
-//     page,
-//     limit
-//   );
-
-//   res.status(StatusCodes.OK).json({ total, page, limit, payments });
-// };
-
-/**
  * ----------------- Default Exports (staffController) -----------------
  */
 
@@ -102,7 +65,4 @@ export default {
   getSingleStaff, // Get details of a single staff member
   updateStaff, // Update staff member details
   deleteStaff, // Delete a staff member
-
-  // recordStaffTransaction, // Record a payment made to a staff member
-  // getStaffTransactions, // Get all payments made to a staff member
 };

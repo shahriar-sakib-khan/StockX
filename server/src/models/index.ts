@@ -20,9 +20,6 @@ export type { IDivision } from './divisionModels/divisionModel.js';
 export { default as DivisionMembership } from './divisionModels/divisionMembershipModel.js';
 export type { IDivisionMembership } from './divisionModels/divisionMembershipModel.js';
 
-export { default as Staff } from './divisionModels/staffModel.js';
-export type { IStaff } from './divisionModels/staffModel.js';
-
 export { default as Store } from './divisionModels/storeModel.js';
 export type { IStore } from './divisionModels/storeModel.js';
 

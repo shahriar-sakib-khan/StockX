@@ -1,8 +1,7 @@
 import { Router } from 'express';
 
-import { staffController } from '@/controllers/v1';
 import { validateRequest, divisionScope } from '@/middlewares';
-import { staff } from '@/validations';
+import { staffController, staffValidator } from '@/feats/staff';
 
 const router = Router({ mergeParams: true });
 
@@ -25,7 +24,7 @@ const router = Router({ mergeParams: true });
 router.post(
   '/',
   divisionScope(['division_admin']),
-  validateRequest(staff.staffInputSchema),
+  validateRequest(staffValidator.staffInputSchema),
   staffController.createStaff
 );
 
@@ -51,7 +50,7 @@ router.get('/:staffId', staffController.getSingleStaff);
 router.put(
   '/:staffId',
   divisionScope(['division_admin']),
-  validateRequest(staff.updateStaffSchema),
+  validateRequest(staffValidator.updateStaffSchema),
   staffController.updateStaff
 );
 

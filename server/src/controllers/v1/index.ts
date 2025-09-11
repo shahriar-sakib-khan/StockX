@@ -10,7 +10,6 @@ export { default as divisionController } from './division.controller';
 
 export { default as vehicleController } from './vehicle.controller';
 export { default as storeController } from './store.controller';
-export { default as staffController } from './staff.controller';
 
 export { default as inventoryController } from './inventory.controller';
 

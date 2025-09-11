@@ -1,6 +1,6 @@
 import { HydratedDocument } from 'mongoose';
 
-import { IStaff } from '@/models';
+import { IStaff } from '@/feats/staff';
 import {
   resolveRef,
   listSanitizer,

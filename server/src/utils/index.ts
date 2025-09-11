@@ -16,7 +16,6 @@ export {
   cylinderSanitizers,
   vehicleSanitizers,
   storeSanitizers,
-  staffSanitizers,
   transactionSanitizers,
   accountSanitizers,
   txCategorySanitizers,
