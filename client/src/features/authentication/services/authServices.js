@@ -47,3 +47,15 @@ export const getUser = async () => API.get("/user/me");
  * @returns {Promise<UpdateUserResponse>}
  */
 export const updateUser = async (data) => API.patch("/user/me", data);
+
+
+export const CreateWorkspace = async (data) => API.post("/workspace", data);
+export const getMyWorkspaces = async () => API.get("/workspace/mine");
+export const CreateDivision = async (data, workspaceId) => {
+    return API.post(`/workspace/${workspaceId}/divisions`, data)};
+export const getWorkspaceDivisions = async (workspaceId) => {
+    return API.get(`/workspace/${workspaceId}/divisions`)};
+
+
+
+

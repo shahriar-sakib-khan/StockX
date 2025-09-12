@@ -15,6 +15,11 @@ import {
     SupportPage,
     PricingPage,
     ServicesPage,
+    CreateOrJoin,
+    CreateWorkspace,
+    CreateDivision,
+    SelectWorkspace,
+    SelectDivision,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
@@ -32,6 +37,11 @@ const router = createBrowserRouter([
             { path: "services", element: <ServicesPage /> },
             { path: "login", element: <LoginPage /> },
             { path: "signup", element: <SignupPage /> },
+            { path: "createOrJoin",  element:<CreateOrJoin />},
+            { path: "createWorkspace",  element:<CreateWorkspace />},
+            { path: "createDivision",  element:<CreateDivision />},
+            { path: "selectWorkspace",  element:<SelectWorkspace />},
+            { path: "selectDivision",  element:<SelectDivision />},
             {
                 path: "dashboard",
                 element: (

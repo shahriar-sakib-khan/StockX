@@ -13,9 +13,14 @@ import {
     useRecordVehicleTransaction,
     useVehicleTransactions,
 } from "@/features/vehicle/hooks/vehicleHooks";
-import { workspaceId, divisionId } from "@/constants/ids";
+
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function VehiclePage() {
+    
+    const workspaceId = useAuthStore((state) => state.currentWorkspace).id;
+    const divisionId = useAuthStore((state) => state.currentDivision).id;
+    
     // Fetch: all vehicles
     const {
         data: vehicles = [],

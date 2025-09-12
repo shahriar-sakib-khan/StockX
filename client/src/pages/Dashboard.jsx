@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
     InventoryOverviewSection,
     QuickActionsSection,
@@ -7,14 +8,31 @@ import { Heading } from "../features/dashboard/utils/Heading";
 import { Section } from "../features/dashboard/utils/Section";
 import { useUIStore } from "../stores/useUIStore";
 import { PiWallet as WalletIcon } from "react-icons/pi";
+import { useAuthStore } from "../stores/useAuthStore";
+import { logOnce } from "./utils/logOnce";
+
 
 export default function Dashboard() {
     const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+    const user = useAuthStore((state) => state.user);
+    const workspace = useAuthStore((state) => state.currentWorkspace);
+    const division = useAuthStore((state) => state.currentDivision);
+
+    // Logging safely in useEffect to avoid double logs in React 18 Strict Mode
+    useEffect(() => {
+        logOnce("👤 User from DB:", user);
+        logOnce("👤 Current workspace:", workspace);
+        logOnce("👤 Current division:", division);
+    }, [user, workspace, division]);
 
     return (
         <div className="grid h-[var(--height-with-nav-titlebar)] grid-cols-[auto_1fr] bg-amber-50">
             <main
-                className={`flex flex-col gap-4 overflow-auto bg-gray-50 transition-all ${isSidebarOpen ? "w-[var(--width-with-sidebar-lg-rightbar)]" : "w-[var(--width-with-sidebar-sm-rightbar)]"}`}
+                className={`flex flex-col gap-4 overflow-auto bg-gray-50 transition-all ${
+                    isSidebarOpen
+                        ? "w-[var(--width-with-sidebar-lg-rightbar)]"
+                        : "w-[var(--width-with-sidebar-sm-rightbar)]"
+                }`}
             >
                 <StatsSection />
                 <QuickActionsSection />
@@ -72,14 +90,10 @@ export default function Dashboard() {
                         <div className="flex flex-col gap-2">
                             <div className="ml-3 flex items-center gap-2">
                                 <WalletIcon className="size-8 rounded-sm bg-blue-100 p-1 text-2xl text-blue-600" />
-                                <h2 className="text-lg text-gray-400">
-                                    Balance
-                                </h2>
+                                <h2 className="text-lg text-gray-400">Balance</h2>
                             </div>
                             <div className="mt-1 w-full pl-2 text-left">
-                                <span
-                                    className={`text-3xl font-semibold text-gray-600`}
-                                >
+                                <span className={`text-3xl font-semibold text-gray-600`}>
                                     {"15,000".toLocaleString()}
                                 </span>{" "}
                                 <span className={`text-sm`}>Tk</span>

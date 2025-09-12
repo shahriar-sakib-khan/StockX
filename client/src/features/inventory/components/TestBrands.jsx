@@ -3,9 +3,12 @@ import {
     getDetailedBrands,
     getBrands,
 } from "../../brands/services/brandServices";
-import { divisionId, workspaceId } from "@/constants/ids";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function TestBrands() {
+    const workspaceId = useAuthStore((state) => state.currentWorkspace).id;
+    const divisionId = useAuthStore((state) => state.currentDivision).id;
+    
     useEffect(() => {
         async function fetchBrands() {
             try {

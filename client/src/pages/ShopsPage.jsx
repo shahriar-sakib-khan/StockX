@@ -1,5 +1,4 @@
 import { ConfirmDialog, Spinner } from "@/components";
-import { divisionId, workspaceId } from "@/constants/ids";
 import ShopInfoModal from "@/features/shop/components/ShopleInfoModal";
 import {
     useAllShops,
@@ -9,8 +8,12 @@ import {
 } from "@/features/shop/hooks/shopHooks";
 import { useState } from "react";
 import { ShopCard } from "../features";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function ShopsPage() {
+    const workspaceId = useAuthStore((state) => state.currentWorkspace).id;
+    const divisionId = useAuthStore((state) => state.currentDivision).id;
+    
     // Fetch: all shops
     const {
         data: shops = [],
