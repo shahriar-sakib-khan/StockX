@@ -1,5 +1,6 @@
-import { txConstants } from '@/common/constants';
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+
+import { txConstants } from '@/common/constants/index.js';
 
 export interface ITxCategory extends Document {
   workspace: Types.ObjectId;

@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
-import { roleConstants } from '@/common/constants';
+import { roleConstants } from '@/common/constants/index.js';
 
 /**
  * TypeScript Interface for User fields

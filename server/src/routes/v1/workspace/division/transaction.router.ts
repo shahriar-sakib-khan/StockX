@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { transactionController } from '@/controllers/v1';
-import { validateRequest } from '@/middlewares';
-import { transaction } from '@/validations';
+import { transactionController } from '@/controllers/v1/index.js';
+import { validateRequest } from '@/middlewares/index.js';
+import { transaction } from '@/validations/index.js';
 
 const router = Router({ mergeParams: true });
 

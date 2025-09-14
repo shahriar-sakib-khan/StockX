@@ -1,9 +1,9 @@
-import seedGlobalBrands from './seedGlobalBrands';
+import seedGlobalBrands from './seedGlobalBrands.js';
 
-export { default as seedLocalBrands } from './seedLocalBrands';
-export { default as seedLocalCylinders } from './seedLocalCylinders';
-export { default as seedBaseTxCategories } from './seedBaseTxCategories';
-export { default as seedBaseAccounts } from './seedBaseAccounts';
+export { default as seedLocalBrands } from './seedLocalBrands.js';
+export { default as seedLocalCylinders } from './seedLocalCylinders.js';
+export { default as seedBaseTxCategories } from './seedBaseTxCategories.js';
+export { default as seedBaseAccounts } from './seedBaseAccounts.js';
 
 export default async function runBootstrap() {
   await seedGlobalBrands();

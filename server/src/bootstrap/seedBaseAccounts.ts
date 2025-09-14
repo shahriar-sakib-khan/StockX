@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-import { Account } from '@/models';
+import { Account } from '@/models/index.js';
 
 const defaultChartOfAccounts = [
   // ======================== Assets ========================

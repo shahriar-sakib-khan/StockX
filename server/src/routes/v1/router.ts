@@ -1,12 +1,12 @@
 import { Router } from 'express';
 
-import authRouter from './auth/router';
-import adminRouter from './admin/router';
-import userRouter from './user/router';
-import paymentRouter from './payment';
-import workspaceRouter from './workspace/router';
+import authRouter from './auth/router.js';
+import adminRouter from './admin/router.js';
+import userRouter from './user/router.js';
+import paymentRouter from './payment/index.js';
+import workspaceRouter from './workspace/router.js';
 
-import { requireAuth, requireRole } from '@/middlewares';
+import { requireAuth, requireRole } from '@/middlewares/index.js';
 
 const router = Router();
 

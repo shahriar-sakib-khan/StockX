@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Membership, Workspace } from '@/models';
+import { Membership, Workspace } from '@/models/index.js';
 import { assertAuth } from '@/common/assertions.js';
 import { StatusCodes } from 'http-status-codes';
 

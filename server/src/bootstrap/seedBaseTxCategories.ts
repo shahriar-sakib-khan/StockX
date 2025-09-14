@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-import { TxCategory } from '@/models';
+import { TxCategory } from '@/models/index.js';
 
 const defaultTxCategoryList = [
   // ======================== Retail Sales ========================

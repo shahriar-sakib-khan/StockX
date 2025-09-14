@@ -1,7 +1,6 @@
 import 'express';
 
-import { IMembership } from '@/models/Membership';
-import { IDivisionMembership } from '@/models/DivisionMembership';
+import { IMembership, IDivisionMembership } from '@/models/index.js';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -11,12 +10,29 @@ declare module 'express-serve-static-core' {
       email?: string;
       username?: string;
     };
+
     workspace?: {
       workspaceId: string;
       name: string;
     };
 
-    membership?: IMembership;
-    divMembership?: IDivisionMembership;
+    membership?: {
+      user: string;
+      workspace: string;
+      workspaceRoles: string[];
+    };
+
+    divMembership?: {
+      user: string;
+      division: string;
+      divisionRoles: string[];
+    };
+
+    cycle?: {
+      cycleId: string;
+      month: number;
+      year: number;
+      isClosed: boolean;
+    };
   }
 }

@@ -1,5 +1,5 @@
-export { default as User } from './userModel';
-export type { IUser } from './userModel';
+export { default as User } from './userModel.js';
+export type { IUser } from './userModel.js';
 
 export { default as PaymentTransaction } from './transactionModel.js';
 

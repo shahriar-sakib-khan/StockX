@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-import DivisionMembership from './divisionMembershipModel';
+import DivisionMembership from './divisionMembershipModel.js';
 
 export interface IDivision extends Document {
   workspace: Types.ObjectId;

@@ -1,8 +1,8 @@
 import { body } from 'express-validator';
 
 import withValidationErrors from './withValidationErrors.js';
-import { User } from '../../models/index.js';
-import { roleConstants } from '@/common/constants';
+import { User } from '@/models/index.js';
+import { roleConstants } from '@/common/constants/index.js';
 
 /**
  * Update-user input validation

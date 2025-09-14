@@ -7,8 +7,8 @@
 
 import { Types } from 'mongoose';
 
-import { Errors } from '@/error';
-import { Staff, staffValidator, staffSanitizers } from '@/feats/staff';
+import { Errors } from '@/error/index.js';
+import { Staff, staffValidator, staffSanitizers } from '@/feats/staff/index.js';
 
 /**
  * ----------------- Staff CRUD -----------------

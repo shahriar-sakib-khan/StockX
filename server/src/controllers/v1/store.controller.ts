@@ -7,7 +7,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { storeService } from '@/services/v1';
+import { storeService } from '@/services/v1/index.js';
 
 /**
  * ----------------- Store CRUD Controllers -----------------

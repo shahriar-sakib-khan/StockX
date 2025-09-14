@@ -1,22 +1,25 @@
-export { authService } from './auth';
+export { authService } from './auth/index.js';
 
 export * as sslService from './sslcommerzService.js';
 // export * as transactionService from './transactionService.js';
 
-export { userService } from './user';
+export { userService } from './user/index.js';
 
-export { adminUserService } from './admin';
-
-export { workspaceService, memberService, roleService, inviteService } from './workspace';
+export { adminUserService } from './admin/index.js';
 
 export {
+  workspaceService,
+  memberService,
+  roleService,
+  inviteService,
+  // divisionServices
   divisionService,
   divisionMembersService,
   divisionRolesService,
   vehicleService,
   storeService,
-} from './division';
+} from './workspace/index.js';
 
-export { brandService, cylinderService } from './inventory';
+export { brandService, cylinderService } from './inventory/index.js';
 
-export { transactionService } from './transaction';
+export { transactionService } from './transaction/index.js';

@@ -15,20 +15,11 @@
     "strict": true,
     "noEmitOnError": true,
     "isolatedModules": true,
-    "types": ["node"],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["*"],
-      "@/controllers/*": ["controllers/*"],
-      "@/services/*": ["services/*"],
-      "@/models/*": ["models/*"],
-      "@/middlewares/*": ["middlewares/*"],
-      "@/utils/*": ["utils/*"],
-      "@/config/*": ["config/*"]
+      "@/*": ["*"]
     }
   },
-  "include": ["src", "src/types"],
+  "include": ["src", "src/types", "sanitizers", "node_modules/@types"],
   "exclude": ["node_modules", "dist"]
 }

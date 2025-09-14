@@ -6,11 +6,11 @@
 
 import { HydratedDocument, Types } from 'mongoose';
 
-import { IWorkspace, Membership, Workspace } from '@/models';
-import { WorkspaceInput } from '@/validations/workspace.validation';
-import { Errors } from '@/error';
-import { workspaceSanitizers } from '@/utils';
-import { workspaceMembershipSanitizers } from '@/utils/sanitizers';
+import { IWorkspace, Membership, Workspace } from '@/models/index.js';
+import { WorkspaceInput } from '@/validations/workspace.validation.js';
+import { Errors } from '@/error/index.js';
+import { workspaceSanitizers } from '@/sanitizers/index.js';
+import { workspaceMembershipSanitizers } from '@/sanitizers/index.js';
 
 /**
  * @function createWorkspace

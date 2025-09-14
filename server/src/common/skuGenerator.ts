@@ -1,4 +1,4 @@
-import { Cylinder } from '@/models';
+import { Cylinder } from '@/models/index.js';
 import { Types } from 'mongoose';
 
 interface GenerateSKUInput {

@@ -1,9 +1,10 @@
 import { Types } from 'mongoose';
 
-import { Invite, Membership, User } from '@/models';
-import { Errors } from '@/error';
-import { workspace } from '@/validations';
-import { workspaceMembershipSanitizers, Tokens } from '@/utils';
+import { Invite, Membership, User } from '@/models/index.js';
+import { Errors } from '@/error/index.js';
+import { workspace } from '@/validations/index.js';
+import { Tokens } from '@/utils/index.js';
+import { workspaceMembershipSanitizers } from '@/sanitizers/index.js';
 
 /**
  * @function sendWorkspaceInvite

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { userController } from '@/controllers/v1';
+import { userController } from '@/controllers/v1/index.js';
 
 /**
  * @swagger

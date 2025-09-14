@@ -4,10 +4,10 @@
  * @description Services for user-related operations (admin scope)
  */
 
-import { User } from '@/models';
-import { Errors } from '@/error';
-import { userSanitizers } from '@/utils';
-import { user } from '@/validations';
+import { User } from '@/models/index.js';
+import { Errors } from '@/error/index.js';
+import { userSanitizers } from '@/sanitizers/index.js';
+import { user } from '@/validations/index.js';
 
 /**
  * @function getAllUsers

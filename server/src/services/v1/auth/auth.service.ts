@@ -1,7 +1,8 @@
-import { User } from '@/models';
-import { Errors } from '@/error';
-import { auth } from '@/validations';
-import { JWTs, Passwords, userSanitizers } from '@/utils';
+import { User } from '@/models/index.js';
+import { Errors } from '@/error/index.js';
+import { auth } from '@/validations/index.js';
+import { userSanitizers } from '@/sanitizers/index.js';
+import { Passwords, JWTs } from '@/utils/index.js';
 
 /**
  * Register a new user.

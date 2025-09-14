@@ -1,4 +1,4 @@
-import { GlobalBrand } from '@/models';
+import { GlobalBrand } from '@/models/index.js';
 
 const defaultBrands = [
   {

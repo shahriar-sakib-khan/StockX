@@ -1,7 +1,6 @@
-import { Errors } from '@/error';
-import { Workspace, IWorkspace, Membership } from '@/models';
-import { RolesInput } from '@/validations/workspace.validation';
-import { workspaceMembershipSanitizers } from '@/utils';
+import { Errors } from '@/error/index.js';
+import { Workspace, IWorkspace } from '@/models/index.js';
+import { RolesInput } from '@/validations/workspace.validation.js';
 
 /**
  * All roles of the workspace.

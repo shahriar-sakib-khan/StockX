@@ -9,8 +9,8 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { adminUserService, brandService } from '@/services/v1';
-import { assertAuth } from '@/common';
+import { adminUserService, brandService } from '@/services/v1/index.js';
+import { assertAuth } from '@/common/index.js';
 
 /**
  * ----------------- Admin User CRUD -----------------

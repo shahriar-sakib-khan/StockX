@@ -5,7 +5,7 @@
  */
 import { z } from 'zod';
 
-import { txConstants } from '@/common';
+import { txConstants } from '@/common/index.js';
 
 /**
  * VehicleInputSchema
@@ -42,7 +42,6 @@ export type UpdateVehicleInput = z.infer<typeof updateVehicleSchema>;
 */
 
 /**
- * VehicleTransactionInput
  * @property {number} amount - Required. Transaction amount, must be greater than 0.
  * @property {VehicleCategoryType} category - Required. Must be one of vehicle-related categories.
  * @property {PaymentMethodType} [paymentMethod] - Optional. One of 'cash', 'bank', 'mobile', 'due', 'other'.

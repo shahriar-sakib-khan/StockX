@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-import { constants } from '@/common/constants';
+import { constants } from '@/common/constants/index.js';
 
 export interface IDivisionMembership extends Document {
   workspace: Types.ObjectId;
@@ -9,7 +9,6 @@ export interface IDivisionMembership extends Document {
   user: Types.ObjectId;
   divisionRoles: string[];
   status: constants.DivisionMembershipStatusType;
-  // status: 'active' | 'removed';
   addedBy?: Types.ObjectId | null;
   removedBy?: Types.ObjectId | null;
 
@@ -25,6 +24,7 @@ const divisionMembershipSchema: Schema<IDivisionMembership> = new Schema(
     divisionRoles: { type: [String], default: [] },
     status: { type: String, enum: constants.DivisionMembershipStatuses, default: 'active' },
     addedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    removedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );

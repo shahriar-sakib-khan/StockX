@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
-import { workspaceScope, validateRequest } from '@/middlewares';
-import { workspaceController } from '@/controllers/v1';
-import { workspace } from '@/validations';
-import workspaceMemberRouter from './member.router';
-import workspaceInviteRouter from './invite.router';
-import divisionRouter from './division/router';
+import { workspaceScope, validateRequest } from '@/middlewares/index.js';
+import { workspaceController } from '@/controllers/v1/index.js';
+import { workspace } from '@/validations/index.js';
+import workspaceMemberRouter from './member.router.js';
+import workspaceInviteRouter from './invite.router.js';
+import divisionRouter from './division/router.js';
 
 const router = Router();
 

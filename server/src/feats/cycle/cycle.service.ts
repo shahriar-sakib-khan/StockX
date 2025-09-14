@@ -7,9 +7,8 @@
 
 import { Types } from 'mongoose';
 
-import { Errors } from '@/error';
-import { Cycle } from '@/feats/cycle';
-import { cycleValidator, cycleSanitizers } from '@/feats/cycle';
+import { Errors } from '@/error/index.js';
+import { Cycle, cycleValidator, cycleSanitizers } from '@/feats/cycle/index.js';
 
 /**
  * ----------------- Create a New Cycle -----------------

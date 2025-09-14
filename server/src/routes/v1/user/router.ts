@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { userController } from '@/controllers/v1';
-import { validateRequest } from '@/middlewares';
-import { user } from '@/validations';
-import userInviteRouter from './userInvite.router';
+import { userController } from '@/controllers/v1/index.js';
+import { validateRequest } from '@/middlewares/index.js';
+import { user } from '@/validations/index.js';
+import userInviteRouter from './userInvite.router.js';
 
 /**
  * @swagger

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import { inventoryController } from '@/controllers/v1';
-import { divisionScope } from '@/middlewares';
+import { inventoryController } from '@/controllers/v1/index.js';
+import { divisionScope } from '@/middlewares/index.js';
 
 const router = Router({ mergeParams: true });
 

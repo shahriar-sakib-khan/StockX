@@ -1,2 +1,3 @@
-export { default as staffRouter } from './staff.routes';
-export { default as cycleRouter } from './cycle.routes';
+export { default as staffRouter } from './staff.routes.js';
+export { default as cycleRouter } from './cycle.routes.js';
+export { default as salaryRouter } from './salary.routes.js';

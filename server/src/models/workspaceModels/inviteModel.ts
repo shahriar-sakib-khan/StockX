@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-import { constants } from '@/common/constants';
+import { constants } from '@/common/constants/index.js';
 
 export interface IInvite extends Document {
   workspace: Types.ObjectId;

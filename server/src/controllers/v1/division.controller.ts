@@ -29,9 +29,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions';
-import { divisionService, divisionMembersService, divisionRolesService } from '@/services/v1';
-import { seedBaseTxCategories, seedBaseAccounts, seedLocalBrands } from '@/bootstrap';
+import { assertAuth } from '@/common/assertions.js';
+import { divisionService, divisionMembersService, divisionRolesService } from '@/services/v1/index.js';
+import { seedBaseTxCategories, seedBaseAccounts, seedLocalBrands } from '@/bootstrap/index.js';
 
 // <============================> General Division Controllers <============================>
 

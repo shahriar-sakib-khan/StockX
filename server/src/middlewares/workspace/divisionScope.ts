@@ -1,14 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions';
-import { Division, DivisionMembership } from '@/models';
+import { assertAuth, assertMembership } from '@/common/assertions.js';
+import { Division, DivisionMembership } from '@/models/index.js';
 
 const divisionScope = (allowedRoles: string[] = []) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     assertAuth(req);
     const { userId, role } = req.user;
     const { workspaceId, divisionId } = req.params;
+    assertMembership(req);
     const { user } = req.membership;
 
     // Validate required objects exist
@@ -47,7 +48,7 @@ const divisionScope = (allowedRoles: string[] = []) => {
 
     // Assign division-membership to request object
     req.divMembership = {
-      userId,
+      user: userId,
       division: divisionId,
       divisionRoles: divisionMembership.divisionRoles,
     };

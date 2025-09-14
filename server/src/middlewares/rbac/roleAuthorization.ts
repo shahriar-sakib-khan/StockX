@@ -1,4 +1,4 @@
-import { assertAuth } from '@/common';
+import { assertAuth } from '@/common/index.js';
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 

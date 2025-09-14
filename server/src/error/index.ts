@@ -1,2 +1,2 @@
-export { default as Errors } from './customErrors';
-export { default as errorHandler } from './errorHandlerMiddleware';
+export { default as Errors } from './customErrors.js';
+export { default as errorHandler } from './errorHandlerMiddleware.js';

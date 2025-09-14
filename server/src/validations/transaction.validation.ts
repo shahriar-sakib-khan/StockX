@@ -5,7 +5,7 @@
  */
 import z from 'zod';
 
-import { txConstants } from '@/common/constants';
+import { txConstants } from '@/common/constants/index.js';
 
 /**
  * TransactionInput

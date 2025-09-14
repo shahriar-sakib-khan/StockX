@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { Errors } from '@/error';
-import { Tokens } from '@/utils';
-import { assertAuth } from '@/common';
+import { Errors } from '@/error/index.js';
+import { Tokens } from '@/utils/index.js';
+import { assertAuth } from '@/common/index.js';
 
 /**
  * Middleware to authenticate user from JWT access token (cookie or header).

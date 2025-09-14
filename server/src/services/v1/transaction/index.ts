@@ -1,1 +1,1 @@
-export {default as transactionService} from './transaction.service';
+export {default as transactionService} from './transaction.service.js';

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { StatusCodes } from 'http-status-codes';
 
-import { Errors } from '@/error/index';
+import { Errors } from '@/error/index.js';
 
 /**
  * Global Express error handling middleware.

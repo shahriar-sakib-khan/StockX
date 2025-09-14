@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares';
-import { auth } from '@/validations';
-import { authController } from '@/controllers/v1';
-import { requireAuth } from '@/middlewares';
+import { validateRequest } from '@/middlewares/index.js';
+import { auth } from '@/validations/index.js';
+import { authController } from '@/controllers/v1/index.js';
+import { requireAuth } from '@/middlewares/index.js';
 
 const router = Router();
 

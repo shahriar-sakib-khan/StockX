@@ -7,8 +7,8 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { authService } from '@/services/v1';
-import { Tokens } from '@/utils';
+import { authService } from '@/services/v1/index.js';
+import { Tokens } from '@/utils/index.js';
 
 /**
  * ----------------- Authentication Controllers -----------------

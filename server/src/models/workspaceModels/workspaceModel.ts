@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 
-import Membership from './membershipModel';
+import Membership from './membershipModel.js';
 
 export interface IWorkspace extends Document {
   name: string;

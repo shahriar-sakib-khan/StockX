@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-import { GlobalBrand, LocalBrand } from '@/models';
+import { GlobalBrand, LocalBrand } from '@/models/index.js';
 
 const seedLocalBrands = async (
   workspaceId: string,

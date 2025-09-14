@@ -1,13 +1,13 @@
 import { Router } from 'express';
 
-import { divisionController } from '@/controllers/v1';
-import { workspaceScope, divisionScope, validateRequest } from '@/middlewares';
-import { division } from '@/validations';
-import inventoryRouter from './inventory.router';
-import transactionRouter from './transaction.router';
-import vehicleRouter from './vehicle.router';
-import storeRouter from './store.router';
-import { staffRouter, cycleRouter } from '@/feats/routers';
+import { divisionController } from '@/controllers/v1/index.js';
+import { workspaceScope, divisionScope, validateRequest } from '@/middlewares/index.js';
+import { division } from '@/validations/index.js';
+import inventoryRouter from './inventory.router.js';
+import transactionRouter from './transaction.router.js';
+import vehicleRouter from './vehicle.router.js';
+import storeRouter from './store.router.js';
+import { staffRouter, cycleRouter, salaryRouter } from '@/feats/routers/index.js';
 
 const router = Router({ mergeParams: true });
 
@@ -220,5 +220,10 @@ router.use('/:divisionId/transactions', divisionScope(), transactionRouter);
  * ----------------- Division Staff Sub-Routes -----------------
  */
 router.use('/:divisionId/', divisionScope(), staffRouter);
+
+/**
+ * ----------------- Division Salary Sub-Routes -----------------
+ */
+router.use('/:divisionId/', divisionScope(), salaryRouter);
 
 export default router;

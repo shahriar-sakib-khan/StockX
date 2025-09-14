@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
-import { Cylinder, IGlobalBrand, LocalBrand } from '@/models';
-import { generateSKU } from '@/common';
+import { Cylinder, IGlobalBrand, LocalBrand } from '@/models/index.js';
+import { generateSKU } from '@/common/index.js';
 
 const seedLocalCylinders = async (
   userData: { brandId: string; activeStatus: boolean }[],

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { workspaceScope, validateRequest } from '@/middlewares';
-import { workspaceController } from '@/controllers/v1';
-import { workspace } from '@/validations';
+import { workspaceScope, validateRequest } from '@/middlewares/index.js';
+import { workspaceController } from '@/controllers/v1/index.js';
+import { workspace } from '@/validations/index.js';
 
 const router = Router({ mergeParams: true });
 

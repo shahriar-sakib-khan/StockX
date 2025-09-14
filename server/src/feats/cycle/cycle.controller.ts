@@ -7,7 +7,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { cycleService } from '@/feats/cycle';
+import { cycleService } from '@/feats/cycle/index.js';
 
 /**
  * ----------------- Cycle CRUD Controllers -----------------

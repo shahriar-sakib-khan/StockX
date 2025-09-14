@@ -6,8 +6,8 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common';
-import { transactionService } from '@/services/v1';
+import { assertAuth } from '@/common/index.js';
+import { transactionService } from '@/services/v1/index.js';
 
 // <============================> General Transactions Controllers <============================>
 export const allTransactions = async (req: Request, res: Response) => {

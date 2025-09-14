@@ -1,2 +1,2 @@
-export {default as brandService} from './brands.service';
-export {default as cylinderService} from './cylinders.service';
+export {default as brandService} from './brands.service.js';
+export {default as cylinderService} from './cylinders.service.js';

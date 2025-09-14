@@ -15,4 +15,8 @@ export default defineConfig({
             "@": path.resolve(__dirname, "src"), // @ points to the src folder
         },
     },
+    build: {
+        outDir: "dist",
+        sourcemap: false,
+    },
 });

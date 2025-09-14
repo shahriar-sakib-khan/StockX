@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
 
-import { Membership, Workspace } from '@/models';
-import { workspaceMembershipSanitizers } from '@/utils';
-import { Errors } from '@/error';
+import { Membership, Workspace } from '@/models/index.js';
+import { workspaceMembershipSanitizers } from '@/sanitizers/index.js';
+import { Errors } from '@/error/index.js';
 
 /**
  * All active workspace members.

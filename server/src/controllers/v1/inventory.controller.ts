@@ -7,9 +7,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common';
-import { brandService, cylinderService } from '@/services/v1';
-import { seedLocalCylinders } from '@/bootstrap';
+import { assertAuth } from '@/common/index.js';
+import { brandService, cylinderService } from '@/services/v1/index.js';
+import { seedLocalCylinders } from '@/bootstrap/index.js';
 
 // <============================> Brand Controllers <============================>
 

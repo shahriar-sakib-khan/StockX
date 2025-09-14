@@ -1,7 +1,7 @@
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
 import crypto from 'crypto';
 
-import { Errors } from '@/error';
+import { Errors } from '@/error/index.js';
 
 //=============================================
 // Types

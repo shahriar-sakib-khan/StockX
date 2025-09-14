@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
-import { GlobalBrand, LocalBrand } from '@/models';
-import { brandSanitizers } from '@/utils';
+import { GlobalBrand, LocalBrand } from '@/models/index.js';
+import { brandSanitizers } from '@/sanitizers/index.js';
 
 // <============================> Global Brand Services <============================>
 /**

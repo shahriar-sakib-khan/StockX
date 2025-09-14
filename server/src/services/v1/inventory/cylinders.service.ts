@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
-import { Cylinder } from '@/models';
-import { cylinderSanitizers } from '@/utils';
+import { Cylinder } from '@/models/index.js';
+import { cylinderSanitizers } from '@/sanitizers/index.js';
 
 /**
  * @function getAllCylinders
@@ -72,8 +72,7 @@ export const getAllCylinders = async (
   const totalCount = cylinders.reduce((sum, cyl) => sum + (cyl.count || 0), 0);
 
   return {
-    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, ['id', 'name'])
-      .cylinders,
+    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, ['id', 'name']).cylinders,
     total: totalCount,
   };
 };

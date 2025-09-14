@@ -6,7 +6,7 @@
  */
 import { z } from 'zod';
 
-import { roleConstants } from '@/common';
+import { roleConstants } from '@/common/index.js';
 
 /**
  * UpdateUserInputSchema

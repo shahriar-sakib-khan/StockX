@@ -6,9 +6,9 @@
 
 import { Types } from 'mongoose';
 
-import { Account, ITransaction, Transaction, TxCategory } from '@/models';
-import { transactionSanitizers, txCategorySanitizers } from '@/utils';
-import { Errors } from '@/error';
+import { Account, ITransaction, Transaction, TxCategory } from '@/models/index.js';
+import { transactionSanitizers, txCategorySanitizers } from '@/sanitizers/index.js';
+import { Errors } from '@/error/index.js';
 
 /**
  * ----------------- Transactions Generals -----------------

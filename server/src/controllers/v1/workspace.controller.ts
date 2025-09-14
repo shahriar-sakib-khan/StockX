@@ -9,8 +9,8 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { workspaceService, memberService, roleService, inviteService } from '@/services/v1';
-import { assertAuth } from '@/common';
+import { workspaceService, memberService, roleService, inviteService } from '@/services/v1/index.js';
+import { assertAuth } from '@/common/index.js';
 
 /**
  * ----------------- Workspace CRUD -----------------

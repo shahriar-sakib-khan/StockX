@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import { validateRequest, divisionScope } from '@/middlewares';
-import { cycleController, cycleValidator } from '@/feats/cycle';
+import { validateRequest, divisionScope } from '@/middlewares/index.js';
+import { cycleController, cycleValidator } from '@/feats/cycle/index.js';
 
 const router = Router({ mergeParams: true });
 
