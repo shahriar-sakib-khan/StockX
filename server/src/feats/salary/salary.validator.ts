@@ -15,13 +15,13 @@ import { z } from 'zod';
  * Zod schema for validating salary creation input.
  * Ensures all required fields are present, scoped to workspace & division.
  */
-export const createSalaryInputSchema = z
+export const createSalarySchema = z
   .object({
     monthlySalary: z.number().positive({ message: 'Monthly salary must be greater than 0' }),
   })
   .strict();
 
-export type CreateSalaryInput = z.infer<typeof createSalaryInputSchema>;
+export type CreateSalaryInput = z.infer<typeof createSalarySchema>;
 
 /**
  * Update Salary
@@ -29,7 +29,7 @@ export type CreateSalaryInput = z.infer<typeof createSalaryInputSchema>;
  * Zod schema for validating salary update input.
  * All fields are optional to allow partial updates.
  */
-export const updateSalarySchema = createSalaryInputSchema.partial();
+export const updateSalarySchema = createSalarySchema.partial();
 export type UpdateSalaryInput = z.infer<typeof updateSalarySchema>;
 
 /**

@@ -1,23 +1,21 @@
 import { HydratedDocument } from 'mongoose';
 
-import { ISalary } from './salary.model.js';
 import {
   resolveRef,
   listSanitizer,
-  divisionMembershipSanitizer,
-  workspaceSanitizer,
-  divisionSanitizer,
   cycleSanitizer,
 } from '@/sanitizers/index.js';
+
+import { ISalary } from './salary.model.js';
 
 /**
  * ----------------- Single salary -----------------
  */
 export const salarySanitizer = (salary: ISalary | HydratedDocument<ISalary>) => ({
   id: String(salary._id),
-  member: resolveRef(salary.member ?? null, divisionMembershipSanitizer),
-  division: resolveRef(salary.division ?? null, divisionSanitizer),
-  workspace: resolveRef(salary.workspace ?? null, workspaceSanitizer),
+  // member: resolveRef(salary.member ?? null, divisionMembershipSanitizer),
+  // division: resolveRef(salary.division ?? null, divisionSanitizer),
+  // workspace: resolveRef(salary.workspace ?? null, workspaceSanitizer),
   cycle: resolveRef(salary.cycle ?? null, cycleSanitizer),
 
   monthlySalary: salary.monthlySalary,

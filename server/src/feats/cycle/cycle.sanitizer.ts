@@ -1,12 +1,8 @@
 import { HydratedDocument } from 'mongoose';
 
-import { ICycle } from '@/feats/cycle/index.js';
-import {
-  resolveRef,
-  listSanitizer,
-  workspaceSanitizer,
-  divisionSanitizer,
-} from '@/sanitizers/index.js';
+import { resolveRef, listSanitizer } from '@/sanitizers/index.js';
+
+import { ICycle } from '../cycle/index.js';
 
 /**
  * ----------------- Cycle -----------------
@@ -20,8 +16,8 @@ export const cycleSanitizer = (cycle: ICycle | HydratedDocument<ICycle>) => ({
   isClosed: cycle.isClosed,
 
   // Relations
-  workspace: resolveRef(cycle.workspace ?? null, workspaceSanitizer),
-  division: resolveRef(cycle.division ?? null, divisionSanitizer),
+  // workspace: resolveRef(cycle.workspace ?? null, workspaceSanitizer),
+  // division: resolveRef(cycle.division ?? null, divisionSanitizer),
 
   createdAt: cycle.createdAt,
   updatedAt: cycle.updatedAt,

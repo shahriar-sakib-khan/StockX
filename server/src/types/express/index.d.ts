@@ -17,9 +17,9 @@ declare module 'express-serve-static-core' {
     };
 
     membership?: {
-      user: string;
-      workspace: string;
-      workspaceRoles: string[];
+      userId: string;
+      storeId: string;
+      storeRoles: string[];
     };
 
     divMembership?: {

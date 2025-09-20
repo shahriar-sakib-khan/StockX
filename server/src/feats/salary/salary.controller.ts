@@ -7,8 +7,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { salaryService } from '@/feats/salary/index.js';
 import { assertCycle } from '@/common/assertions.js';
+
+import { salaryService } from '../salary/index.js';
 
 /**
  * ----------------- Salary CRUD Controllers -----------------

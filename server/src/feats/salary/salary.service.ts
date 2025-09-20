@@ -8,7 +8,8 @@
 import { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
-import { Salary, salaryValidator, salarySanitizers } from '@/feats/salary/index.js';
+
+import { Salary, salaryValidator, salarySanitizers } from '../salary/index.js';
 
 /**
  * @function createSalary

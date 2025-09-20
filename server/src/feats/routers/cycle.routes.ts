@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
-import { validateRequest, divisionScope } from '@/middlewares/index.js';
+import { validateRequest } from '@/middlewares/index.js';
+
 import { cycleController, cycleValidator } from '@/feats/cycle/index.js';
 
 const router = Router({ mergeParams: true });
@@ -20,7 +21,6 @@ const router = Router({ mergeParams: true });
  */
 router.post(
   '/cycle',
-  divisionScope(['division_admin']),
   validateRequest(cycleValidator.createCycleSchema),
   cycleController.createCycle
 );
@@ -49,7 +49,6 @@ router.get('/cycle', cycleController.getAllCycles);
  */
 router.patch(
   '/cycle/:cycleId/close',
-  divisionScope(['division_admin']),
   validateRequest(cycleValidator.closeCycleSchema),
   cycleController.closeCycle
 );
@@ -62,7 +61,6 @@ router.patch(
  */
 router.patch(
   '/cycle/:cycleId/reopen',
-  divisionScope(['division_admin']),
   cycleController.reopenCycle
 );
 

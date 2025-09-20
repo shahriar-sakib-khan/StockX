@@ -16,7 +16,7 @@ import { z } from 'zod';
  * @property {string} [image] - Optional. Must be a valid URL.
  * @property {number} [salary] - Required. Staff salary plan.
  */
-export const staffInputSchema = z
+export const createStaffSchema = z
   .object({
     name: z.string().min(1, { message: 'Staff name is required' }),
     phone: z.string().regex(/^\+?[0-9]{11,15}$/, {
@@ -30,11 +30,11 @@ export const staffInputSchema = z
   })
   .strict();
 
-export type CreateStaffInput = z.infer<typeof staffInputSchema>;
+export type CreateStaffInput = z.infer<typeof createStaffSchema>;
 
 /**UpdateDivision
  * @description All fields are optional to support partial updates.
  */
-export const updateStaffSchema = staffInputSchema.partial();
+export const updateStaffSchema = createStaffSchema.partial();
 
 export type UpdateStaffInput = z.infer<typeof updateStaffSchema>;

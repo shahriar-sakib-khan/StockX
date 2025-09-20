@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { validateRequest, divisionScope } from '@/middlewares/index.js';
+import { validateRequest } from '@/middlewares/index.js';
 import { salaryController, salaryValidator } from '@/feats/salary/index.js';
 import { requireActiveCycle } from '@/feats/cycle/index.js';
 
@@ -24,9 +24,8 @@ const router = Router({ mergeParams: true });
  */
 router.post(
   '/salary/:memberId',
-  divisionScope(['division_admin']),
   requireActiveCycle,
-  validateRequest(salaryValidator.createSalaryInputSchema),
+  validateRequest(salaryValidator.createSalarySchema),
   salaryController.createSalary
 );
 
@@ -58,7 +57,6 @@ router.get('/salary/:salaryId', salaryController.getSingleSalary);
  */
 router.put(
   '/salary/:salaryId',
-  divisionScope(['division_admin']),
   validateRequest(salaryValidator.updateSalarySchema),
   salaryController.updateSalary
 );
@@ -70,7 +68,6 @@ router.put(
  */
 router.delete(
   '/salary/:salaryId',
-  divisionScope(['division_admin']),
   salaryController.deleteSalary
 );
 
@@ -81,8 +78,7 @@ router.delete(
 //  */
 // router.post(
 //   '/salary/:salaryId/pay',
-//   divisionScope(['division_admin']),
-//   validateRequest(salaryValidator.paySalarySchema),
+// //   validateRequest(salaryValidator.paySalarySchema),
 //   salaryController.paySalary
 // );
 

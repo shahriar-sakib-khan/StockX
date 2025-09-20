@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { validateRequest, divisionScope } from '@/middlewares/index.js';
+import { validateRequest } from '@/middlewares/index.js';
 import { staffController, staffValidator } from '@/feats/staff/index.js';
 
 const router = Router({ mergeParams: true });
@@ -23,8 +23,7 @@ const router = Router({ mergeParams: true });
  */
 router.post(
   '/staff',
-  divisionScope(['division_admin']),
-  validateRequest(staffValidator.staffInputSchema),
+  validateRequest(staffValidator.createStaffSchema),
   staffController.createStaff
 );
 
@@ -49,7 +48,6 @@ router.get('/staff/:staffId', staffController.getSingleStaff);
  */
 router.put(
   '/staff/:staffId',
-  divisionScope(['division_admin']),
   validateRequest(staffValidator.updateStaffSchema),
   staffController.updateStaff
 );
@@ -59,6 +57,6 @@ router.put(
  * @desc    Remove a staff member
  * @access  Admin (division)
  */
-router.delete('/staff/:staffId', divisionScope(['division_admin']), staffController.deleteStaff);
+router.delete('/staff/:staffId', staffController.deleteStaff);
 
 export default router;

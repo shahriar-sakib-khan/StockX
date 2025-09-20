@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { Cycle } from '@/feats/cycle/index.js';
 import { Errors } from '@/error/index.js';
+
+import { Cycle } from '../cycle/index.js';
 
 /**
  * Middleware to require an active cycle for a division.

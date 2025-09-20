@@ -1,68 +1,83 @@
-import { Request, Response, NextFunction } from 'express';
-import { Membership, Workspace } from '@/models/index.js';
-import { assertAuth } from '@/common/assertions.js';
-import { StatusCodes } from 'http-status-codes';
+// import { Request, Response, NextFunction } from 'express';
+// import { StatusCodes } from 'http-status-codes';
 
-const workspaceScope =
-  (allowedRoles: string[] = []) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    assertAuth(req);
-    const { userId, role } = req.user;
-    const { workspaceId } = req.params;
+// import { assertAuth } from '@/common/assertions.js';
+// import { Membership, Workspace } from '@/models/index.js';
 
-    // Validate required objects exist
-    if (!req.user) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Authentication missing.' });
-    }
+// /**
+//  * Middleware to enforce workspace-based access control
+//  *
+//  * @param allowedRoles - Roles allowed to access this route. Example: ['admin', 'manager']
+//  * @throws {Error} If user is not authenticated
+//  * @throws {Error} If user has no workspace membership
+//  * @throws {Error} If user has multiple memberships
+//  * @throws {Error} If workspace is not found
+//  * @throws {Error} If membership is inactive
+//  * @throws {Error} If user does not have the required role
+//  */
+// const workspaceScope =
+//   (allowedRoles: string[] = []) =>
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     // Ensure user is authenticated
+//     assertAuth(req);
+//     const { userId } = req.user;
 
-    // Workspace check
-    const workspace = await Workspace.findById(workspaceId).select('workspaceRoles').lean();
-    if (!workspace)
-      return res.status(StatusCodes.NOT_FOUND).json({ message: 'Workspace not found' });
+//     if (!userId) {
+//       return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Authentication missing.' });
+//     }
 
-    // SuperAdmin override (ostad)
-    if (role === 'ostad') {
-      req.membership = {
-        user: userId,
-        workspace: workspaceId,
-        workspaceRoles: workspace.workspaceRoles.map(role => role.name),
-      };
-      return next();
-    }
+//     // Ensure user is a member of a workspace
+//     const memberships = await Membership.find({ user: userId }).lean();
 
-    // Membership check
-    const membership = await Membership.findOne({
-      user: userId,
-      workspace: workspaceId,
-    }).lean();
+//     if (memberships.length === 0) {
+//       return res
+//         .status(StatusCodes.NOT_FOUND)
+//         .json({ message: 'User has no workspace membership.' });
+//     }
+//     // Ensure user has only one membership
+//     if (memberships.length > 1) {
+//       console.error(`Data integrity issue: User ${userId} has multiple memberships`, memberships);
 
-    if (!membership || membership.status !== 'active') {
-      return res
-        .status(StatusCodes.FORBIDDEN)
-        .json({ message: 'Access denied: Not a workspace member' });
-    }
+//       return res.status(StatusCodes.CONFLICT).json({
+//         message: 'Multiple memberships detected. Please contact support.',
+//       });
+//     }
 
-    // Assign membership to request object
-    req.membership = {
-      user: userId,
-      workspace: workspaceId,
-      workspaceRoles: membership.workspaceRoles,
-    };
+//     const membership = memberships[0];
 
-    // Role validation
-    if (allowedRoles.length > 0) {
-      const hasWorkspaceRoles = membership.workspaceRoles.some(
-        workspaceRoles =>
-          allowedRoles.includes(workspaceRoles) || membership.workspaceRoles.includes('admin')
-      );
-      if (!hasWorkspaceRoles) {
-        return res
-          .status(StatusCodes.FORBIDDEN)
-          .json({ message: 'Access denied: Insufficient workspace role privileges' });
-      }
-    }
+//     // Ensure workspace exists
+//     const workspace = await Workspace.findById(membership.workspace).lean();
 
-    next();
-  };
+//     if (!workspace) {
+//       return res.status(StatusCodes.NOT_FOUND).json({ message: 'Workspace not found.' });
+//     }
 
-export default workspaceScope;
+//     // Ensure membership is active
+//     if (membership.status !== 'active') {
+//       return res
+//         .status(StatusCodes.FORBIDDEN)
+//         .json({ message: 'Access denied: inactive membership.' });
+//     }
+
+//     // Assign membership and roles to request
+//     req.membership = {
+//       userId,
+//       workspaceId: membership.workspace.toString(),
+//       workspaceRoles: membership.workspaceRoles,
+//     };
+
+//     // RBAC authorization check for allowed roles
+//     if (allowedRoles.length > 0) {
+//       const hasRole = membership.workspaceRoles.some(role => allowedRoles.includes(role));
+
+//       if (!hasRole) {
+//         return res
+//           .status(StatusCodes.FORBIDDEN)
+//           .json({ message: 'Access denied: insufficient role privileges.' });
+//       }
+//     }
+
+//     next();
+//   };
+
+// export default workspaceScope;

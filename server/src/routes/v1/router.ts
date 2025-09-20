@@ -1,12 +1,9 @@
 import { Router } from 'express';
 
 import authRouter from './auth/router.js';
-import adminRouter from './admin/router.js';
-import userRouter from './user/router.js';
-import paymentRouter from './payment/index.js';
-import workspaceRouter from './workspace/router.js';
 
 import { requireAuth, requireRole } from '@/middlewares/index.js';
+import { storeRouter } from '@/feats/routers/index.js';
 
 const router = Router();
 
@@ -28,9 +25,6 @@ const router = Router();
 router.use('/auth', authRouter);
 
 // Authenticated routes
-router.use('/user', requireAuth, userRouter);
-router.use('/admin', requireAuth, requireRole('ostad'), adminRouter);
-router.use('/workspace', requireAuth, workspaceRouter);
-router.use('/payment', paymentRouter);
+router.use('/', requireAuth, storeRouter);
 
 export default router;

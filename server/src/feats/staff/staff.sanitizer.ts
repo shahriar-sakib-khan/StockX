@@ -1,12 +1,11 @@
 import { HydratedDocument } from 'mongoose';
 
-import { IStaff } from '@/feats/staff/index.js';
 import {
   resolveRef,
   listSanitizer,
-  workspaceSanitizer,
-  divisionSanitizer,
 } from '@/sanitizers/index.js';
+
+import { IStaff } from '../staff/index.js';
 
 /**
  * ----------------- Staff -----------------
@@ -21,8 +20,8 @@ export const staffSanitizer = (staff: IStaff | HydratedDocument<IStaff>) => ({
   salary: staff.salary,
   joiningDate: staff.joiningDate,
 
-  workspace: resolveRef(staff.workspace ?? null, workspaceSanitizer),
-  division: resolveRef(staff.division ?? null, divisionSanitizer),
+  // workspace: resolveRef(staff.workspace ?? null, workspaceSanitizer),
+  // division: resolveRef(staff.division ?? null, divisionSanitizer),
 
   createdAt: staff.createdAt,
   updatedAt: staff.updatedAt,

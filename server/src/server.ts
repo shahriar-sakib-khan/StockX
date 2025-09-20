@@ -15,7 +15,7 @@ import cookieParser from 'cookie-parser';
 import apiRouter from './routes/router.js';
 import { errorHandler } from '@/error/index.js';
 import { connectDB } from '@/config/index.js';
-import runBootstrap from './bootstrap/index.js';
+// import runBootstrap from './bootstrap/index.js';
 
 // ------------------------------
 // Initialize Express App
@@ -91,7 +91,7 @@ const startServer = async (): Promise<void> => {
     await connectDB();
 
     // Run any initial setup tasks
-    await runBootstrap();
+    // await runBootstrap();
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

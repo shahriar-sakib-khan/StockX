@@ -8,7 +8,8 @@
 import { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
-import { Cycle, cycleValidator, cycleSanitizers } from '@/feats/cycle/index.js';
+
+import { Cycle, cycleValidator, cycleSanitizers } from '../cycle/index.js';
 
 /**
  * ----------------- Create a New Cycle -----------------
