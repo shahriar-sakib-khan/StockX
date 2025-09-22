@@ -1,7 +1,7 @@
 import { Button, Divider, FormInputField } from "@/components";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { login, getWorkspaceDivisions } from "../services/authServices";
+import { login } from "../services/authServices";
 import useInput from "@/hooks/useInput";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { FcGoogle as GoogleIcon } from "react-icons/fc";
@@ -9,7 +9,6 @@ import { FcGoogle as GoogleIcon } from "react-icons/fc";
 export default function LoginForm() {
     const navigate = useNavigate();
     const location = useLocation();
-        const { currentWorkspace, setWorkspace, setDivision } = useAuthStore();
 
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
@@ -33,27 +32,28 @@ export default function LoginForm() {
     } = useMutation({
         mutationFn: login,
         onSuccess: async () => {
-            const { workspaces } = await initializeAuth();
+            await initializeAuth();
+            navigate("/stores", { replace: true });
 
-            if (!workspaces || workspaces.length === 0) {
-                navigate("/createOrJoin", { replace: true });
-            } else if (workspaces.length === 1) {
-                // set this workspace
-                setWorkspace(workspaces[0]);
+            // const { workspaces } = await initializeAuth();
+            // if (!workspaces || workspaces.length === 0) {
+            // } else if (workspaces.length === 1) {
+            //     // set this workspace
+            //     setWorkspace(workspaces[0]);
 
-                const res = await getWorkspaceDivisions(workspaces[0].id);
-                const divisions = res?.divisions || [];
-                if (divisions.length === 0) {
-                    navigate("/createDivision", { replace: true });
-                } else if (divisions.length === 1) {
-                    setDivision(divisions[0]);
-                    navigate(location.state?.redirectUrl || "/dashboard", { replace: true });
-                } else {
-                    navigate("/selectDivision", { replace: true });
-                }
-            } else {
-                navigate("/selectWorkspace", { replace: true });
-            }
+            //     const res = await getWorkspaceDivisions(workspaces[0].id);
+            //     const divisions = res?.divisions || [];
+            //     if (divisions.length === 0) {
+            //         navigate("/createDivision", { replace: true });
+            //     } else if (divisions.length === 1) {
+            //         setDivision(divisions[0]);
+            //         navigate(location.state?.redirectUrl || "/dashboard", { replace: true });
+            //     } else {
+            //         navigate("/selectDivision", { replace: true });
+            //     }
+            // } else {
+            //     navigate("/selectWorkspace", { replace: true });
+            // }
 
             resetValues();
         },

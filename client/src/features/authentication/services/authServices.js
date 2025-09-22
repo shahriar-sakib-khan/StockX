@@ -49,12 +49,20 @@ export const getUser = async () => API.get("/user/me");
 export const updateUser = async (data) => API.patch("/user/me", data);
 
 
-export const CreateWorkspace = async (data) => API.post("/workspace", data);
-export const getMyWorkspaces = async () => API.get("/workspace/mine");
-export const CreateDivision = async (data, workspaceId) => {
-    return API.post(`/workspace/${workspaceId}/divisions`, data)};
-export const getWorkspaceDivisions = async (workspaceId) => {
-    return API.get(`/workspace/${workspaceId}/divisions`)};
+// export const CreateWorkspace = async (data) => API.post("/workspace", data);
+// export const getMyWorkspaces = async () => API.get("/workspace/mine");
+// export const CreateDivision = async (data, workspaceId) => {
+//     return API.post(`/workspace/${workspaceId}/divisions`, data)};
+// export const getWorkspaceDivisions = async (workspaceId) => {
+//     return API.get(`/workspace/${workspaceId}/divisions`)};
+export const getAllStores = async () => API.get("/stores");
+
+/**
+ * Create a new store for the current user
+ * @param {{ name: string, location: string, phone: string }} data
+ * @returns {Promise<any>}
+ */
+export const createStore = async (data) => API.post("/store", data);
 
 
 

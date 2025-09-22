@@ -15,15 +15,18 @@ import { logOnce } from "./utils/logOnce";
 export default function Dashboard() {
     const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
     const user = useAuthStore((state) => state.user);
-    const workspace = useAuthStore((state) => state.currentWorkspace);
-    const division = useAuthStore((state) => state.currentDivision);
+
+    const allStores = useAuthStore((state) => state.allStores);
+    const setAllStores = useAuthStore((state) => state.setAllStores);
+    const setCurrentStore = useAuthStore((state) => state.setCurrentStore);
+    const store = useAuthStore((state) => state.currentStore);
 
     // Logging safely in useEffect to avoid double logs in React 18 Strict Mode
     useEffect(() => {
         logOnce("👤 User from DB:", user);
-        logOnce("👤 Current workspace:", workspace);
-        logOnce("👤 Current division:", division);
-    }, [user, workspace, division]);
+        logOnce("👤 Current Store:", store);
+        logOnce("👤 Current Stores:", allStores);
+    }, [user]);
 
     return (
         <div className="grid h-[var(--height-with-nav-titlebar)] grid-cols-[auto_1fr] bg-amber-50">
