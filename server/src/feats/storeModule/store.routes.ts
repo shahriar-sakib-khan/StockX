@@ -2,7 +2,8 @@ import { Router } from 'express';
 
 import { validateRequest } from '@/middlewares/index.js';
 
-import { storeValidator, storeScope, storeController } from '@/feats/storeModule/index.js';
+import inviteRouter from '@/feats/inviteModule/invite.routes.js';
+import { storeValidator, storeScope, storeController } from './index.js';
 
 const router = Router({ mergeParams: true });
 
@@ -29,7 +30,7 @@ router.post(
 );
 
 /**
- * @route   GET /store
+ * @route   GET /stores
  * @desc    Get all stores belonging to the authenticated user
  * @access  Authenticated
  */
@@ -71,5 +72,10 @@ router.delete('/store/:storeId', storeScope(['admin']), storeController.deleteSt
  * @access  Authenticated
  */
 router.get('/store/:storeId/profile', storeScope(), storeController.myStoreProfile);
+
+/**
+ * ----------------- Sub-router (Store Invites) -----------------
+ */
+router.use('/store/:storeId', storeScope(), inviteRouter);
 
 export default router;

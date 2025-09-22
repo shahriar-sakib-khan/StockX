@@ -25,7 +25,7 @@ export const createStore = async (
   storeData: storeValidator.CreateStoreInput,
   userId: string
 ): Promise<storeSanitizers.SanitizedStore> => {
-  const { name, description, image, location, phone } = storeData;
+  const { name, description, location, phone } = storeData;
 
   // Prevent duplicate store names for the same user
   const existingStore = await Store.exists({ name, createdBy: userId });
@@ -37,7 +37,6 @@ export const createStore = async (
   const store = await Store.create({
     name,
     description,
-    image,
     location,
     phone,
     createdBy: new Types.ObjectId(userId),
@@ -56,27 +55,69 @@ export const createStore = async (
 
 /**
  * @function getAllStores
- * @description Retrieves all stores created by a specific user, with pagination.
+ * @description Retrieves all stores a user owns or is a member of, ordered with owned stores first.
  *
- * @param {string} userId - The creator's user ID.
+ * @param {string} userId - The user's ID.
  * @param {number} page - Current page number for pagination.
  * @param {number} limit - Max number of stores per page.
- * @returns {Promise<storeSanitizers.SanitizedStores & { total: number }>} List of sanitized stores with total count.
+ * @returns {Promise<storeSanitizers.SanitizedStores & { total: number }>}
  */
 export const getAllStores = async (
   userId: string,
   page: number,
   limit: number
 ): Promise<storeSanitizers.SanitizedStores & { total: number }> => {
-  const total: number = await Store.countDocuments({ createdBy: userId });
-  if (total === 0) return { stores: [], total };
+  const skip = (page - 1) * limit;
 
-  const skip: number = (page - 1) * limit;
-  const stores = await Store.find({ createdBy: userId }).skip(skip).limit(limit).lean();
+  // Get owned stores
+  const ownedStores = await Store.find({ createdBy: new Types.ObjectId(userId) })
+    .select('id name image location phone createdBy')
+    .lean();
+
+  // Get joined stores
+  const memberships = await Membership.find({
+    user: new Types.ObjectId(userId),
+    status: 'active',
+  })
+    .select('store')
+    .lean();
+
+  // Extract store IDs
+  const joinedStoreIds = memberships.map(m => m.store);
+
+  // Get joined stores
+  const joinedStores = await Store.find({ _id: { $in: joinedStoreIds } })
+    .select('id name image location phone createdBy')
+    .lean();
+
+  // Create a map of stores
+  const storeMap = new Map<string, any>();
+
+  // Add owned stores first (priority)
+  for (const store of ownedStores) {
+    storeMap.set(String(store._id), store);
+  }
+
+  // Add joined stores (only if not already in owned)
+  for (const store of joinedStores) {
+    if (!storeMap.has(String(store._id))) {
+      storeMap.set(String(store._id), store);
+    }
+  }
+
+  // Convert to array and apply pagination
+  const allStores = Array.from(storeMap.values());
+  const total = allStores.length;
+  const paginatedStores = allStores.slice(skip, skip + limit);
 
   return {
-    stores: storeSanitizers.allStoreSanitizer(stores, ['id', 'name', 'image', 'location', 'phone'])
-      .stores,
+    stores: storeSanitizers.allStoreSanitizer(paginatedStores, [
+      'id',
+      'name',
+      'image',
+      'location',
+      'phone',
+    ]).stores,
     total,
   };
 };
@@ -145,6 +186,9 @@ export const deleteStore = async (storeId: string): Promise<storeSanitizers.Sani
     .lean();
 
   if (!store) throw new Errors.NotFoundError('Store not found');
+
+  // Delete all memberships associated with the store after deleting the store
+  await Membership.deleteMany({ store: storeId });
 
   return storeSanitizers.storeSanitizer(store);
 };

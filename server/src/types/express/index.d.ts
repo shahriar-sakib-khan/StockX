@@ -11,21 +11,14 @@ declare module 'express-serve-static-core' {
       username?: string;
     };
 
-    workspace?: {
-      workspaceId: string;
-      name: string;
+    store?: {
+      storeId: string;
     };
 
     membership?: {
       userId: string;
       storeId: string;
       storeRoles: string[];
-    };
-
-    divMembership?: {
-      user: string;
-      division: string;
-      divisionRoles: string[];
     };
 
     cycle?: {

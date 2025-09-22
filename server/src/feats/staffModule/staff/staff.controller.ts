@@ -7,7 +7,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { staffService } from '../staff/index.js';
+import { staffService } from './index.js';
 
 /**
  * ----------------- Staff CRUD Controllers -----------------

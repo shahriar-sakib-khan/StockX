@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes';
  * Validates request body against the provided Zod schema
  * and attaches sanitized data to req.body.
  */
-const validateRequest = <T>(schema: ZodType<T>) => {
+export const validateRequest = <T>(schema: ZodType<T>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
@@ -25,5 +25,3 @@ const validateRequest = <T>(schema: ZodType<T>) => {
     next();
   };
 };
-
-export default validateRequest;

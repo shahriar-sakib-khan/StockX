@@ -41,8 +41,14 @@ export const updateUser = async (
   userId: string,
   updateData: userValidator.UpdateUserInput
 ): Promise<userSanitizers.SanitizedUser> => {
-  const user = await User.findByIdAndUpdate(userId, updateData, { new: true })
-    .select('firstName lastName username email address image role')
+  const { firstName, lastName, username, email, address, image } = updateData;
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { firstName, lastName, username, email, address, image },
+    { new: true }
+  )
+    .select('firstName lastName username email address image')
     .lean();
 
   if (!user) throw new Errors.NotFoundError('User not found');

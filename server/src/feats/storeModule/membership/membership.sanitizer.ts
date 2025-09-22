@@ -2,7 +2,7 @@ import { HydratedDocument } from 'mongoose';
 
 import { resolveRef, listSanitizer, userSanitizer } from '@/sanitizers/index.js';
 
-import { storeSanitizers } from '../index.js';
+import { storeSanitizer } from '../store/store.sanitizer.js';
 import { IMembership } from './index.js';
 
 /**
@@ -10,7 +10,7 @@ import { IMembership } from './index.js';
  */
 export const membershipSanitizer = (membership: IMembership | HydratedDocument<IMembership>) => ({
   id: String(membership._id),
-  store: resolveRef(membership.store ?? null, storeSanitizers.storeSanitizer),
+  store: resolveRef(membership.store ?? null, storeSanitizer),
   user: resolveRef(membership.user ?? null, userSanitizer),
   storeRoles: membership.storeRoles ?? [],
   status: membership.status,

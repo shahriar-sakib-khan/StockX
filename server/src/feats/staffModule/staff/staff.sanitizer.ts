@@ -1,11 +1,8 @@
 import { HydratedDocument } from 'mongoose';
 
-import {
-  resolveRef,
-  listSanitizer,
-} from '@/sanitizers/index.js';
+import { resolveRef, listSanitizer } from '@/sanitizers/index.js';
 
-import { IStaff } from '../staff/index.js';
+import { IStaff } from './index.js';
 
 /**
  * ----------------- Staff -----------------

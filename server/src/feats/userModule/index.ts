@@ -1,5 +1,5 @@
 /**
- * ----------------- Exports From User -----------------
+ * ----------------- Exports from User -----------------
  */
 export {
   User,
@@ -13,7 +13,7 @@ export {
 } from './user/index.js';
 
 /**
- * ----------------- Exports From Auth -----------------
+ * ----------------- Exports from Auth -----------------
  */
 export {
   authController,
@@ -22,3 +22,9 @@ export {
   authService,
   authValidator,
 } from './auth/index.js';
+
+/**
+ * ----------------- Router Exports -----------------
+ */
+export { default as userRouter } from './user.routes.js';
+export { default as authRouter } from './auth.routes.js';

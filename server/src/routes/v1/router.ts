@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import authRouter from './auth/router.js';
+import { requireAuth } from '@/middlewares';
 
-import { requireAuth, requireRole } from '@/middlewares/index.js';
-import { storeRouter } from '@/feats/routers/index.js';
+import { storeRouter } from '@/feats/storeModule/index.js';
+import { authRouter, userRouter } from '@/feats/userModule/index.js';
 
 const router = Router();
 
@@ -22,9 +22,10 @@ const router = Router();
  *     description: Payment and billing routes
  */
 
-router.use('/auth', authRouter);
+router.use('/', authRouter);
 
 // Authenticated routes
+router.use('/', requireAuth, userRouter);
 router.use('/', requireAuth, storeRouter);
 
 export default router;

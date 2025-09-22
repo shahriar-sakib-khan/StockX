@@ -1,6 +1,9 @@
-export * from './auth/userAuthenticationMiddleware.js';
-export * from './rbac/roleAuthorization.js';
+/**
+ * ----------------- Shared Middlewares from Feats -----------------
+ */
+export { requireAuth } from '@/feats/userModule/index.js';
 
-export { default as validateRequest } from './validators/validateRequest.js';
-
-// export { default as workspaceScope } from './workspace/workspaceScope.js';
+/**
+ * ----------------- Validate Request -----------------
+ */
+export { validateRequest } from './validateRequest.js';

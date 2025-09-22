@@ -1,8 +1,9 @@
 import { Router } from 'express';
 
 import { validateRequest } from '@/middlewares/index.js';
-import { salaryController, salaryValidator } from '@/feats/salary/index.js';
+
 import { requireActiveCycle } from '@/feats/cycle/index.js';
+import { salaryController, salaryValidator } from '@/feats/staffModule/index.js';
 
 const router = Router({ mergeParams: true });
 
@@ -66,10 +67,7 @@ router.put(
  * @desc    Delete a salary record (rare case)
  * @access  Admin (division)
  */
-router.delete(
-  '/salary/:salaryId',
-  salaryController.deleteSalary
-);
+router.delete('/salary/:salaryId', salaryController.deleteSalary);
 
 // /**
 //  * @route   POST /:workspaceId/divisions/:divisionId/salary/:salaryId/pay

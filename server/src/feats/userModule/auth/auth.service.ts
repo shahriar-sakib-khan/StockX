@@ -3,6 +3,7 @@ import { Passwords, JWTs } from '@/utils/index.js';
 
 import { User, userSanitizers } from '../index.js';
 import { authValidator } from './index.js';
+import { Invite } from '@/models/index.js';
 
 /**
  * Registers a new user.
@@ -14,7 +15,7 @@ import { authValidator } from './index.js';
 export const registerUser = async (
   userData: authValidator.RegisterInput
 ): Promise<userSanitizers.SanitizedUser> => {
-  const { firstName, lastName, username, email, password, address } = userData;
+  const { username, email, password, address } = userData;
 
   const existingUsers = await User.find({
     $or: [{ email }, { username }],
@@ -28,14 +29,22 @@ export const registerUser = async (
   }
 
   const hashedPassword = await Passwords.hashPassword(password);
+
   const user = await User.create({
-    firstName,
-    lastName,
     username,
     email,
     address,
     password: hashedPassword,
   });
+
+  const updateResult = await Invite.updateMany(
+    { email, user: null, status: 'pending' }, // only unclaimed + pending invites
+    { $set: { user: user._id, status: 'sent' } } // link + update status
+  );
+
+  if (updateResult.modifiedCount > 0) {
+    console.log(`[Invite Update] You have ${updateResult.modifiedCount} pending invite(s)!`);
+  }
 
   return userSanitizers.userSanitizer(user);
 };

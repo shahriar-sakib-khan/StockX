@@ -35,7 +35,7 @@ app.use(cookieParser()); // Parse cookies
 const allowedOrigins = [
   'https://stockxbd.com',
   'https://www.stockxbd.com',
-  'http://localhost:5100',
+  'http://localhost:5173',
 ];
 
 console.log(allowedOrigins);

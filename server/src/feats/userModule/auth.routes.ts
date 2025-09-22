@@ -1,8 +1,7 @@
 import { Router } from 'express';
 
 import { validateRequest, requireAuth } from '@/middlewares/index.js';
-import { auth } from '@/validations/index.js';
-import { authController } from '@/feats/userModule/index.js';
+import { authController, authValidator } from '@/feats/userModule/index.js';
 
 const router = Router();
 
@@ -22,14 +21,18 @@ const router = Router();
  * @desc    Register a new user
  * @access  Public
  */
-router.post('/auth/register', validateRequest(auth.registerSchema), authController.register);
+router.post(
+  '/auth/register',
+  validateRequest(authValidator.registerSchema),
+  authController.register
+);
 
 /**
  * @route   POST /auth/login
  * @desc    Log in a user using email/username and password
  * @access  Public
  */
-router.post('/auth/login', validateRequest(auth.loginSchema), authController.login);
+router.post('/auth/login', validateRequest(authValidator.loginSchema), authController.login);
 
 /**
  * @route   POST /auth/logout

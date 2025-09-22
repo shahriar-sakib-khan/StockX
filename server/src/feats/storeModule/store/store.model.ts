@@ -61,15 +61,9 @@ storeSchema.pre('save', function (next) {
 });
 
 /**
- * ----------------- Pre-delete Hook -----------------
- * Remove all store memberships when a store is deleted
+ * ----------------- To JSON Hook -----------------
+ * Remove __v
  */
-storeSchema.pre('findOneAndDelete', async function (next) {
-  const storeId = this.getQuery()['_id'];
-  await Membership.deleteMany({ store: storeId });
-  next();
-});
-
 storeSchema.methods.toJSON = function (): Partial<IStore> {
   const obj = this.toObject();
   delete obj.__v;

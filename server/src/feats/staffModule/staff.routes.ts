@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { validateRequest } from '@/middlewares/index.js';
-import { staffController, staffValidator } from '@/feats/staff/index.js';
+import { staffController, staffValidator } from '@/feats/staffModule/staff/index.js';
 
 const router = Router({ mergeParams: true });
 
