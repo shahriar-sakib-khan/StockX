@@ -1,7 +1,7 @@
 import { LuSquareChevronLeft as MenuIcon } from "react-icons/lu";
 import { pagesConfig } from "../../pages/utils/pagesConfig";
 import { NavLink } from "react-router-dom";
-import DivisionMenu from "../ui/DivisionMenu";
+import StoreMenu from "../ui/StoreMenu";
 import { useUIStore } from "../../stores/useUIStore";
 
 export default function Sidebar() {
@@ -57,7 +57,7 @@ export default function Sidebar() {
             <div
                 className={`mb-4 flex h-[var(--titlebar-height)] items-center justify-between border-b-1 border-gray-300 bg-gray-50 p-3 text-gray-800`}
             >
-                <DivisionMenu />
+                <StoreMenu />
                 <button
                     className="rounded p-1 transition-all hover:bg-gray-200"
                     onClick={() => toggleMenu("isSidebarOpen")}

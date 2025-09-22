@@ -7,7 +7,7 @@ export const useUIStore = create(
             // States
             isUserMenuOpen: false,
             isSidebarOpen: true,
-            isDivisionMenuOpen: false,
+            isStoreMenuOpen: false,
 
             // Generic setter
             setMenuState: (menukey, isOpen) => set({ [menukey]: isOpen }),
@@ -20,7 +20,7 @@ export const useUIStore = create(
             closeAll: () => {
                 set({
                     isUserMenuOpen: false,
-                    isDivisionMenuOpen: false,
+                    isStoreMenuOpen: false,
                 });
             },
         }),
