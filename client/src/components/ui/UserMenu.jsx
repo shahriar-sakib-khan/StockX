@@ -16,16 +16,17 @@ export default function UserMenu() {
     const toggleMenu = useUIStore((state) => state.toggleMenu);
 
     const { data: user } = useAuth();
-    const { email, firstName, lastName } = user || {};
+    const { email, firstName, lastName, username } = user || {};
 
-    const fullName =
-        firstName && lastName
-            ? `${firstName} ${lastName}`
-            : firstName
-              ? firstName
-              : lastName
-                ? `Dear ${lastName}`
-                : "Dear visitor";
+    const fullName = username
+        ? username
+        : firstName && lastName
+          ? `${firstName} ${lastName}`
+          : firstName
+            ? firstName
+            : lastName
+              ? `Dear ${lastName}`
+              : "Dear visitor";
 
     const { mutate: signOut } = useMutation({
         mutationFn: logout,

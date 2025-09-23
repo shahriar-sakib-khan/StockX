@@ -40,10 +40,13 @@ export default function ShowAllStores() {
                 effect="coverflow"
                 grabCursor
                 centeredSlides
-                slidesPerView={3}
-                spaceBetween={40}
+                spaceBetween={40} // spacing between slides
                 mousewheel={{ sensitivity: 0.5 }}
                 navigation
+                slideToClickedSlide={true}
+                preventClicks={false}
+                preventClicksPropagation={false}
+                touchStartPreventDefault={false}
                 coverflowEffect={{
                     rotate: 0,
                     stretch: 0,
@@ -51,15 +54,24 @@ export default function ShowAllStores() {
                     modifier: 1,
                     slideShadows: false,
                 }}
-                className="w-full max-w-5xl mb-8"
+                breakpoints={{
+                    320: { slidesPerView: 1, spaceBetween: 20 }, // mobile
+                    640: { slidesPerView: 2, spaceBetween: 30 }, // tablet
+                    1024: { slidesPerView: 3, spaceBetween: 40 }, // desktop
+                }}
+                className="mb-8 w-full max-w-5xl"
             >
                 {stores.map((store) => (
                     <SwiperSlide
                         key={store.id}
-                        className="flex cursor-pointer items-center justify-center"
-                        onClick={() => handleSelectStore(store)}
+                        className="flex items-center justify-center"
+                        style={{ width: "300px" }} // ensures proper width for click
                     >
-                        <div className="flex h-[200px] w-[300px] items-center justify-center rounded-2xl bg-indigo-500 text-2xl font-bold text-white shadow-lg">
+                        <div
+                            onClick={() => handleSelectStore(store)}
+                            className="flex h-[200px] w-full cursor-pointer items-center justify-center rounded-2xl bg-indigo-500 text-2xl font-bold text-white shadow-lg transition-transform duration-300 hover:scale-105"
+                            style={{ pointerEvents: "auto" }}
+                        >
                             {store.name}
                         </div>
                     </SwiperSlide>
@@ -68,7 +80,7 @@ export default function ShowAllStores() {
 
             <button
                 onClick={() => navigate("/addStore")}
-                className="mt-4 rounded-xl bg-blue-500 px-6 py-3 text-xl font-semibold text-white hover:bg-green-600 transition"
+                className="mt-4 rounded-xl bg-blue-500 px-6 py-3 text-xl font-semibold text-white transition hover:bg-green-600"
             >
                 Add Store
             </button>

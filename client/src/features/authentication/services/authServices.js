@@ -55,6 +55,10 @@ export const updateUser = async (data) => API.patch("/user/me", data);
 // export const getWorkspaceDivisions = async (workspaceId) => {
 //     return API.get(`/workspace/${workspaceId}/divisions`)};
 
+
+
+// ================= STORES ==================
+
 /**
  * Fetch all stores of the current user
  * @returns {Promise<any>} Response containing the list of stores
@@ -68,6 +72,10 @@ export const getAllStores = async () => API.get("/stores");
  */
 export const createStore = async (data) => API.post("/store", data);
 
+
+
+// ================= INVITES ==================
+
 /**
  * Send an invite to a staff member for a specific store.
  * @param {string} storeId - ID of the store
@@ -77,8 +85,6 @@ export const createStore = async (data) => API.post("/store", data);
 export const inviteStaff = async (storeId, data) => {
     return API.post(`/store/${storeId}/invites`, data);
 };
-
-// ================= INVITES ==================
 
 /**
  * Get all invitations for the current user
@@ -92,7 +98,7 @@ export const getUserInvites = async () => API.get("/user/invites");
  * @returns {Promise<any>}
  */
 export const acceptInvite = async (token) =>
-    API.put(`/user/invites/${token}/accept`);
+    API.patch(`/user/invites/${token}/accept`);
 
 /**
  * Decline a specific invite using its token
@@ -100,4 +106,4 @@ export const acceptInvite = async (token) =>
  * @returns {Promise<any>}
  */
 export const declineInvite = async (token) =>
-    API.put(`/user/invites/${token}/decline`);
+    API.patch(`/user/invites/${token}/decline`);

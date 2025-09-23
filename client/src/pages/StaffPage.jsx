@@ -2,11 +2,11 @@ import { useState } from "react";
 import { StaffCard } from "../features";
 import { useAuthStore } from "../stores/useAuthStore";
 import { inviteStaff } from "../features/authentication/services/authServices";
+import { MdArrowDropDown } from "react-icons/md";
 
 export default function StaffPage() {
     const currentStore = useAuthStore((state) => state.currentStore);
 
-    // keep your initial staff cards
     const [staffList, setStaffList] = useState([
         {
             id: Date.now(),
@@ -30,19 +30,20 @@ export default function StaffPage() {
         },
     ]);
 
-    // modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [email, setEmail] = useState("");
     const [role, setRole] = useState("");
-    // const [lifespan, setLifespan] = useState("");
-    const lifespan = '1d';
+    const [lifespan, setLifespan] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+
+    const roleOptions = ["admin", "manager", "staff"];
+    const lifespanOptions = ["1h", "6h", "12h", "1d", "3d", "7d"];
 
     const onAddClick = () => {
         setEmail("");
         setRole("");
-        // setLifespan("");
+        setLifespan("");
         setErrorMsg("");
         setIsModalOpen(true);
     };
@@ -96,7 +97,7 @@ export default function StaffPage() {
                 </button>
             </div>
 
-            {/* original StaffCard list preserved */}
+            {/* original StaffCard list */}
             <div className="mb-10 flex flex-wrap gap-5">
                 {staffList.map((staff) => (
                     <StaffCard
@@ -119,22 +120,43 @@ export default function StaffPage() {
                             placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full mb-3 rounded border border-gray-300 p-2"
+                            className="w-full mb-3 rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
-                        <input
-                            type="text"
-                            placeholder="Role"
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="w-full mb-3 rounded border border-gray-300 p-2"
-                        />
-                        {/* <input
-                            type="text"
-                            placeholder="Lifespan (e.g. 1d)"
-                            value={lifespan}
-                            onChange={(e) => setLifespan(e.target.value)}
-                            className="w-full mb-3 rounded border border-gray-300 p-2"
-                        /> */}
+
+                        {/* Role dropdown */}
+                        <div className="relative mb-3">
+                            <select
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                className="w-full rounded border border-gray-300 p-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            >
+                                <option value="">Select Role</option>
+                                {roleOptions.map((r) => (
+                                    <option key={r} value={r}>
+                                        {r.charAt(0).toUpperCase() + r.slice(1)}
+                                    </option>
+                                ))}
+                            </select>
+                            <MdArrowDropDown className="absolute right-2 top-2.5 pointer-events-none text-gray-500 text-xl" />
+                        </div>
+
+                        {/* Lifespan dropdown */}
+                        <div className="relative mb-3">
+                            <select
+                                value={lifespan}
+                                onChange={(e) => setLifespan(e.target.value)}
+                                className="w-full rounded border border-gray-300 p-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            >
+                                <option value="">Select Lifespan</option>
+                                {lifespanOptions.map((l) => (
+                                    <option key={l} value={l}>
+                                        {l}
+                                    </option>
+                                ))}
+                            </select>
+                            <MdArrowDropDown className="absolute right-2 top-2.5 pointer-events-none text-gray-500 text-xl" />
+                        </div>
+
                         {errorMsg && (
                             <p className="text-red-500 mb-2">{errorMsg}</p>
                         )}
@@ -148,7 +170,7 @@ export default function StaffPage() {
                             </button>
                             <button
                                 onClick={onSendInvite}
-                                className="px-4 py-2 rounded bg-blue-500 text-white"
+                                className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
                                 disabled={isLoading}
                             >
                                 {isLoading ? "Sending..." : "Send"}

@@ -75,7 +75,7 @@ export default function InvitationPage() {
                                 {invite.store.name}
                             </p>
                             <p className="text-sm text-gray-500">
-                                Role: {invite.role} • Status: {invite.status}
+                                Role: {invite.role}
                             </p>
                         </div>
 
