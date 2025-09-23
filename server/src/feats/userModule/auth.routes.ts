@@ -1,7 +1,8 @@
 import { Router } from 'express';
 
-import { validateRequest, requireAuth } from '@/middlewares/index.js';
-import { authController, authValidator } from '@/feats/userModule/index.js';
+import { validateRequest } from '@/middlewares/index.js';
+
+import { authController, authValidator } from './index.js';
 
 const router = Router();
 
@@ -39,7 +40,7 @@ router.post('/auth/login', validateRequest(authValidator.loginSchema), authContr
  * @desc    Log out the currently authenticated user
  * @access  Private
  */
-router.post('/auth/logout', requireAuth, authController.logout);
+router.post('/auth/logout', authController.logout);
 
 /**
  * @route   POST /auth/refresh

@@ -2,8 +2,11 @@ import { Router } from 'express';
 
 import { validateRequest } from '@/middlewares/index.js';
 
-import inviteRouter from '@/feats/inviteModule/invite.routes.js';
 import { storeValidator, storeScope, storeController } from './index.js';
+
+import inviteRouter from '@/feats/inviteModule/invite.routes.js';
+import localBrandRouter from '@/feats/brandModule/local.brand.routes.js';
+import { cylinderRouter, cylinderTxRouter } from '../cylinderModule/index.js';
 
 const router = Router({ mergeParams: true });
 
@@ -77,5 +80,16 @@ router.get('/store/:storeId/profile', storeScope(), storeController.myStoreProfi
  * ----------------- Sub-router (Store Invites) -----------------
  */
 router.use('/store/:storeId', storeScope(), inviteRouter);
+
+/**
+ * ----------------- Sub-router (Local Brands) -----------------
+ */
+router.use('/store/:storeId', storeScope(), localBrandRouter);
+
+/**
+ * ----------------- Sub-router (Cylinder and Transactions) -----------------
+ */
+router.use('/store/:storeId', storeScope(), cylinderRouter);
+router.use('/store/:storeId', storeScope(), cylinderTxRouter);
 
 export default router;

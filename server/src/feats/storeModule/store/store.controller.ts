@@ -8,6 +8,12 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { assertAuth } from '@/common/assertions.js';
+import {
+  seedBaseAccounts,
+  seedBaseTxCategories,
+  seedLocalBrands,
+  seedLocalCylinders,
+} from '@/bootstrap/index.js';
 
 import { storeService } from './index.js';
 
@@ -20,6 +26,12 @@ export const createStore = async (req: Request, res: Response) => {
   const { userId } = req.user;
 
   const store = await storeService.createStore(req.body, userId);
+
+  // Create local brands from global brands with inactive status for selection
+  await seedBaseAccounts(store.id);
+  await seedBaseTxCategories(store.id);
+  await seedLocalBrands(userId, store.id);
+  await seedLocalCylinders(userId, store.id);
 
   res.status(StatusCodes.CREATED).json({ message: 'Store created successfully', store });
 };

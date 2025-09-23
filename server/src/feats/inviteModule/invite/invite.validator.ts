@@ -8,7 +8,7 @@
 
 import { z } from 'zod';
 
-import { InviteLifespan } from './invite.constants.js';
+import { InviteLifespan, InviteRoles } from './invite.constants.js';
 
 /**
  * ----------------- Create Invite Schema -----------------
@@ -21,7 +21,7 @@ export const createInviteSchema = z
     email: z
       .string()
       .refine(val => /^\S+@\S+\.\S+$/.test(val), { message: 'Invalid email address' }),
-    role: z.string().min(1, { message: 'Role is required' }),
+    role: z.enum(...[InviteRoles], { message: 'Invalid invite role' }),
     lifespan: z.enum(...[InviteLifespan], { message: 'Invalid invite lifespan' }),
   })
   .strict();

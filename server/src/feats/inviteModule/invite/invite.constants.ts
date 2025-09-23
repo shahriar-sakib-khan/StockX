@@ -26,3 +26,10 @@ export const InviteExpirationMap: Record<InviteLifespanType, number> = {
   '3d': 3 * 24 * 60 * 60 * 1000, // 3 days
   '7d': 7 * 24 * 60 * 60 * 1000, // 7 days
 } as const;
+
+/**
+ * ----------------- Invite Roles -----------------
+ * Represents the available roles for invites
+ */
+export const InviteRoles = ['admin', 'manager', 'staff'] as const;
+export type InviteRoleType = (typeof InviteRoles)[number];
