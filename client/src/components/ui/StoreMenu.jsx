@@ -127,7 +127,7 @@ export default function StoreMenu() {
                     className="flex items-center rounded-sm px-2 py-1 text-start hover:bg-gray-100"
                 >
                     <AddIcon className="mr-2 size-7 rounded bg-gray-100 p-1 text-lg" />
-                    Create Store
+                    Add Store
                 </button>
             </section>
         </MenuContainer>

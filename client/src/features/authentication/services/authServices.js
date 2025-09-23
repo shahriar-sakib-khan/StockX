@@ -48,22 +48,56 @@ export const getUser = async () => API.get("/user/me");
  */
 export const updateUser = async (data) => API.patch("/user/me", data);
 
-
 // export const CreateWorkspace = async (data) => API.post("/workspace", data);
 // export const getMyWorkspaces = async () => API.get("/workspace/mine");
 // export const CreateDivision = async (data, workspaceId) => {
 //     return API.post(`/workspace/${workspaceId}/divisions`, data)};
 // export const getWorkspaceDivisions = async (workspaceId) => {
 //     return API.get(`/workspace/${workspaceId}/divisions`)};
+
+/**
+ * Fetch all stores of the current user
+ * @returns {Promise<any>} Response containing the list of stores
+ */
 export const getAllStores = async () => API.get("/stores");
 
 /**
  * Create a new store for the current user
- * @param {{ name: string, location: string, phone: string }} data
- * @returns {Promise<any>}
+ * @param {{ name: string, location: string, phone: string }} data - Store information
+ * @returns {Promise<any>} Response containing the newly created store
  */
 export const createStore = async (data) => API.post("/store", data);
 
+/**
+ * Send an invite to a staff member for a specific store.
+ * @param {string} storeId - ID of the store
+ * @param {{ email: string, role: string }} data - Invite data
+ * @returns {Promise<any>} Response from the server
+ */
+export const inviteStaff = async (storeId, data) => {
+    return API.post(`/store/${storeId}/invites`, data);
+};
 
+// ================= INVITES ==================
 
+/**
+ * Get all invitations for the current user
+ * @returns {Promise<any>}  { total, page, limit, invites: [...] }
+ */
+export const getUserInvites = async () => API.get("/user/invites");
 
+/**
+ * Accept a specific invite using its token
+ * @param {string} token
+ * @returns {Promise<any>}
+ */
+export const acceptInvite = async (token) =>
+    API.put(`/user/invites/${token}/accept`);
+
+/**
+ * Decline a specific invite using its token
+ * @param {string} token
+ * @returns {Promise<any>}
+ */
+export const declineInvite = async (token) =>
+    API.put(`/user/invites/${token}/decline`);
