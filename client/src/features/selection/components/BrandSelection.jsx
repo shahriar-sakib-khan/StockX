@@ -6,21 +6,19 @@ import {
     useSaveSelectedBrands,
 } from "../../brands/hooks/brandHooks";
 import brandLogo from "@/assets/images/bashundhara.webp";
-import { divisionId, workspaceId } from "@/constants/ids";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { logOnce } from "@/pages/utils/logOnce";
 
 export default function BrandSelection() {
     const navigate = useNavigate();
 
     // Fetch brands
-    const { data: allBrands = [], isLoading: loadingAll } = useBrands(
-        workspaceId,
-        divisionId,
-    );
+    const storeId = useAuthStore((state) => state.currentStore)?.id;
+    const { data: allBrands = [], isLoading: loadingAll } = useBrands(storeId);
+    logOnce(allBrands);
 
-    const { mutate: saveBrands, isLoading: isSaving } = useSaveSelectedBrands(
-        workspaceId,
-        divisionId,
-    );
+    const { mutate: saveBrands, isLoading: isSaving } =
+        useSaveSelectedBrands(storeId);
 
     // Local draft: [{id, isActive}]
     const [draftBrands, setDraftBrands] = useState([]);
@@ -59,8 +57,17 @@ export default function BrandSelection() {
     // Submit
     const submitSelectedBrands = () => {
         if (!Array.isArray(draftBrands) || draftBrands.length === 0) return;
+
+        if (!storeId) {
+            console.error("No store selected — cannot save brands");
+            return;
+        }
+
+        // saveBrands is the react-query mutate from useSaveSelectedBrands(storeId)
+        // it accepts (variables, options)
         saveBrands(draftBrands, {
             onSuccess: () => navigate("/inventory"),
+            onError: (err) => console.error("Failed to update brands:", err),
         });
     };
 

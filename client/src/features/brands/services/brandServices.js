@@ -1,50 +1,41 @@
 // @ts-check
 import API from "@/services/apiClient";
 
-/**
- * Get all brands in a division (basic list view).
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @returns {Promise<import("../types/brands").BrandsResponse>} A promise that resolves to an array of brand objects with total count.
- */
-export const getBrands = async (workspaceId, divisionId) =>
-    API.get(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/all-brands`,
-    );
+/** @typedef {import("@/features/brands/types/brands").SelectedBrand} SelectedBrand */
+
+// ================= BRANDS ==================
 
 /**
- * Get all brands in a division with detailed information.
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @returns {Promise<import("../types/brands").DetailedBrandsResponse>} A promise that resolves to an array of detailed brand objects with total count.
+ * Get all brands (including inactive ones) for a given store.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing the full list of brands.
  */
-export const getDetailedBrands = async (workspaceId, divisionId) =>
-    API.get(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/all-brands/d`,
-    );
+export const getBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands/a`);
 
 /**
- * Save or select brands in a division.
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @param {import("../types/brands").SelectedBrand[]} brands - Array of brand objects to save or select (only id and isActive).
- * @returns {Promise<import("../types/brands").SaveBrandsResponse>} A promise that resolves to the server response.
+ * Get only active brands for a given store.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing the active brands.
  */
-export const saveSelectedBrands = async (workspaceId, divisionId, brands) =>
-    API.patch(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/brands`,
-        brands,
-    );
+export const getActiveBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands`);
 
 /**
- * Get all cylinders in a division.
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @returns {Promise<Object[]>} A promise that resolves to an array of cylinder objects.
+ * Get detailed brand information for a given store.
+ * Typically includes extended metadata about each brand.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing detailed brand data.
  */
-// export const getCylinders = async (workspaceId, divisionId) =>
-//     API.get(`/workspace/${workspaceId}/divisions/${divisionId}/inventory/cylinders`);
+export const getDetailedBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands/d`);
+
+/**
+ * Save (select) specific brands for a store.
+ * @param {string} storeId
+ * @param {{id: string, isActive: boolean}[]} brands
+ */
+export const saveSelectedBrands = async (storeId, brands) => {
+    if (!storeId) throw new Error("storeId is required");
+    return API.patch(`/store/${storeId}/brands`, brands);
+};

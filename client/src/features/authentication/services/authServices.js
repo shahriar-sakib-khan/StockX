@@ -48,13 +48,6 @@ export const getUser = async () => API.get("/user/me");
  */
 export const updateUser = async (data) => API.patch("/user/me", data);
 
-// export const CreateWorkspace = async (data) => API.post("/workspace", data);
-// export const getMyWorkspaces = async () => API.get("/workspace/mine");
-// export const CreateDivision = async (data, workspaceId) => {
-//     return API.post(`/workspace/${workspaceId}/divisions`, data)};
-// export const getWorkspaceDivisions = async (workspaceId) => {
-//     return API.get(`/workspace/${workspaceId}/divisions`)};
-
 
 
 // ================= STORES ==================
@@ -101,9 +94,32 @@ export const acceptInvite = async (token) =>
     API.patch(`/user/invites/${token}/accept`);
 
 /**
- * Decline a specific invite using its token
- * @param {string} token
- * @returns {Promise<any>}
+ * Decline a specific invite using its token.
+ * @param {string} token - The invite token to decline.
+ * @returns {Promise<any>} Response from the server.
  */
 export const declineInvite = async (token) =>
     API.patch(`/user/invites/${token}/decline`);
+
+
+
+
+
+
+// ================= BRANDS ==================
+
+/**
+ * Get all brands (including inactive ones) for a given store.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing the full list of brands.
+ */
+export const getLocalBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands/a`);
+
+/**
+ * Get only active brands for a given store.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing the active brands.
+ */
+export const getActiveLocalBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands`);

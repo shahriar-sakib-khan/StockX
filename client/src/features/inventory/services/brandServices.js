@@ -1,38 +1,39 @@
-import API from "../../../services/apiClient";
+// @ts-check
+import API from "@/services/apiClient";
 
-// Get all global brands
-// export const getGlobalBrands = async (workspaceId, divisionId) =>
-//     await API.get(
-//         `/workspace/${workspaceId}/divisions/${divisionId}/inventory/global-brands`,
-//     );
+// ================= BRANDS ==================
 
-// Get all brands in a division (list only)
-export const getDivisionBrands = async (workspaceId, divisionId) =>
-    await API.get(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/all-brands`,
-    );
+/**
+ * Get all brands (including inactive ones) for a given store.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing the full list of brands.
+ */
+export const getBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands/a`);
 
-// Get all brands in a division (detailed)
-export const getDetailedDivisionBrands = async (workspaceId, divisionId) =>
-    await API.get(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/brands/d`,
-    );
+/**
+ * Get only active brands for a given store.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing the active brands.
+ */
+export const getActiveBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands`);
 
-// Select brands in a division
-export const saveSelectedDivisionBrands = async (
-    workspaceId,
-    divisionId,
-    brands,
-) =>
-    await API.patch(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/brands`,
-        {
-            brands, // {list of {id, isActive}}
-        },
-    );
+/**
+ * Get detailed brand information for a given store.
+ * Typically includes extended metadata about each brand.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing detailed brand data.
+ */
+export const getDetailedBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands/d`);
 
-// Get all cylinders in a division
-export const getCylinders = async (workspaceId, divisionId) =>
-    await API.get(
-        `/workspace/${workspaceId}/divisions/${divisionId}/inventory/cylinders`,
-    );
+/**
+ * Select (fetch) the active brands for a given store.
+ * This is similar to getActiveLocalBrands but can be used
+ * where the purpose is explicitly to select brands for a UI.
+ * @param {string} storeId - The ID of the store.
+ * @returns {Promise<any>} Response containing selected active brands.
+ */
+export const saveSelectedBrands = async (storeId) =>
+    API.get(`/store/${storeId}/brands`);

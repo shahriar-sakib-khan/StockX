@@ -6,13 +6,12 @@ import {
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function TestBrands() {
-    const workspaceId = useAuthStore((state) => state.currentWorkspace).id;
-    const divisionId = useAuthStore((state) => state.currentDivision).id;
+    const storeId = useAuthStore((state) => state.currentStore)?.id;
     
     useEffect(() => {
         async function fetchBrands() {
             try {
-                const data = await getBrands(workspaceId, divisionId);
+                const data = await getBrands(storeId);
 
                 console.log("Server response:", data);
             } catch (err) {
@@ -20,7 +19,7 @@ export default function TestBrands() {
             }
 
             try {
-                const dataD = await getDetailedBrands(workspaceId, divisionId);
+                const dataD = await getDetailedBrands(storeId);
 
                 console.log("Server response2:", dataD);
             } catch (err) {
