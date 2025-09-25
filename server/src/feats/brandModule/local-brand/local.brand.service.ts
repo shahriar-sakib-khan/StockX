@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 
 import { LocalBrand, localBrandSanitizers, localBrandValidator } from './index.js';
+import { Cylinder } from '@/models/index.js';
 
 /**
  * @function getActiveLocalBrands
@@ -111,17 +112,27 @@ export const detailedLocalBrands = async (
 export const selectLocalBrands = async (
   selectedBrands: localBrandValidator.LocalBrandSelectionInput,
   userId: string
-): Promise<{ updatedCount: number }> => {
-  const bulkOps = selectedBrands.map(({ id, isActive }) => ({
+): Promise<{ brandUpdatedCount: number; cylinderUpdatedCount: number }> => {
+  const brandBulkOps = selectedBrands.map(({ id, isActive }) => ({
     updateOne: {
       filter: { _id: id },
       update: { isActive, selectedBy: new Types.ObjectId(userId) },
     },
   }));
+  const brandResult = await LocalBrand.bulkWrite(brandBulkOps);
 
-  const result = await LocalBrand.bulkWrite(bulkOps);
+  const cylinderBulkOps = selectedBrands.map(({ id, isActive }) => ({
+    updateMany: {
+      filter: { brand: id },
+      update: { isActive, createdBy: new Types.ObjectId(userId) },
+    },
+  }));
+  const cylinderResult = await Cylinder.bulkWrite(cylinderBulkOps);
 
-  return { updatedCount: result.modifiedCount };
+  return {
+    brandUpdatedCount: brandResult.modifiedCount,
+    cylinderUpdatedCount: cylinderResult.modifiedCount,
+  };
 };
 
 /**

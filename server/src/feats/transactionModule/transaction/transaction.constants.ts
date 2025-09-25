@@ -28,6 +28,17 @@ export const TransactionCategory = [
 export type TxCategoryType = (typeof TransactionCategory)[number];
 
 /**
+ * ----------------- Category Cash Flow Types -----------------
+ */
+export const CategoryType = {
+  CASH_INFLOW: 'cash_inflow', // Cash coming into the business
+  CASH_OUTFLOW: 'cash_outflow', // Cash leaving the business
+  NON_CASH: 'non_cash', // Inventory swaps or adjustments, no direct cash impact
+} as const;
+
+export type CategoryTypeType = (typeof CategoryType)[keyof typeof CategoryType];
+
+/**
  * ----------------- Other Constants -----------------
  */
 
@@ -36,7 +47,8 @@ export type PaymentMethodType = (typeof PaymentMethod)[number];
 
 export const CounterpartyKind = [
   'customer',
-  'store',
+  'supplier',
+  'shop',
   'vehicle',
   'staff',
   'internal',

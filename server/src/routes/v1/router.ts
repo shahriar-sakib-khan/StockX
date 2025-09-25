@@ -1,23 +1,24 @@
 import { Router } from 'express';
 
-import { requireAuth } from '@/middlewares';
+import { requireAuth } from '@/middlewares/index.js';
 
-import { storeRouter } from '@/feats/storeModule/index.js';
-import { authRouter, userRouter } from '@/feats/userModule/index.js';
+import { default as AuthRouter } from './auth.router.js';
+import { default as UserRouter } from './user.router.js';
+import { default as StoreRouter } from './store-routers/store.router.js';
 
 const router = Router();
 
 /**
  * @swagger
- * tags:
- *   name: API
- *   description: API entry point for all versioned routes
+ * /api/v1:
+ *    description: Entry point for all v1 routes of the API
+ *    tags: [API]
  */
 
-router.use('/', authRouter);
+router.use('/', AuthRouter);
 
 // Authenticated routes
-router.use('/', requireAuth, userRouter);
-router.use('/', requireAuth, storeRouter);
+router.use('/', requireAuth, UserRouter);
+router.use('/', requireAuth, StoreRouter);
 
 export default router;

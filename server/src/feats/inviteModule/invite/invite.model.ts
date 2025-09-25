@@ -5,7 +5,7 @@ import {
   InviteStatusType,
   InviteLifespan,
   InviteLifespanType,
-} from './invite.constants';
+} from './invite.constants.js';
 
 export interface IInvite extends Document {
   store: Types.ObjectId;

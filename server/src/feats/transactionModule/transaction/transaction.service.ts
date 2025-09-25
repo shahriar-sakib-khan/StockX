@@ -9,7 +9,7 @@ import { Types } from 'mongoose';
 import { Errors } from '@/error/index.js';
 import { TxCategory, Account } from '@/models/index.js';
 
-import { Transaction } from './index.js';
+import { Transaction, transactionSanitizers } from './index.js';
 
 /**
  * @function recordTransaction
@@ -18,12 +18,13 @@ import { Transaction } from './index.js';
  * @param {Object} txData - The data for the transaction.
  * @param {string} transactorId - The ID of the transactor.
  * @param {string} storeId - The ID of the store.
+ * @returns {Promise<transactionSanitizers.SanitizedTransaction>} The recorded transaction.
  */
 export const recordTransaction = async (
   txData: Record<string, any>,
   transactorId: string,
   storeId: string
-) => {
+): Promise<transactionSanitizers.SanitizedTransaction> => {
   const {
     category, // must exist, used to figure out debit/credit
     amount,
@@ -60,6 +61,7 @@ export const recordTransaction = async (
     creditAccountId: creditAccount._id,
     amount,
     category,
+    transactionType: config.categoryType,
     paymentMethod: paymentMethod ?? 'cash',
     counterpartyType,
     cylinderId,
@@ -76,7 +78,8 @@ export const recordTransaction = async (
 
   // Save transaction
   const transaction = await Transaction.create(txObj);
-  return transaction;
+
+  return transactionSanitizers.transactionSanitizer(transaction);
 };
 
 /**
@@ -84,11 +87,12 @@ export const recordTransaction = async (
  * @description Retrieves all transactions for a store
  *
  * @param {string} storeId - The ID of the store
- * @returns {Promise<any>} An array of transactions
+ * @returns {Promise<transactionSanitizers.SanitizedTransactions>} All transactions
  */
 export const getAllTransactions = async (storeId: string): Promise<any> => {
   const transactions = await Transaction.find({ store: storeId }).lean();
-  return transactions;
+
+  return transactionSanitizers.allTransactionSanitizer(transactions);
 };
 
 export default { recordTransaction, getAllTransactions };

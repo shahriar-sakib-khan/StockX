@@ -18,7 +18,7 @@ const router = Router({ mergeParams: true });
  */
 
 /**
- * @route   POST /store/:storeId/invites
+ * @route   POST /stores/:storeId/invites
  * @desc    Send a store invite to a user
  * @access  Admin
  */
@@ -29,21 +29,21 @@ router.post(
 );
 
 /**
- * @route   GET /store/:storeId/invites
+ * @route   GET /stores/:storeId/invites
  * @desc    Get all invites sent for a store
  * @access  Admin
  */
 router.get('/invites', inviteController.allInvites);
 
 /**
- * @route   GET /store/:storeId/invites/:inviteId
+ * @route   GET /stores/:storeId/invites/:inviteId
  * @desc    Get a single invite by ID
  * @access  Admin
  */
 router.get('/invites/:inviteId', inviteController.singleInvite);
 
 /**
- * @route   DELETE /store/:storeId/invites/:inviteId
+ * @route   DELETE /stores/:storeId/invites/:inviteId
  * @desc    Delete a sent invite from a store by ID
  * @access  Admin
  */

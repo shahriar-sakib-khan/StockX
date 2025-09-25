@@ -1,15 +1,13 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-import {
-  TxCategoryType,
-  TransactionCategory,
-} from '../feats/transactionModule/transaction/transaction.constants';
+import { transactionConstants } from '@/feats/transactionModule/index.js';
 
 export interface ITxCategory extends Document {
   store: Types.ObjectId;
 
-  code: TxCategoryType;
+  code: transactionConstants.TxCategoryType;
   name: string;
+  categoryType: transactionConstants.CategoryTypeType;
   descriptionTemplate?: string;
   debitAccountCode: string;
   creditAccountCode: string;
@@ -22,8 +20,9 @@ export interface ITxCategory extends Document {
 const txCategorySchema: Schema<ITxCategory> = new Schema(
   {
     store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
-    code: { type: String, required: true, enum: TransactionCategory },
+    code: { type: String, required: true, enum: transactionConstants.TransactionCategory },
     name: { type: String, required: true },
+    categoryType: { type: String, required: true, enum: transactionConstants.CategoryType },
     descriptionTemplate: { type: String },
     debitAccountCode: { type: String, required: true },
     creditAccountCode: { type: String, required: true },

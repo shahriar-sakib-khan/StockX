@@ -65,8 +65,6 @@ export const getAllStores = async () => API.get("/stores");
  */
 export const createStore = async (data) => API.post("/store", data);
 
-
-
 // ================= INVITES ==================
 
 /**
@@ -76,7 +74,7 @@ export const createStore = async (data) => API.post("/store", data);
  * @returns {Promise<any>} Response from the server
  */
 export const inviteStaff = async (storeId, data) => {
-    return API.post(`/store/${storeId}/invites`, data);
+    return API.post(`/stores/${storeId}/invites`, data);
 };
 
 /**

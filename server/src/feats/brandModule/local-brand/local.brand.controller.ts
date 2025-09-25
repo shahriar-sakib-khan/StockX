@@ -56,9 +56,14 @@ export const selectBrands = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
 
-  const updateStats = await localBrandService.selectLocalBrands(req.body, userId);
+  const { brandUpdatedCount, cylinderUpdatedCount } = await localBrandService.selectLocalBrands(
+    req.body,
+    userId
+  );
 
-  res.status(StatusCodes.OK).json({ message: 'Brands selected successfully', updateStats });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: 'Brands selected successfully', brandUpdatedCount, cylinderUpdatedCount });
 };
 
 /**

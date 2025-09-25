@@ -1,12 +1,8 @@
-export { default as Cylinder } from './cylinder.model';
-export type { ICylinder } from './cylinder.model';
+export { default as Cylinder } from './cylinder.model.js';
+export type { ICylinder } from './cylinder.model.js';
 
-// export * as cylinderValidator from './cylinder.validator';
+export { default as cylinderController } from './cylinder.controller.js';
 
-// export { cylinderMiddleware } from './cylinder.middleware';
+export { default as cylinderService } from './cylinder.service.js';
 
-export { default as cylinderController } from './cylinder.controller';
-
-export { default as cylinderService } from './cylinder.service';
-
-export * as cylinderSanitizers from './cylinder.sanitizer';
+export * as cylinderSanitizers from './cylinder.sanitizer.js';

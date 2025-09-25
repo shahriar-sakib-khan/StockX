@@ -3,7 +3,6 @@ import { Router } from 'express';
 import { validateRequest } from '@/middlewares/validateRequest.js';
 
 import { userValidator, userController } from '@/feats/userModule/index.js';
-import { userInviteRouter } from '../inviteModule';
 
 const router = Router({ mergeParams: true });
 
@@ -31,10 +30,5 @@ router.get('/user/me', userController.getCurrentUser);
  * @access  Authenticated
  */
 router.patch('/user', validateRequest(userValidator.updateUserSchema), userController.updateUser);
-
-/**
- * ----------------- Sub-router (User Invites) -----------------
- */
-router.use('/user', userInviteRouter);
 
 export default router;

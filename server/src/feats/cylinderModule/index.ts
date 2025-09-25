@@ -22,5 +22,5 @@ export {
 /**
  * ----------------- Router Exports -----------------
  */
-export { default as cylinderRouter } from './cylinder.routes';
-export { default as cylinderTxRouter } from './cylinder.tx.routes';
+export { default as cylinderRouter } from './cylinder.routes.js';
+export { default as cylinderTxRouter } from './cylinder.tx.routes.js';

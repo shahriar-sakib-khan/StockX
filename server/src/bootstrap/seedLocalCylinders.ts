@@ -1,7 +1,7 @@
-import { Types, startSession } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { LocalBrand, Cylinder } from '@/models/index.js';
-import { generateSKU } from '@/common';
+import { generateSKU } from '@/common/index.js';
 
 /**
  * @function seedLocalCylinders
@@ -70,7 +70,7 @@ export const seedLocalCylinders = async (
             price: priceMap.get(`${size}-${regulatorType}`) || 0,
             count: 0,
             isFull,
-            isActive: true,
+            isActive: false,
             createdBy: userObjectId,
           });
         }

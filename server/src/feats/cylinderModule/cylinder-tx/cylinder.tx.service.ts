@@ -1,11 +1,16 @@
 import { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
-import { recordTransaction } from '@/services/v1/index.js';
-import { Transaction } from '@/models/index.js';
+
+import {
+  Transaction,
+  transactionConstants,
+  transactionSanitizers,
+  transactionService,
+} from '@/feats/transactionModule/index.js';
 
 import { Cylinder } from '../index.js';
-import { cylinderTxValidator } from './index.js';
+import { cylinderTxValidator, CylinderTxConstants } from './index.js';
 
 export const buyCylinder = async (
   userData: cylinderTxValidator.BuyCylinderInput,
@@ -24,15 +29,15 @@ export const buyCylinder = async (
 
   // Transaction-specific fields
   const txData = {
-    category: 'cylinder-buy',
+    category: CylinderTxConstants.CylinderTxCategory.CYLINDER_PURCHASE_WHOLESALE_CASH,
     amount: quantity * pricePerUnit,
-    counterpartyType: 'shop',
+    counterpartyType: CylinderTxConstants.CylinderCounterpartyKind.STORE,
     cylinderId,
     quantity,
     pricePerUnit,
   };
 
-  const tx = await recordTransaction(txData, userId, storeId);
+  const tx = await transactionService.recordTransaction(txData, userId, storeId);
 
   return tx;
 };
@@ -55,14 +60,15 @@ export const sellCylinder = async (
 
   // Transaction-specific fields
   const txData = {
-    category: 'cylinder-sale',
+    category: CylinderTxConstants.CylinderTxCategory.CYLINDER_SALE_CASH,
     amount: quantity * pricePerUnit,
-    counterpartyType: 'customer',
+    counterpartyType: CylinderTxConstants.CylinderCounterpartyKind.CUSTOMER,
     cylinderId,
     quantity,
+    pricePerUnit,
   };
 
-  const tx = await recordTransaction(txData, userId, storeId);
+  const tx = await transactionService.recordTransaction(txData, userId, storeId);
   return tx;
 };
 
@@ -74,14 +80,13 @@ export const allCylinderTransactions = async (
   cylinderId: string,
   page: number,
   limit: number
-): Promise<any> => {
-  const skip = (page - 1) * limit;
-
+): Promise<transactionSanitizers.SanitizedTransactions & { total: number }> => {
   const total = await Transaction.countDocuments({
     cylinderId: new Types.ObjectId(cylinderId),
   });
   if (total === 0) return { transactions: [], total };
 
+  const skip = (page - 1) * limit;
   const transactions = await Transaction.find({
     cylinderId: new Types.ObjectId(cylinderId),
   })
@@ -90,7 +95,15 @@ export const allCylinderTransactions = async (
     .limit(limit)
     .lean();
 
-  return { transactions, total };
+  return {
+    transactions: transactionSanitizers.allTransactionSanitizer(transactions, [
+      'id',
+      'amount',
+      'transactionType',
+      'details',
+    ]).transactions,
+    total,
+  };
 };
 
 export default {

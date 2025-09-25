@@ -17,28 +17,28 @@ const router = Router({ mergeParams: true });
  */
 
 /**
- * @route   GET /store/:storeId/brands
+ * @route   GET /stores/:storeId/brands
  * @desc    Get all active local brands
  * @access  Private
  */
 router.get('/brands', localBrandController.activeLocalBrands);
 
 /**
- * @route   GET /store/:storeId/brands/a
+ * @route   GET /stores/:storeId/brands/a
  * @desc    Get all local brands
  * @access  Private
  */
 router.get('/brands/a', localBrandController.allLocalBrands);
 
 /**
- * @route   GET /store/:storeId/brands/d
+ * @route   GET /stores/:storeId/brands/d
  * @desc    Get detailed local brand list
  * @access  Private
  */
 router.get('/brands/d', localBrandController.detailedLocalBrands);
 
 /**
- * @route   PATCH /store/:storeId/brands
+ * @route   PATCH /stores/:storeId/brands
  * @desc    Select local brands
  * @access  Private
  */

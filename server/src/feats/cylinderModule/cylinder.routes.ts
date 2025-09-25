@@ -16,21 +16,21 @@ const router = Router({ mergeParams: true });
  */
 
 /**
- * @route   GET /store/:storeId/cylinders
+ * @route   GET /stores/:storeId/cylinders
  * @desc    Get active cylinders in a store
  * @access  Authenticated
  */
 router.get('/cylinders', cylinderController.getActiveCylinders);
 
 /**
- * @route   GET /store/:storeId/cylinders/a
+ * @route   GET /stores/:storeId/cylinders/a
  * @desc    Get all cylinders in a store
  * @access  Authenticated
  */
 router.get('/cylinders/a', cylinderController.allCylinders);
 
 /**
- * @route   GET /store/:storeId/cylinders/d
+ * @route   GET /stores/:storeId/cylinders/d
  * @desc    Get detailed cylinder list for a store
  * @access  Authenticated
  */
