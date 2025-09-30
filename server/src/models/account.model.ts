@@ -33,7 +33,7 @@ const accountSchema: Schema<IAccount> = new Schema(
   { timestamps: true }
 );
 
-accountSchema.index({ workspace: 1, division: 1, code: 1 }, { unique: true });
+// accountSchema.index({ workspace: 1, division: 1, code: 1 }, { unique: true });
 
 accountSchema.methods.toJSON = function (): Partial<IAccount> {
   const obj = this.toObject();

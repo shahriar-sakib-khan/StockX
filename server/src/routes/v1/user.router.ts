@@ -20,6 +20,6 @@ router.use('/', userRouter);
 router.use('/user', requireRole('user'));
 
 // User invite routes
-router.use('/', userInviteRouter);
+router.use('/user', userInviteRouter);
 
 export default router;

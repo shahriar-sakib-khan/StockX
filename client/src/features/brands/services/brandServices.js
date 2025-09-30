@@ -11,7 +11,7 @@ import API from "@/services/apiClient";
  * @returns {Promise<any>} Response containing the full list of brands.
  */
 export const getBrands = async (storeId) =>
-    API.get(`/store/${storeId}/brands/a`);
+    API.get(`/stores/${storeId}/brands/a`);
 
 /**
  * Get only active brands for a given store.
@@ -19,7 +19,7 @@ export const getBrands = async (storeId) =>
  * @returns {Promise<any>} Response containing the active brands.
  */
 export const getActiveBrands = async (storeId) =>
-    API.get(`/store/${storeId}/brands`);
+    API.get(`/stores/${storeId}/brands`);
 
 /**
  * Get detailed brand information for a given store.
@@ -28,7 +28,7 @@ export const getActiveBrands = async (storeId) =>
  * @returns {Promise<any>} Response containing detailed brand data.
  */
 export const getDetailedBrands = async (storeId) =>
-    API.get(`/store/${storeId}/brands/d`);
+    API.get(`/stores/${storeId}/brands/d`);
 
 /**
  * Save (select) specific brands for a store.
@@ -37,5 +37,5 @@ export const getDetailedBrands = async (storeId) =>
  */
 export const saveSelectedBrands = async (storeId, brands) => {
     if (!storeId) throw new Error("storeId is required");
-    return API.patch(`/store/${storeId}/brands`, brands);
+    return API.patch(`/stores/${storeId}/brands`, brands);
 };

@@ -71,8 +71,7 @@ export default function BrandSelection() {
         });
     };
 
-    const allSelected =
-        draftBrands.length > 0 && draftBrands.every((b) => b.isActive);
+    const allSelected = draftBrands.length > 0 && draftBrands.every((b) => b.isActive);
     const selectedCount = draftBrands.filter((b) => b.isActive).length;
     const isSubmitDisabled = draftBrands.length === 0 || isSaving || loadingAll;
 

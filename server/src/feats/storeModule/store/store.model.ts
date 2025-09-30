@@ -41,7 +41,7 @@ const storeSchema: Schema<IStore> = new Schema(
   { timestamps: true }
 );
 
-// storeSchema.index({ workspace: 1, name: 1 }, { unique: true });
+// storeSchema.index({name: 1 }, { unique: true });
 
 /**
  * ----------------- Pre-save Hook -----------------

@@ -63,7 +63,7 @@ export const getAllStores = async () => API.get("/stores");
  * @param {{ name: string, location: string, phone: string }} data - Store information
  * @returns {Promise<any>} Response containing the newly created store
  */
-export const createStore = async (data) => API.post("/store", data);
+export const createStore = async (data) => API.post("/stores", data);
 
 // ================= INVITES ==================
 
@@ -98,26 +98,3 @@ export const acceptInvite = async (token) =>
  */
 export const declineInvite = async (token) =>
     API.patch(`/user/invites/${token}/decline`);
-
-
-
-
-
-
-// ================= BRANDS ==================
-
-/**
- * Get all brands (including inactive ones) for a given store.
- * @param {string} storeId - The ID of the store.
- * @returns {Promise<any>} Response containing the full list of brands.
- */
-export const getLocalBrands = async (storeId) =>
-    API.get(`/store/${storeId}/brands/a`);
-
-/**
- * Get only active brands for a given store.
- * @param {string} storeId - The ID of the store.
- * @returns {Promise<any>} Response containing the active brands.
- */
-export const getActiveLocalBrands = async (storeId) =>
-    API.get(`/store/${storeId}/brands`);

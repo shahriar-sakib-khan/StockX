@@ -48,7 +48,7 @@ const localBrandSchema: Schema<ILocalBrand> = new Schema(
   { timestamps: true }
 );
 
-localBrandSchema.index({ division: 1, isActive: 1 });
+// localBrandSchema.index({ division: 1, isActive: 1 });
 
 localBrandSchema.methods.toJSON = function (): Partial<ILocalBrand> {
   const obj = this.toObject();
