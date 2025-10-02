@@ -18,6 +18,7 @@ import {
     ShowAllStores,
     AddStore,
     InvitationsPage,
+    BrandSelectionPage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
             { path: "stores",  element:<ShowAllStores />},
             { path: "addStore",  element:<AddStore />},
             { path: "invitations",  element:<InvitationsPage />},
+            { path: "selectBrands",  element:<BrandSelectionPage />},
             {
                 path: "dashboard",
                 element: (

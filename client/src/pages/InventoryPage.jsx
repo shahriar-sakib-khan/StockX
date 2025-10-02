@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Tabs } from "../components";
 import { BrandSelection, InventoryTable } from "../features";
-import TestBrands from "../features/inventory/components/TestBrands";
+// import TestBrands from "../features/inventory/components/TestBrands";
 
 export default function InventoryPage() {
+    const [showBrandSelection, setShowBrandSelection] = useState(false);
+
     const tabs = [
         { key: "cylinders", label: "Cylinders" },
         { key: "stoves", label: "Stoves" },
@@ -26,7 +29,18 @@ export default function InventoryPage() {
                     </>
                 )}
             </Tabs>
-            <BrandSelection />
+
+            {!showBrandSelection ? (
+                <button
+                    className="mt-4 rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+                    onClick={() => setShowBrandSelection(true)}
+                >
+                    Select Brands
+                </button>
+            ) : (
+                <BrandSelection />
+            )}
+
             {/* <TestBrands /> */}
         </div>
     );

@@ -44,7 +44,7 @@ export default function AddStorePage() {
             setCurrentStore(newStore);
 
             // Redirect to dashboard
-            navigate("/dashboard", { replace: true });
+            navigate("/selectBrands", { replace: true });
         } catch (err) {
             console.error("Failed to create store:", err);
             setErrorMsg(
