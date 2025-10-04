@@ -1,11 +1,14 @@
 import { useState } from "react";
 import clsx from "clsx";
 import cylinderImg from "@/assets/images/cylinderModel.png";
+import stoveImg from "@/assets/images/stoveModel.png"; // add stove image
+import regulatorImg from "@/assets/images/regulatorModel.png"; // add regulator image
 import { TableHeader } from "../utils/TableHeader";
 import { TableRow } from "../utils/TableRow";
 import SearchBar from "./SearchBar";
 
 const brands = [
+    // Cylinders
     {
         id: "brand1",
         name: "Omera Gas",
@@ -50,38 +53,81 @@ const brands = [
             { type: "22mm", size: 33, quantity: 11 },
         ],
     },
+
+    // Stoves
+    {
+        id: "stove1",
+        name: "Miyako Stove",
+        imageUrl: stoveImg,
+        stockCount: 15,
+        stoves: [
+            { type: "single-burner", size: "small", quantity: 12 },
+            { type: "double-burner", size: "large", quantity: 8 },
+        ],
+    },
+    {
+        id: "stove2",
+        name: "Vision Stove",
+        imageUrl: stoveImg,
+        stockCount: 10,
+        stoves: [
+            { type: "single-burner", size: "small", quantity: 5 },
+            { type: "double-burner", size: "large", quantity: 3 },
+        ],
+    },
+
+    // Regulators
+    {
+        id: "reg1",
+        name: "Walton Regulator",
+        imageUrl: regulatorImg,
+        stockCount: 25,
+        regulators: [
+            { type: "20mm", size: "standard", quantity: 20 },
+            { type: "22mm", size: "heavy", quantity: 5 },
+        ],
+    },
+    {
+        id: "reg2",
+        name: "Singer Regulator",
+        imageUrl: regulatorImg,
+        stockCount: 18,
+        regulators: [
+            { type: "20mm", size: "standard", quantity: 10 },
+            { type: "22mm", size: "heavy", quantity: 4 },
+        ],
+    },
 ];
 
-const headers = [
-    "#",
-    "Brand",
-    "Status",
-    "Full cylinders",
-    "Empty cylinders",
-    "Action",
-];
+const headers = ["#", "Brand", "Status", "Full", "Empty", "Action"];
 
 // Main Table Component
-export default function CylinderTable({ overview = false, brandCount, type }) {
+export default function InventoryTable({ overview = false, brandCount, type }) {
     const [selectedSize, setSelectedSize] = useState("12");
     const [selectedType, setSelectedType] = useState("20mm");
     const [searchTerm, setSearchTerm] = useState("");
 
     const typeMap = {
-        cylinder: "brand",
+        cylinder: "cylinder",
         stoves: "stove",
         regulators: "regulator",
     };
 
     const product = typeMap[type] || type;
 
-    // collect unique sizes & types across all brands
-    const sizes = [
-        ...new Set(brands.flatMap((b) => b.cylinders.map((c) => c.size))),
-    ];
-    const types = [
-        ...new Set(brands.flatMap((b) => b.cylinders.map((c) => c.type))),
-    ];
+    // collect unique sizes & types across all brands for this type
+    let sizes = [];
+    let types = [];
+    if (type === "cylinder") {
+        sizes = [...new Set(brands.flatMap((b) => b.cylinders?.map((c) => c.size) || []))];
+        types = [...new Set(brands.flatMap((b) => b.cylinders?.map((c) => c.type) || []))];
+    } else if (type === "stoves") {
+        sizes = [...new Set(brands.flatMap((b) => b.stoves?.map((s) => s.size) || []))];
+        types = [...new Set(brands.flatMap((b) => b.stoves?.map((s) => s.type) || []))];
+    } else if (type === "regulators") {
+        sizes = [...new Set(brands.flatMap((b) => b.regulators?.map((r) => r.size) || []))];
+        types = [...new Set(brands.flatMap((b) => b.regulators?.map((r) => r.type) || []))];
+    }
 
     // filter brands by search term
     let displayedBrands =
@@ -95,9 +141,7 @@ export default function CylinderTable({ overview = false, brandCount, type }) {
 
     return (
         <div className="w-full bg-transparent p-4">
-            {/* Search Bar */}
-
-            {/* Filters as Buttons */}
+            {/* Search & Filters */}
             <div className="mb-4 flex gap-16">
                 {!overview && (
                     <SearchBar
@@ -121,7 +165,7 @@ export default function CylinderTable({ overview = false, brandCount, type }) {
                                     : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100",
                             )}
                         >
-                            {s}L
+                            {s}
                         </button>
                     ))}
                 </div>
@@ -152,16 +196,21 @@ export default function CylinderTable({ overview = false, brandCount, type }) {
                     <TableHeader headers={headers} />
                 </thead>
                 <tbody>
-                    {displayedBrands.map((b, i) => (
-                        <TableRow
-                            key={b.id}
-                            brand={b}
-                            index={i}
-                            selectedSize={selectedSize}
-                            selectedType={selectedType}
-                            headers={headers}
-                        />
-                    ))}
+                    {displayedBrands
+                        .filter((b) => b[`${product}s`]) // only show correct type
+                        .map((b, i) => (
+                            <TableRow
+                                key={b.id}
+                                brand={b}
+                                index={i}
+                                selectedSize={selectedSize}
+                                selectedType={selectedType}
+                                headers={headers}
+                                type={type}
+                                onEdit={() => {}}
+                                onDelete={() => {}}
+                            />
+                        ))}
                 </tbody>
             </table>
         </div>

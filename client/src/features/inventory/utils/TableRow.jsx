@@ -8,14 +8,23 @@ export const TableRow = ({
     selectedSize,
     selectedType,
     headers,
+    type,
     onEdit,
     onDelete,
 }) => {
-    const cylinder = brand.cylinders.find(
-        (c) => c.size === Number(selectedSize) && c.type === selectedType,
-    );
+    let items = [];
+    if (type === "cylinder") items = brand.cylinders || [];
+    if (type === "stoves") items = brand.stoves || [];
+    if (type === "regulators") items = brand.regulators || [];
 
-    const quantity = cylinder ? cylinder.quantity : 0;
+    const selectedItem =
+        items.find(
+            (i) => String(i.size) === String(selectedSize) && i.type === selectedType,
+        ) ||
+        items.find((i) => String(i.size) === String(selectedSize)) ||
+        items[0];
+
+    const quantity = selectedItem ? selectedItem.quantity : 0;
 
     let status = "Out of Stock";
     if (quantity > 20) status = "In Stock";

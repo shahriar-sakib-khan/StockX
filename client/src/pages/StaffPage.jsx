@@ -8,26 +8,26 @@ export default function StaffPage() {
     const currentStore = useAuthStore((state) => state.currentStore);
 
     const [staffList, setStaffList] = useState([
-        {
-            id: Date.now(),
-            name: "Salif bro",
-            role: "Friend",
-            salary: "18,000/-",
-            paid: "15,000/-",
-            remaining: "3,000/-",
-            salaryStatus: "Paid",
-            lastPaidDate: "12 August, 2025",
-        },
-        {
-            id: Date.now() + 1,
-            name: "Sakib bro",
-            role: "Friend",
-            salary: "18,000/-",
-            paid: "15,000/-",
-            remaining: "3,000/-",
-            salaryStatus: "Paid",
-            lastPaidDate: "12 August, 2025",
-        },
+        // {
+        //     id: Date.now(),
+        //     name: "Salif bro",
+        //     role: "Friend",
+        //     salary: "18,000/-",
+        //     paid: "15,000/-",
+        //     remaining: "3,000/-",
+        //     salaryStatus: "Paid",
+        //     lastPaidDate: "12 August, 2025",
+        // },
+        // {
+        //     id: Date.now() + 1,
+        //     name: "Sakib bro",
+        //     role: "Friend",
+        //     salary: "18,000/-",
+        //     paid: "15,000/-",
+        //     remaining: "3,000/-",
+        //     salaryStatus: "Paid",
+        //     lastPaidDate: "12 August, 2025",
+        // },
     ]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
