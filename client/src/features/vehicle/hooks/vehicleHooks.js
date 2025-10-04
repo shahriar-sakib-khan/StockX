@@ -6,14 +6,17 @@ import {
     updateVehicleInfo,
     deleteVehicle,
     createVehicle,
-    recordVehicleTransaction,
+    repairVehicle,
+    fuelVehicle,
     getVehicleTransactions,
+    getAllVehicleTransactions,
 } from "../services/vehicleServices";
 import queryClient from "@/services/queryClient";
 import {
     VEHICLE,
-    VEHICLE_TRANSACTION,
     VEHICLES,
+    VEHICLE_TRANSACTION,
+    VEHICLE_TRANSACTIONS,
 } from "../constants/vehicleQueryKeys";
 
 /** type imports
@@ -33,17 +36,16 @@ import {
 /** Vehicle CRUD query hooks */
 
 /**
- * Get all vehicles in a division.
+ * Get all vehicles in a store.
  *
- * @param {string} workspaceId
- * @param {string} divisionId
- * @param {import("@tanstack/react-query").UseQueryOptions<AllVehiclesResponse, unknown, AllVehiclesResponse, [string, string, string]>} [options]
+ * @param {string} storeId
+ * @param {import("@tanstack/react-query").UseQueryOptions<AllVehiclesResponse, unknown, AllVehiclesResponse, [string, string]>} [options]
  */
-export const useAllVehicles = (workspaceId, divisionId, options) => {
+export const useAllVehicles = (storeId, options) => {
     /** @type {import("@tanstack/react-query").UseQueryResult<AllVehiclesResponse, unknown>} */
     const { data, ...rest } = useQuery({
-        queryKey: [VEHICLES, workspaceId, divisionId],
-        queryFn: () => getVehicles(workspaceId, divisionId),
+        queryKey: [VEHICLES, storeId],
+        queryFn: () => getVehicles(storeId),
         ...options,
     });
 
@@ -53,21 +55,15 @@ export const useAllVehicles = (workspaceId, divisionId, options) => {
 /**
  * Get details of a single vehicle by ID.
  *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @param {string} vehicleId - The ID of the vehicle.
- * @param {import("@tanstack/react-query").UseQueryOptions<SingleVehicleResponse, unknown, SingleVehicleResponse, [string, string, string, string]>} [options]
+ * @param {string} storeId
+ * @param {string} vehicleId
+ * @param {import("@tanstack/react-query").UseQueryOptions<SingleVehicleResponse, unknown, SingleVehicleResponse, [string, string, string]>} [options]
  */
-export const useSingleVehicle = (
-    workspaceId,
-    divisionId,
-    vehicleId,
-    options,
-) => {
+export const useSingleVehicle = (storeId, vehicleId, options) => {
     /** @type {import("@tanstack/react-query").UseQueryResult<SingleVehicleResponse, unknown>} */
     const { data, ...rest } = useQuery({
-        queryKey: [VEHICLE, workspaceId, divisionId, vehicleId],
-        queryFn: () => getSingleVehicle(workspaceId, divisionId, vehicleId),
+        queryKey: [VEHICLE, storeId, vehicleId],
+        queryFn: () => getSingleVehicle(storeId, vehicleId),
         ...options,
     });
 
@@ -75,20 +71,19 @@ export const useSingleVehicle = (
 };
 
 /**
- * Create a new vehicle in a division.
+ * Create a new vehicle in a store.
  *
- * @param {string} workspaceId
- * @param {string} divisionId
+ * @param {string} storeId
  * @param {import("@tanstack/react-query").UseMutationOptions<CreateVehicleResponse, unknown, NewVehicle>} [options]
  */
-export const useCreateVehicle = (workspaceId, divisionId, options) => {
+export const useCreateVehicle = (storeId, options) => {
     /** @type {import("@tanstack/react-query").UseMutationResult<CreateVehicleResponse, unknown, NewVehicle>} */
     const { mutate, ...rest } = useMutation({
         mutationFn: /** @param {NewVehicle} vehicleInfo */ (vehicleInfo) =>
-            createVehicle(workspaceId, divisionId, vehicleInfo),
+            createVehicle(storeId, vehicleInfo),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [VEHICLES, workspaceId, divisionId],
+                queryKey: [VEHICLES, storeId],
             });
         },
         ...options,
@@ -100,29 +95,23 @@ export const useCreateVehicle = (workspaceId, divisionId, options) => {
 /**
  * Update an existing vehicle's information.
  *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
+ * @param {string} storeId
  * @param {import("@tanstack/react-query").UseMutationOptions<UpdateVehicleResponse, unknown, { vehicleId: string } & UpdatedVehicle>} [options]
  */
-export const useUpdateVehicle = (workspaceId, divisionId, options) => {
+export const useUpdateVehicle = (storeId, options) => {
     /** @type {import("@tanstack/react-query").UseMutationResult<UpdateVehicleResponse, unknown, { vehicleId: string } & UpdatedVehicle>} */
     const { mutate, ...rest } = useMutation({
         /** @param {{ vehicleId: string } & UpdatedVehicle} payload */
         mutationFn: (payload) => {
             const { vehicleId, ...vehicleInfo } = payload;
-            return updateVehicleInfo(
-                workspaceId,
-                divisionId,
-                vehicleId,
-                vehicleInfo,
-            );
+            return updateVehicleInfo(storeId, vehicleId, vehicleInfo);
         },
         onSuccess: (_, payload) => {
             queryClient.invalidateQueries({
-                queryKey: [VEHICLES, workspaceId, divisionId],
+                queryKey: [VEHICLES, storeId],
             });
             queryClient.invalidateQueries({
-                queryKey: [VEHICLE, workspaceId, divisionId, payload.vehicleId],
+                queryKey: [VEHICLE, storeId, payload.vehicleId],
             });
         },
         ...options,
@@ -132,20 +121,19 @@ export const useUpdateVehicle = (workspaceId, divisionId, options) => {
 };
 
 /**
- * Delete a vehicle from a division.
+ * Delete a vehicle from a store.
  *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
+ * @param {string} storeId
  * @param {import("@tanstack/react-query").UseMutationOptions<DeleteVehicleResponse, unknown, string>} [options]
  */
-export const useDeleteVehicle = (workspaceId, divisionId, options) => {
+export const useDeleteVehicle = (storeId, options) => {
     /** @type {import("@tanstack/react-query").UseMutationResult<DeleteVehicleResponse, unknown, string>} */
     const { mutate, ...rest } = useMutation({
         mutationFn: /** @param {string} vehicleId */ (vehicleId) =>
-            deleteVehicle(workspaceId, divisionId, vehicleId),
+            deleteVehicle(storeId, vehicleId),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [VEHICLES, workspaceId, divisionId],
+                queryKey: [VEHICLES, storeId],
             });
         },
         ...options,
@@ -159,31 +147,43 @@ export const useDeleteVehicle = (workspaceId, divisionId, options) => {
 /** Vehicle transaction query hooks */
 
 /**
- * Record a new vehicle transaction.
+ * Record a repair transaction for a vehicle.
  *
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @param {string} vehicleId - Vehicle ID.
- * @param {import("@tanstack/react-query").UseMutationOptions<VehicleTransactionResponse, unknown, VehicleTransactionInput >} [options]
+ * @param {string} storeId
+ * @param {string} vehicleId
+ * @param {import("@tanstack/react-query").UseMutationOptions<VehicleTransactionResponse, unknown, VehicleTransactionInput>} [options]
  */
-export const useRecordVehicleTransaction = (
-    workspaceId,
-    divisionId,
-    vehicleId,
-    options,
-) => {
-    /** @type {import("@tanstack/react-query").UseMutationResult<VehicleTransactionResponse, unknown, VehicleTransactionInput >} */
+export const useRepairVehicle = (storeId, vehicleId, options) => {
+    /** @type {import("@tanstack/react-query").UseMutationResult<VehicleTransactionResponse, unknown, VehicleTransactionInput>} */
     const { mutate, ...rest } = useMutation({
         mutationFn: /** @param {VehicleTransactionInput} data */ (data) =>
-            recordVehicleTransaction(workspaceId, divisionId, vehicleId, data),
+            repairVehicle(storeId, vehicleId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: [
-                    VEHICLE_TRANSACTION,
-                    workspaceId,
-                    divisionId,
-                    vehicleId,
-                ],
+                queryKey: [VEHICLE_TRANSACTION, storeId, vehicleId],
+            });
+        },
+        ...options,
+    });
+
+    return { mutate, ...rest };
+};
+
+/**
+ * Record a fuel transaction for a vehicle.
+ *
+ * @param {string} storeId
+ * @param {string} vehicleId
+ * @param {import("@tanstack/react-query").UseMutationOptions<VehicleTransactionResponse, unknown, VehicleTransactionInput>} [options]
+ */
+export const useFuelVehicle = (storeId, vehicleId, options) => {
+    /** @type {import("@tanstack/react-query").UseMutationResult<VehicleTransactionResponse, unknown, VehicleTransactionInput>} */
+    const { mutate, ...rest } = useMutation({
+        mutationFn: /** @param {VehicleTransactionInput} data */ (data) =>
+            fuelVehicle(storeId, vehicleId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [VEHICLE_TRANSACTION, storeId, vehicleId],
             });
         },
         ...options,
@@ -195,24 +195,34 @@ export const useRecordVehicleTransaction = (
 /**
  * Fetch all transactions for a vehicle.
  *
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @param {string} vehicleId - Vehicle ID.
- * @param {import("@tanstack/react-query").UseQueryOptions<AllVehicleTransactionsResponse, unknown>} [options] - Optional React Query options.
+ * @param {string} storeId
+ * @param {string} vehicleId
+ * @param {import("@tanstack/react-query").UseQueryOptions<AllVehicleTransactionsResponse, unknown>} [options]
  */
-export const useVehicleTransactions = (
-    workspaceId,
-    divisionId,
-    vehicleId,
-    options,
-) => {
+export const useVehicleTransactions = (storeId, vehicleId, options) => {
     /** @type {import("@tanstack/react-query").UseQueryResult<AllVehicleTransactionsResponse, unknown>} */
     const { data, ...rest } = useQuery({
-        queryKey: [VEHICLE_TRANSACTION, workspaceId, divisionId, vehicleId],
-        queryFn: () =>
-            getVehicleTransactions(workspaceId, divisionId, vehicleId),
+        queryKey: [VEHICLE_TRANSACTION, storeId, vehicleId],
+        queryFn: () => getVehicleTransactions(storeId, vehicleId),
         ...options,
     });
 
-    return { data, ...rest };
+    return { data: data?.transactions || [], ...rest };
+};
+
+/**
+ * Fetch all transactions across all vehicles in a store.
+ *
+ * @param {string} storeId
+ * @param {import("@tanstack/react-query").UseQueryOptions<AllVehicleTransactionsResponse, unknown>} [options]
+ */
+export const useAllVehicleTransactions = (storeId, options) => {
+    /** @type {import("@tanstack/react-query").UseQueryResult<AllVehicleTransactionsResponse, unknown>} */
+    const { data, ...rest } = useQuery({
+        queryKey: [VEHICLE_TRANSACTIONS, storeId],
+        queryFn: () => getAllVehicleTransactions(storeId),
+        ...options,
+    });
+
+    return { data: data?.transactions || [], ...rest };
 };

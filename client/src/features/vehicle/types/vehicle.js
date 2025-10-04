@@ -8,8 +8,7 @@
  * @property {string} regNumber
  * @property {string|null} vehicleBrand
  * @property {string|null} vehicleModel
- * @property {string} workspace
- * @property {string} division
+ * @property {string} store - Store ID this vehicle belongs to
  * @property {number} totalFuelCost
  * @property {number} totalRepairCost
  * @property {string} createdAt
@@ -69,26 +68,23 @@
 /**
  * @typedef {Object} VehicleTransactionInput
  * @property {number} amount - Required. Transaction amount.
- * @property {VehicleCategoryType} category - Required. Must be vehicle-related.
+ * @property {VehicleCategoryType} category - Required. Must be either "fuel_payment" or "repair_payment".
  * @property {PaymentMethodType} [paymentMethod] - Optional payment method.
  * @property {string} [ref] - Optional reference string (invoice/voucher).
- * @property {Object<string, any>} [details] - Optional extra metadata.
- * @property {string} workspace - Workspace ID.
- * @property {string} division - Division ID.
+ * @property {Object<string, any>} [details] - Optional extra metadata (like garage info for repairs, fuel type, etc).
+ * @property {string} store - Store ID this transaction is tied to
  */
 
 /**
  * @typedef {Object} VehicleTransaction
  * @property {string} id
- * @property {Object} workspace
- * @property {Object} division
+ * @property {string} store - Store ID
  * @property {number} amount
  * @property {VehicleCategoryType} category
  * @property {PaymentMethodType | null} paymentMethod
  * @property {string} counterpartyType
  * @property {Object | null} staff
  * @property {Object | null} vehicle
- * @property {Object | null} store
  * @property {Object | null} customer
  * @property {Object} transactedBy
  * @property {string | null} ref

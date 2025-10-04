@@ -1,14 +1,18 @@
 // @ts-check
 
 /**
+ * Vehicle query keys used in react-query
  * @typedef {"vehicles" | "vehicle" | "vehicle_transaction" | "vehicle_transactions"} VehicleQueryKey
  */
 
-/** @type {VehicleQueryKey} */
-export const VEHICLE = "vehicle";
-/** @type {VehicleQueryKey} */
-export const VEHICLES = "vehicles";
-/** @type {VehicleQueryKey} */
-export const VEHICLE_TRANSACTION = "vehicle_transaction";
-/** @type {VehicleQueryKey} */
-export const VEHICLE_TRANSACTIONS = "vehicle_transactions";
+/** Single vehicle */
+export const VEHICLE = /** @type {VehicleQueryKey} */ ("vehicle");
+
+/** All vehicles in a store */
+export const VEHICLES = /** @type {VehicleQueryKey} */ ("vehicles");
+
+/** Transactions for a single vehicle */
+export const VEHICLE_TRANSACTION = /** @type {VehicleQueryKey} */ ("vehicle_transaction");
+
+/** All transactions across all vehicles in a store */
+export const VEHICLE_TRANSACTIONS = /** @type {VehicleQueryKey} */ ("vehicle_transactions");

@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/pages/VehiclePage.jsx
+import { useState, useEffect } from "react";
 import {
     VehicleCard,
     VehicleInfoModal,
@@ -10,44 +11,36 @@ import {
     useCreateVehicle,
     useUpdateVehicle,
     useDeleteVehicle,
-    useRecordVehicleTransaction,
     useVehicleTransactions,
+    useFuelVehicle,
+    useRepairVehicle,
 } from "@/features/vehicle/hooks/vehicleHooks";
 
 import { useAuthStore } from "@/stores/useAuthStore";
+import { logOnce } from "./utils/logOnce";
 
 export default function VehiclePage() {
-    
-    const workspaceId = useAuthStore((state) => state.currentWorkspace).id;
-    const divisionId = useAuthStore((state) => state.currentDivision).id;
-    
-    // Fetch: all vehicles
+    const storeId = useAuthStore((state) => state.currentStore?.id);
+
+    // Fetch all vehicles
     const {
         data: vehicles = [],
         isLoading,
         isError,
         error,
-    } = useAllVehicles(workspaceId, divisionId);
+    } = useAllVehicles(storeId);
 
-    // Fetch: transactions of a vehicle
+    // CRUD mutations
+    const { mutate: createVehicle, isLoading: isCreating } =
+        useCreateVehicle(storeId);
+    const { mutate: updateVehicle, isLoading: isUpdating } =
+        useUpdateVehicle(storeId);
+    const { mutate: deleteVehicle } = useDeleteVehicle(storeId);
 
-    // Vehicle Mutations: CRUD
-    const { mutate: createVehicle, isLoading: isCreating } = useCreateVehicle(
-        workspaceId,
-        divisionId,
-    );
-
-    const { mutate: updateVehicle, isLoading: isUpdating } = useUpdateVehicle(
-        workspaceId,
-        divisionId,
-    );
-
-    const { mutate: deleteVehicle } = useDeleteVehicle(workspaceId, divisionId);
-
-    // Vehicle Mutations: Transaction
-
-    // Vehicle States: CRUD
+    // Form / UI state
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false); // <-- consistent name
     const [formData, setFormData] = useState({
         brand: "",
         model: "",
@@ -55,27 +48,18 @@ export default function VehiclePage() {
     });
     const [editingVehicle, setEditingVehicle] = useState(null);
     const [deletingVehicleId, setDeletingVehicleId] = useState(null);
-
-    // Vehicle States: Transaction
-    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-    const [IshistoryModalOpen, setIshistoryModalOpen] = useState(false);
     const [transactionVehicleId, setTransactionVehicleId] = useState(null);
     const [historyVehicleId, setHistoryVehicleId] = useState(null);
+
     const [transactionData, setTransactionData] = useState({
         amount: "",
-        /** @type {'fuel_payment' | 'repair_payment'} category */
         category: "fuel_payment",
-        /** @type {'cash' | 'bank' | 'mobile' | 'due' | 'other'} paymentMethod */
         paymentMethod: "cash",
         ref: "",
         details: {},
     });
 
-    // useEffect(() => {
-    //     console.log(transactionData);
-    // }, [transactionData]);
-
-    // Vehicle Handlers: CRUD
+    // CRUD handlers
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -88,11 +72,13 @@ export default function VehiclePage() {
     };
 
     const openEditModal = (vehicle) => {
+        // Accept either frontend-shaped or backend-shaped object
         setEditingVehicle(vehicle);
         setFormData({
-            brand: vehicle.brand,
-            model: vehicle.model,
-            regNo: vehicle.regNo,
+            brand: vehicle.brand ?? vehicle.vehicleBrand ?? "",
+            model: vehicle.model ?? vehicle.vehicleModel ?? "",
+            regNo: vehicle.regNo ?? vehicle.regNumber ?? "",
+            id: vehicle.id ?? vehicle._id,
         });
         setIsInfoModalOpen(true);
     };
@@ -100,10 +86,9 @@ export default function VehiclePage() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editingVehicle) {
-            // Update vehicle
             updateVehicle(
                 {
-                    vehicleId: editingVehicle.id,
+                    vehicleId: editingVehicle.id || editingVehicle._id,
                     regNumber: formData.regNo,
                     vehicleBrand: formData.brand,
                     vehicleModel: formData.model,
@@ -118,7 +103,6 @@ export default function VehiclePage() {
                 },
             );
         } else {
-            // Add new vehicle
             createVehicle(
                 {
                     regNumber: formData.regNo,
@@ -143,37 +127,25 @@ export default function VehiclePage() {
                 onError: (err) => console.error("Error deleting vehicle:", err),
             });
         }
-        setDeletingVehicleId(null); // close dialog
+        setDeletingVehicleId(null);
     };
 
-    /** -------------------------------------------------------------------------------------------- */
-    // Vehicle Handlers: Transaction
+    /* ----------------- Transactions ----------------- */
+    const fuelMutation = useFuelVehicle(storeId, transactionVehicleId);
+    const repairMutation = useRepairVehicle(storeId, transactionVehicleId);
 
-    // Transaction mutation
-    const { mutate: recordTransaction, isLoading: isRecording } =
-        useRecordVehicleTransaction(
-            workspaceId,
-            divisionId,
-            transactionVehicleId,
-            {
-                enabled: !!transactionVehicleId,
-            },
-        );
+    // Fetch transactions for the currently selected history vehicle.
+    // Only enabled when we have both a vehicle id and the modal is open.
+    const {
+        data: transactionsHistory = [],
+        isLoading: isTransactionsLoading,
+        isError: isTransactionsError,
+    } = useVehicleTransactions(storeId, historyVehicleId, {
+        enabled: !!historyVehicleId && isHistoryOpen,
+    });
 
-    // Fetch transactions for selected vehicle
-    const { data: transactionsHistory, isLoading: isTransactionsLoading } =
-        useVehicleTransactions(workspaceId, divisionId, historyVehicleId, {
-            enabled: !!historyVehicleId, // only fetch when a vehicle is selected
-        });
-
-    // useEffect(() => {
-    //     console.log(transactionsHistory);
-    // }, [transactionsHistory]);
-
-    // Open transaction modal for a specific vehicle
-    const openTransactionModal = /** @param {string} vehicleId */ (
-        vehicleId,
-    ) => {
+    // open transaction modal (fuel/repair)
+    const openTransactionModal = (vehicleId) => {
         setTransactionVehicleId(vehicleId);
         setTransactionData({
             amount: "",
@@ -185,33 +157,42 @@ export default function VehiclePage() {
         setIsTransactionModalOpen(true);
     };
 
-    const openHistoryModal = /** @param {string} vehicleId */ (vehicleId) => {
+    // open history modal - set vehicle id then open modal
+    const openHistoryModal = (vehicleId) => {
+        // debug log — will appear when you click History
+        // eslint-disable-next-line no-console
+        console.log("Opening history for vehicleId:", vehicleId);
         setHistoryVehicleId(vehicleId);
-        setIshistoryModalOpen(true);
+        setIsHistoryOpen(true);
     };
 
-    // Handle transaction form input
+    const closeHistoryModal = () => {
+        setIsHistoryOpen(false);
+        setHistoryVehicleId(null);
+    };
+
     const handleTransactionChange = (e) => {
         const { name, value } = e.target;
         setTransactionData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Submit transaction
     const handleTransactionSubmit = (e) => {
         e.preventDefault();
-        if (transactionVehicleId) {
-            recordTransaction(
-                {
-                    ...transactionData,
-                    amount: Number(transactionData.amount) || 0,
-                },
-                {
-                    onSuccess: () => setIsTransactionModalOpen(false),
-                    onError: (err) => console.error(err),
-                },
-            );
-        }
+        if (!transactionVehicleId) return;
+        const { category, ...rest } = transactionData;
+        const transactionFn =
+            category === "fuel_payment" ? fuelMutation : repairMutation;
+        transactionFn.mutate(
+            { ...rest, amount: Number(transactionData.amount) || 0 },
+            {
+                onSuccess: () => setIsTransactionModalOpen(false),
+                onError: (err) => console.error("Transaction error:", err),
+            },
+        );
     };
+
+    // debug log once to inspect vehicles array
+    logOnce(vehicles);
 
     return (
         <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-6 overflow-y-auto bg-gray-100 pt-5 text-gray-700">
@@ -223,45 +204,52 @@ export default function VehiclePage() {
                     onClick={openAddModal}
                     className="primary-button flex items-center gap-3 px-3 py-1"
                 >
-                    Add Vehicle
-                    <span className="text-xl">+</span>
+                    Add Vehicle <span className="text-xl">+</span>
                 </button>
             </div>
 
             {isLoading ? (
                 <Spinner size={32} />
             ) : isError ? (
-                <p className="text-red-500">Error: {error.message}</p>
+                <p className="text-red-500">
+                    Error: {error?.message || "Failed"}
+                </p>
             ) : (
                 <div className="mb-10 flex flex-wrap gap-5">
                     {vehicles.map((vehicle) => (
                         <VehicleCard
-                            key={vehicle.id}
+                            key={vehicle.id ?? vehicle._id}
                             vehicleInfo={{
-                                brand: vehicle.vehicleBrand,
-                                model: vehicle.vehicleModel,
-                                regNo: vehicle.regNumber,
-                                id: vehicle.id,
+                                brand: vehicle.vehicleBrand ?? vehicle.brand,
+                                model: vehicle.vehicleModel ?? vehicle.model,
+                                regNo: vehicle.regNumber ?? vehicle.regNo,
+                                id: vehicle.id ?? vehicle._id,
                             }}
-                            onDelete={() => setDeletingVehicleId(vehicle.id)}
+                            onDelete={() =>
+                                setDeletingVehicleId(vehicle.id ?? vehicle._id)
+                            }
                             onUpdate={() =>
                                 openEditModal({
-                                    brand: vehicle.vehicleBrand,
-                                    model: vehicle.vehicleModel,
-                                    regNo: vehicle.regNumber,
-                                    id: vehicle.id,
+                                    brand:
+                                        vehicle.vehicleBrand ?? vehicle.brand,
+                                    model:
+                                        vehicle.vehicleModel ?? vehicle.model,
+                                    regNo: vehicle.regNumber ?? vehicle.regNo,
+                                    id: vehicle.id ?? vehicle._id,
                                 })
                             }
                             onRecordTransaction={() =>
-                                openTransactionModal(vehicle.id)
+                                openTransactionModal(vehicle.id ?? vehicle._id)
                             }
-                            onShowHistory={() => openHistoryModal(vehicle.id)}
+                            onShowHistory={() =>
+                                openHistoryModal(vehicle.id ?? vehicle._id)
+                            }
                         />
                     ))}
                 </div>
             )}
 
-            {/* Vehicle Info Modal */}
+            {/* Info Modal */}
             {isInfoModalOpen && (
                 <VehicleInfoModal
                     isOpen={isInfoModalOpen}
@@ -275,7 +263,7 @@ export default function VehiclePage() {
                 />
             )}
 
-            {/* Confirm Delete Modal */}
+            {/* Confirm Delete */}
             <ConfirmDialog
                 isOpen={!!deletingVehicleId}
                 title="Confirm Delete"
@@ -284,6 +272,7 @@ export default function VehiclePage() {
                 onCancel={() => setDeletingVehicleId(null)}
             />
 
+            {/* Transaction Modal */}
             {isTransactionModalOpen && (
                 <VehicleTransactionModal
                     isOpen={isTransactionModalOpen}
@@ -292,41 +281,57 @@ export default function VehiclePage() {
                     transactionData={transactionData}
                     handleTransactionChange={handleTransactionChange}
                     handleTransactionSubmit={handleTransactionSubmit}
-                    isRecording={isRecording}
+                    isRecording={
+                        fuelMutation.isLoading || repairMutation.isLoading
+                    }
                 />
             )}
 
-            {IshistoryModalOpen && (
-                <ModalContainer onClose={() => setIshistoryModalOpen(false)}>
-                    <div className="p-4">
-                        <h2 className="mb-4 text-lg font-semibold">
-                            Transaction History
-                        </h2>
+            {/* History Modal (uses the new ModalContainer) */}
+            <ModalContainer isOpen={isHistoryOpen} onClose={closeHistoryModal}>
+                <div>
+                    <h2 className="mb-4 text-lg font-semibold">
+                        Transaction History
+                    </h2>
 
-                        {isTransactionsLoading ? (
-                            <p>Loading...</p>
-                        ) : transactionsHistory?.data?.length ? (
-                            <ul className="space-y-2">
-                                {transactionsHistory.data.map((txn) => (
-                                    <li
-                                        key={txn.id}
-                                        className="rounded border p-2 text-sm text-gray-600"
-                                    >
+                    {isTransactionsLoading ? (
+                        <p>Loading...</p>
+                    ) : isTransactionsError ? (
+                        <p className="text-red-500">
+                            Failed to load transactions.
+                        </p>
+                    ) : transactionsHistory &&
+                      transactionsHistory.length > 0 ? (
+                        <ul className="space-y-3">
+                            {transactionsHistory.map((txn) => (
+                                <li
+                                    key={txn.id ?? txn._id}
+                                    className="rounded border p-3 text-sm text-gray-700"
+                                >
+                                    <p>
                                         <span className="font-medium">
-                                            {txn.category}
+                                            Type:
                                         </span>{" "}
-                                        - {txn.amount} ({txn.paymentMethod})
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-gray-500">
-                                No transactions found.
-                            </p>
-                        )}
-                    </div>
-                </ModalContainer>
-            )}
+                                        {txn.transactionType ?? txn.type}
+                                    </p>
+                                    <p>
+                                        <span className="font-medium">
+                                            Amount:
+                                        </span>{" "}
+                                        {txn.amount}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {txn.details?.description ||
+                                            JSON.stringify(txn.details ?? {})}
+                                    </p>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-gray-500">No transactions found.</p>
+                    )}
+                </div>
+            </ModalContainer>
         </div>
     );
 }
