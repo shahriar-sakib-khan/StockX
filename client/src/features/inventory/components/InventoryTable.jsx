@@ -61,8 +61,8 @@ const brands = [
         imageUrl: stoveImg,
         stockCount: 15,
         stoves: [
-            { type: "single-burner", size: "small", quantity: 12 },
-            { type: "double-burner", size: "large", quantity: 8 },
+            { type: "Single Burner", size: "small", quantity: 12 },
+            { type: "Double Burner", size: "large", quantity: 8 },
         ],
     },
     {
@@ -71,8 +71,8 @@ const brands = [
         imageUrl: stoveImg,
         stockCount: 10,
         stoves: [
-            { type: "single-burner", size: "small", quantity: 5 },
-            { type: "double-burner", size: "large", quantity: 3 },
+            { type: "Single Burner", size: "small", quantity: 5 },
+            { type: "Double Burner", size: "large", quantity: 3 },
         ],
     },
 
@@ -108,7 +108,7 @@ export default function InventoryTable({ overview = false, brandCount, type }) {
     const [searchTerm, setSearchTerm] = useState("");
 
     const typeMap = {
-        cylinder: "cylinder",
+        cylinders: "cylinder",
         stoves: "stove",
         regulators: "regulator",
     };
@@ -118,7 +118,7 @@ export default function InventoryTable({ overview = false, brandCount, type }) {
     // collect unique sizes & types across all brands for this type
     let sizes = [];
     let types = [];
-    if (type === "cylinder") {
+    if (type === "cylinders") {
         sizes = [...new Set(brands.flatMap((b) => b.cylinders?.map((c) => c.size) || []))];
         types = [...new Set(brands.flatMap((b) => b.cylinders?.map((c) => c.type) || []))];
     } else if (type === "stoves") {
@@ -142,7 +142,7 @@ export default function InventoryTable({ overview = false, brandCount, type }) {
     return (
         <div className="w-full bg-transparent p-4">
             {/* Search & Filters */}
-            <div className="mb-4 flex gap-16">
+            <div className="mb-4 flex gap-16 items-center">
                 {!overview && (
                     <SearchBar
                         value={searchTerm}
@@ -151,8 +151,14 @@ export default function InventoryTable({ overview = false, brandCount, type }) {
                         className="w-100"
                     />
                 )}
-                {/* Sizes */}
-                <div className="ml-auto flex items-center gap-2">
+
+                {/* Sizes — invisible placeholder when not cylinders */}
+                <div
+                    className={clsx(
+                        "ml-auto flex items-center gap-2 transition-all",
+                        type !== "cylinders" && "invisible"
+                    )}
+                >
                     <h2 className="text-gray-600">Size: </h2>
                     {sizes.map((s) => (
                         <button
@@ -189,6 +195,7 @@ export default function InventoryTable({ overview = false, brandCount, type }) {
                     ))}
                 </div>
             </div>
+
 
             {/* Table */}
             <table className="w-full border-collapse overflow-hidden rounded-md border bg-white tracking-wider shadow-sm">

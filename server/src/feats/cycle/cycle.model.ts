@@ -27,7 +27,7 @@ const cycleSchema: Schema<ICycle> = new Schema(
   { timestamps: true }
 );
 
-cycleSchema.index({ workspace: 1, division: 1, month: 1, year: 1 }, { unique: true });
+// cycleSchema.index({ workspace: 1, division: 1, month: 1, year: 1 }, { unique: true });
 
 cycleSchema.methods.toJSON = function (): Partial<ICycle> {
   const obj = this.toObject();

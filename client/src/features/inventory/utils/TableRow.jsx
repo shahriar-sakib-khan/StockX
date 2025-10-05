@@ -13,7 +13,7 @@ export const TableRow = ({
     onDelete,
 }) => {
     let items = [];
-    if (type === "cylinder") items = brand.cylinders || [];
+    if (type === "cylinders") items = brand.cylinders || [];
     if (type === "stoves") items = brand.stoves || [];
     if (type === "regulators") items = brand.regulators || [];
 

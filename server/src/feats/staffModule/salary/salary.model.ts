@@ -38,7 +38,7 @@ const salarySchema: Schema<ISalary> = new Schema(
 );
 
 // Optional: Composite unique index to ensure one record per member per cycle
-salarySchema.index({ member: 1, cycle: 1 }, { unique: true });
+// salarySchema.index({ member: 1, cycle: 1 }, { unique: true });
 
 salarySchema.methods.toJSON = function (): Partial<ISalary> {
   const obj = this.toObject();

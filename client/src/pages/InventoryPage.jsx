@@ -18,13 +18,13 @@ export default function InventoryPage() {
                 {({ activeTab }) => (
                     <>
                         {activeTab === "cylinders" && (
-                            <InventoryTable type="cylinder" />
+                            <InventoryTable type="cylinders" />
                         )}
                         {activeTab === "stoves" && (
-                            <InventoryTable type="stove" />
+                            <InventoryTable type="stoves" />
                         )}
                         {activeTab === "regulators" && (
-                            <InventoryTable type="regulator" />
+                            <InventoryTable type="regulators" />
                         )}
                     </>
                 )}
