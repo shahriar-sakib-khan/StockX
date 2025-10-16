@@ -15,10 +15,7 @@ import { generateSKU } from '@/common/index.js';
  * @param {string} userId
  * @param {string} storeId
  */
-export const seedLocalCylinders = async (
-  userId: string | Types.ObjectId,
-  storeId: string | Types.ObjectId
-): Promise<void> => {
+export const seedLocalCylinders = async (userId: string, storeId: string): Promise<void> => {
   const storeObjectId = new Types.ObjectId(storeId);
   const userObjectId = new Types.ObjectId(userId);
 

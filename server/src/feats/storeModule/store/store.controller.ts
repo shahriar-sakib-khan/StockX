@@ -13,6 +13,8 @@ import {
   seedBaseTxCategories,
   seedLocalBrands,
   seedLocalCylinders,
+  seedLocalRegulators,
+  seedLocalStoves,
 } from '@/bootstrap/index.js';
 
 import { storeService } from './index.js';
@@ -32,6 +34,8 @@ export const createStore = async (req: Request, res: Response) => {
   await seedBaseTxCategories(store.id);
   await seedLocalBrands(userId, store.id);
   await seedLocalCylinders(userId, store.id);
+  await seedLocalRegulators(userId, store.id);
+  await seedLocalStoves(userId, store.id);
 
   res.status(StatusCodes.CREATED).json({ message: 'Store created successfully', store });
 };

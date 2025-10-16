@@ -1,5 +1,4 @@
-// src/pages/VehiclePage.jsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     VehicleCard,
     VehicleInfoModal,

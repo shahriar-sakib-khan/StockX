@@ -10,16 +10,28 @@ import { StatusCodes } from 'http-status-codes';
 import { cylinderService } from './index.js';
 
 /**
- * ----------------- Inventory Controllers -----------------
+ * ----------------- Cylinder Inventory Controllers -----------------
  */
+export const getCylinderInventory = async (req: Request, res: Response) => {
+  const { storeId } = req.params;
+  const size = Number(req.query.size) || 0;
+  const regulatorType = String(req.query.regulatorType) || '';
 
-export const getActiveCylinders = async (req: Request, res: Response) => {
+  const inventoryData = await cylinderService.getCylinderInventory(storeId, size, regulatorType);
+
+  res.status(StatusCodes.OK).json(inventoryData);
+};
+
+/**
+* ----------------- General Cylinder Controllers -----------------
+*/
+export const getAllActiveCylinders = async (req: Request, res: Response) => {
   const { storeId } = req.params;
 
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
 
-  const { cylinders, total } = await cylinderService.getActiveCylinders(storeId, page, limit);
+  const { cylinders, total } = await cylinderService.getAllActiveCylinders(storeId, page, limit);
 
   res.status(StatusCodes.OK).json({ total, page, limit, cylinders });
 };
@@ -47,7 +59,9 @@ export const detailedCylinders = async (req: Request, res: Response) => {
 };
 
 export default {
-  getActiveCylinders,
+  getCylinderInventory,
+
+  getAllActiveCylinders,
   allCylinders,
   detailedCylinders,
 };

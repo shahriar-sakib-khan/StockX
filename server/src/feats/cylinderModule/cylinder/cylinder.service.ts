@@ -3,6 +3,69 @@ import { Types } from 'mongoose';
 import { Cylinder, cylinderSanitizers } from './index.js';
 
 /**
+ * ----------------- Cylinder Inventory -----------------
+ */
+
+/**
+ * @function getCylinderInventory
+ * @description Get cylinder inventory for a store, optionally filtered by size and regulator type.
+ * @param {string} storeId - The ID of the store.
+ * @param {number} size - The size of the cylinder.
+ * @param {string} regulatorType - The type of the regulator.
+ * @returns {Promise<any>} A promise that resolves to an array of cylinder inventory.
+ */
+export const getCylinderInventory = async (
+  storeId: string,
+  size: number,
+  regulatorType: string
+): Promise<any> => {
+  const match: any = { store: new Types.ObjectId(storeId) };
+
+  // Build base match filter
+  if (size && size !== 0) match.size = size;
+  if (regulatorType && regulatorType.trim() !== '') match.regulatorType = regulatorType;
+
+  const summary = await Cylinder.aggregate([
+    // Filter
+    { $match: match },
+    // Group by brand
+    {
+      $group: {
+        _id: '$brand',
+        brandName: { $first: '$name' },
+        cylinderImage: { $first: '$cylinderImage' },
+        fullCount: { $sum: { $cond: [{ $eq: ['$isFull', true] }, 1, 0] } },
+        emptyCount: { $sum: { $cond: [{ $eq: ['$isFull', false] }, 1, 0] } },
+      },
+    },
+    // Add extra fields
+    {
+      $addFields: {
+        id: '$_id',
+        problemCount: 0,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        id: 1,
+        brandName: 1,
+        cylinderImage: 1,
+        fullCount: 1,
+        emptyCount: 1,
+        problemCount: 1,
+      },
+    },
+  ]);
+
+  return summary;
+};
+
+/**
+ * ----------------- General Cylinder Services -----------------
+ */
+
+/**
  * @function getActiveCylinders
  * Fetches active cylinders for a store with pagination.
  *
@@ -11,7 +74,7 @@ import { Cylinder, cylinderSanitizers } from './index.js';
  * @param {number} limit - Number of items per page.
  * @returns {Promise<cylinderSanitizers.SanitizedCylinders & { total: number }>} Paginated active cylinders.
  */
-export const getActiveCylinders = async (
+export const getAllActiveCylinders = async (
   storeId: string,
   page: number,
   limit: number
@@ -103,7 +166,8 @@ export const detailedCylinders = async (
  * ----------------- Default Exports (cylinderService) -----------------
  */
 export default {
-  getActiveCylinders, // Get paginated list of active cylinders for a store
+  getCylinderInventory,
+  getAllActiveCylinders, // Get paginated list of active cylinders for a store
   getAllCylinders, // Get paginated list of cylinders for a store
   detailedCylinders, // Get paginated detailed cylinder data for a store
 };

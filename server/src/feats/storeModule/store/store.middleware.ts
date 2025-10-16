@@ -84,7 +84,6 @@ export const storeScope = (allowedRoles: string[] = []) => {
       storeId,
       storeRoles: membership.storeRoles,
     };
-    console.log('i was here');
     
     return next();
   };

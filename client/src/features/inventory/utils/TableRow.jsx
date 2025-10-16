@@ -3,32 +3,22 @@ import { FaRegEdit as EditIcon } from "react-icons/fa";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
 
 export const TableRow = ({
-    brand,
     index,
+    product,
+    type,
     selectedSize,
     selectedType,
-    headers,
-    type,
     onEdit,
     onDelete,
 }) => {
-    let items = [];
-    if (type === "cylinders") items = brand.cylinders || [];
-    if (type === "stoves") items = brand.stoves || [];
-    if (type === "regulators") items = brand.regulators || [];
-
-    const selectedItem =
-        items.find(
-            (i) => String(i.size) === String(selectedSize) && i.type === selectedType,
-        ) ||
-        items.find((i) => String(i.size) === String(selectedSize)) ||
-        items[0];
-
-    const quantity = selectedItem ? selectedItem.quantity : 0;
+    const fullCount = product ? product.fullCount : 0;
+    const emptyCount = product ? product.emptyCount : 0;
+    const problemCount = product ? product.problemCount : 0;
+    const stockCount = product ? product.stockCount : 0;
 
     let status = "Out of Stock";
-    if (quantity > 20) status = "In Stock";
-    else if (quantity > 0) status = "Low Stock";
+    if (fullCount > 20) status = "In Stock";
+    else if (fullCount > 0) status = "Low Stock";
 
     const statusColors = {
         "In Stock": "bg-emerald-500 text-white",
@@ -38,21 +28,34 @@ export const TableRow = ({
 
     return (
         <tr className="border-b border-gray-200 bg-white text-gray-600 hover:bg-gray-50">
-            <td data-cell={headers[0]} className="p-4">
+            <td data-cell={"#"} className="p-4">
                 {index + 1}
             </td>
             <td
-                data-cell={headers[1]}
-                className="flex flex-nowrap items-center gap-2 p-4"
+                data-cell={"Brand"}
+                className="products-center flex flex-nowrap gap-2 p-4"
             >
                 <img
-                    src={brand.imageUrl}
-                    alt={brand.name}
+                    src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
+                    alt={
+                        product.brandName ? product.brandName : product.itemName
+                    }
                     className="h-6 w-6"
                 />
-                {brand.name}
+                {/* {type === "stoves" && index === 2 && (
+                    <img
+                        src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
+                        alt={
+                            product.brandName
+                                ? product.brandName
+                                : product.itemName
+                        }
+                        className="h-6 w-6"
+                    />
+                )} */}
+                {product.brandName}
             </td>
-            <td data-cell={headers[2]} className="min-w-35 p-4">
+            <td data-cell={"Status"} className="min-w-35 p-4">
                 <span
                     className={clsx(
                         "rounded-full px-3 py-1 text-xs",
@@ -62,22 +65,40 @@ export const TableRow = ({
                     {status}
                 </span>
             </td>
-            <td data-cell={headers[3]} className="p-4">
-                {quantity}
+
+            {/* Cylinder exclusive columns */}
+            {type === "cylinders" && (
+                <td data-cell={"Full"} className="p-4">
+                    {fullCount}
+                </td>
+            )}
+            {type === "cylinders" && (
+                <td data-cell={"Empty"} className="p-4">
+                    {emptyCount}
+                </td>
+            )}
+
+            {/* Stove and Regulator exclusive columns */}
+            {(type === "stoves" || type === "regulators") && (
+                <td data-cell={"In Stock"} className="p-4">
+                    {stockCount}
+                </td>
+            )}
+
+            <td data-cell={"Problem"} className="p-4">
+                {problemCount}
             </td>
-            <td data-cell={headers[4]} className="p-4">
-                {brand.stockCount}
-            </td>
-            {/* Action column */}
-            <td data-cell={headers[5]} className="flex gap-4">
+
+            {/* Actions column */}
+            <td data-cell={"Action"} className="flex gap-4">
                 <button
-                    onClick={() => onEdit(brand)}
+                    onClick={() => onEdit(product)}
                     className="rounded-sm p-1 hover:bg-gray-200/70"
                 >
                     <EditIcon className="size-5 text-gray-500" />
                 </button>
                 <button
-                    onClick={() => onDelete(brand.id)}
+                    onClick={() => onDelete(product.id)}
                     className="rounded-sm p-1 hover:bg-red-100"
                 >
                     <DeleteIcon className="size-5 text-red-400" />

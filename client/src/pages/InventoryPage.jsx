@@ -1,11 +1,7 @@
-import { useState } from "react";
-import { Tabs } from "../components";
-import { BrandSelection, InventoryTable } from "../features";
-// import TestBrands from "../features/inventory/components/TestBrands";
+import { Tabs } from "@/components";
+import { CylinderTable, StoveTable, RegulatorTable } from "@/features";
 
 export default function InventoryPage() {
-    const [showBrandSelection, setShowBrandSelection] = useState(false);
-
     const tabs = [
         { key: "cylinders", label: "Cylinders" },
         { key: "stoves", label: "Stoves" },
@@ -18,30 +14,15 @@ export default function InventoryPage() {
                 {({ activeTab }) => (
                     <>
                         {activeTab === "cylinders" && (
-                            <InventoryTable type="cylinders" />
+                            <CylinderTable type="cylinders" />
                         )}
-                        {activeTab === "stoves" && (
-                            <InventoryTable type="stoves" />
-                        )}
+                        {activeTab === "stoves" && <StoveTable type="stoves" />}
                         {activeTab === "regulators" && (
-                            <InventoryTable type="regulators" />
+                            <RegulatorTable type="regulators" />
                         )}
                     </>
                 )}
             </Tabs>
-
-            {!showBrandSelection ? (
-                <button
-                    className="mt-4 rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-                    onClick={() => setShowBrandSelection(true)}
-                >
-                    Select Brands
-                </button>
-            ) : (
-                <BrandSelection />
-            )}
-
-            {/* <TestBrands /> */}
         </div>
     );
 }

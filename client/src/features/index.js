@@ -14,6 +14,9 @@ export { default as InventoryOverviewSection } from "./dashboard/components/Inve
 
 // inventory
 export { default as InventoryTable } from "./inventory/components/InventoryTable";
+export { default as CylinderTable } from "./inventory/components/CylinderTable";
+export { default as StoveTable } from "./inventory/components/StoveTable";
+export { default as RegulatorTable } from "./inventory/components/RegulatorTable";
 
 // selection
 export { default as BrandSelection } from "./selection/components/BrandSelection";

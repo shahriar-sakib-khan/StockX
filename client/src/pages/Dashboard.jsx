@@ -39,7 +39,7 @@ export default function Dashboard() {
             >
                 <StatsSection />
                 <QuickActionsSection />
-                <InventoryOverviewSection />
+                {/* <InventoryOverviewSection /> */}
 
                 <Section>
                     <Heading>Graph</Heading>

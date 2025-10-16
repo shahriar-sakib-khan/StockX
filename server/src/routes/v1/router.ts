@@ -2,8 +2,8 @@ import { Router } from 'express';
 
 import { requireAuth } from '@/middlewares/index.js';
 
-import { default as AuthRouter } from './auth.router.js';
-import { default as UserRouter } from './user.router.js';
+import { default as AuthRouter } from './auth-router/auth.router.js';
+import { default as UserRouter } from './user-routers/user.router.js';
 import { default as StoreRouter } from './store-routers/store.router.js';
 
 const router = Router();

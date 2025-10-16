@@ -36,10 +36,10 @@ const router = createBrowserRouter([
             { path: "services", element: <ServicesPage /> },
             { path: "login", element: <LoginPage /> },
             { path: "signup", element: <SignupPage /> },
-            { path: "stores",  element:<ShowAllStores />},
-            { path: "addStore",  element:<AddStore />},
-            { path: "invitations",  element:<InvitationsPage />},
-            { path: "selectBrands",  element:<BrandSelectionPage />},
+            { path: "stores", element: <ShowAllStores /> },
+            { path: "addStore", element: <AddStore /> },
+            { path: "invitations", element: <InvitationsPage /> },
+            { path: "selectBrands", element: <BrandSelectionPage /> },
             {
                 path: "dashboard",
                 element: (
