@@ -9,7 +9,7 @@ import brandLogo from "@/assets/images/bashundhara.webp";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { logOnce } from "@/pages/utils/logOnce";
 
-export default function BrandSelection() {
+export default function BrandSelection({ onDone }) {
     const navigate = useNavigate();
 
     // Fetch brands
@@ -20,10 +20,8 @@ export default function BrandSelection() {
     const { mutate: saveBrands, isLoading: isSaving } =
         useSaveSelectedBrands(storeId);
 
-    // Local draft: [{id, isActive}]
     const [draftBrands, setDraftBrands] = useState([]);
 
-    // Initialize selection (mirror from API but only id + isActive)
     useEffect(() => {
         if (Array.isArray(allBrands) && allBrands.length > 0) {
             const sortedBrands = [...allBrands]
@@ -32,10 +30,6 @@ export default function BrandSelection() {
             setDraftBrands(sortedBrands);
         }
     }, [allBrands]);
-
-    // useEffect(() => {
-    //     console.log(draftBrands);
-    // }, [draftBrands]);
 
     // Toggle one brand
     const toggleSingleBrand = (id) => {
@@ -57,53 +51,59 @@ export default function BrandSelection() {
     // Submit
     const submitSelectedBrands = () => {
         if (!Array.isArray(draftBrands) || draftBrands.length === 0) return;
-
         if (!storeId) {
             console.error("No store selected — cannot save brands");
             return;
         }
 
-        // saveBrands is the react-query mutate from useSaveSelectedBrands(storeId)
-        // it accepts (variables, options)
         saveBrands(draftBrands, {
-            onSuccess: () => navigate("/dashboard"),
+            onSuccess: () => {
+                // If opened inside modal -> close modal instead of redirecting
+                if (onDone) onDone();
+                else navigate("/dashboard"); // default for onboarding flow
+            },
             onError: (err) => console.error("Failed to update brands:", err),
         });
     };
 
-    const allSelected = draftBrands.length > 0 && draftBrands.every((b) => b.isActive);
+    const allSelected =
+        draftBrands.length > 0 && draftBrands.every((b) => b.isActive);
     const selectedCount = draftBrands.filter((b) => b.isActive).length;
     const isSubmitDisabled = draftBrands.length === 0 || isSaving || loadingAll;
 
     return (
         <main className="bg-gray-50 p-6">
             <div className="mx-auto max-w-5xl">
-                {/* Header + Submit */}
+                {/* Header + Actions */}
                 <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                        <h2 className="text-2xl font-semibold text-gray-500">
-                            Select brands
+                        <h2 className="text-2xl font-semibold text-gray-700">
+                            Select Brands
                         </h2>
+
+                        {/* Submit */}
                         <button
-                            className={`rounded-md px-4 py-2 font-semibold text-white ${
-                                isSubmitDisabled
-                                    ? "cursor-not-allowed bg-gray-300"
-                                    : "primary-button"
-                            }`}
                             onClick={submitSelectedBrands}
                             disabled={isSubmitDisabled}
+                            className={`rounded-lg px-5 py-2.5 text-sm font-medium shadow transition-all ${
+                                isSubmitDisabled
+                                    ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                                    : "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800"
+                            }`}
                         >
                             {isSaving ? "Saving..." : "Submit"}
                         </button>
                     </div>
 
+                    {/* Select All / Deselect */}
                     <div className="flex items-center gap-4">
                         <button
-                            className="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300"
                             onClick={toggleAllBrandsSelection}
+                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100 active:bg-gray-200"
                         >
                             {allSelected ? "Deselect All" : "Select All"}
                         </button>
+
                         <span className="font-medium text-gray-700">
                             Selected: {selectedCount} / {draftBrands.length}
                         </span>

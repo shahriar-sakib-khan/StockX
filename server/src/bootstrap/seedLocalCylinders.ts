@@ -31,6 +31,7 @@ export const seedLocalCylinders = async (userId: string, storeId: string): Promi
 
   const cylindersToSeed = [];
   const fullStates = [true, false];
+  const defectedStates = [true, false];
   const unit = 'L';
 
   for (const localBrand of localBrands) {
@@ -47,29 +48,32 @@ export const seedLocalCylinders = async (userId: string, storeId: string): Promi
     for (const size of sizes) {
       for (const regulatorType of regulatorTypes) {
         for (const isFull of fullStates) {
-          const sku = await generateSKU({
-            name,
-            size,
-            unit,
-            regulatorType,
-            storeId: storeObjectId,
-          });
+          for (const isDefected of defectedStates) {
+            const sku = await generateSKU({
+              name,
+              size,
+              unit,
+              regulatorType,
+              storeId: storeObjectId,
+            });
 
-          cylindersToSeed.push({
-            store: storeObjectId,
-            brand: _id,
-            sku,
-            name,
-            cylinderImage,
-            regulatorType,
-            size,
-            unit,
-            price: priceMap.get(`${size}-${regulatorType}`) || 0,
-            count: 0,
-            isFull,
-            isActive: false,
-            createdBy: userObjectId,
-          });
+            cylindersToSeed.push({
+              store: storeObjectId,
+              brand: _id,
+              sku,
+              name,
+              cylinderImage,
+              regulatorType,
+              size,
+              unit,
+              price: priceMap.get(`${size}-${regulatorType}`) || 0,
+              count: 0,
+              isFull,
+              isDefected,
+              isActive: false,
+              createdBy: userObjectId,
+            });
+          }
         }
       }
     }

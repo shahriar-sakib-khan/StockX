@@ -1,54 +1,54 @@
-import { ArrowDownAZ, ArrowUpAZ } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
-/**
- * SortBy Component
- * -----------------
- * Props:
- * - sortBy: string (current sort key)
- * - sortOrder: 'asc' | 'desc'
- * - onChange: (newKey: string) => void
- * - onToggleOrder: () => void
- */
-export default function SortBy({ sortBy, sortOrder, onChange, onToggleOrder }) {
-    const options = [
+export default function SortBy({ sortBy, setSortBy, sortOrder, setSortOrder }) {
+    const sortOptions = [
         { value: "name", label: "Name" },
-        { value: "full", label: "Full Count" },
-        { value: "empty", label: "Empty Count" },
+        { value: "full", label: "Full Cylinder Count" },
+        { value: "empty", label: "Empty Cylinder Count" },
         { value: "problem", label: "Problem Count" },
     ];
 
+    const toggleSortOrder = () => {
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    };
+
     return (
-        <div className="flex items-center gap-2">
-            {/* Sort Dropdown */}
+        <div className="flex items-center gap-3">
+            {/* Label */}
+            <span className="text-sm font-medium text-gray-600">Sort by:</span>
+
+            {/* Compact Dropdown */}
             <select
                 value={sortBy}
-                onChange={(e) => onChange(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-800 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                onChange={(e) => setSortBy(e.target.value)}
+                className="min-w-[110px] rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm transition-all hover:border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500"
             >
-                {options.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                        Sort by {opt.label}
+                {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
                     </option>
                 ))}
             </select>
 
-            {/* Asc/Desc Toggle Button */}
+            {/* Sort Order Toggle */}
             <button
-                onClick={onToggleOrder}
-                className={`flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 font-medium transition-all dark:border-gray-700 ${
+                onClick={toggleSortOrder}
+                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium shadow-sm transition-all duration-200 ${
                     sortOrder === "asc"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
-                } `}
-                title={`Toggle to ${sortOrder === "asc" ? "descending" : "ascending"} order`}
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-600 hover:scale-[1.03] hover:bg-emerald-100"
+                        : "border-gray-300 bg-gray-50 text-gray-600 hover:scale-[1.03] hover:bg-gray-100"
+                }`}
+                title={`Sort ${sortOrder === "asc" ? "Ascending" : "Descending"}`}
             >
                 {sortOrder === "asc" ? (
                     <>
-                        <ArrowUpAZ size={16} /> Asc
+                        <ChevronUp size={16} />
+                        <span>ASC</span>
                     </>
                 ) : (
                     <>
-                        <ArrowDownAZ size={16} /> Desc
+                        <ChevronDown size={16} />
+                        <span>DESC</span>
                     </>
                 )}
             </button>

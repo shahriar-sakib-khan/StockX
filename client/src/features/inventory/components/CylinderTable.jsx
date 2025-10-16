@@ -5,15 +5,15 @@ import InventoryTable from "./InventoryTable";
 import { TableRow } from "../utils/TableRow";
 import SearchBar from "../utils/SearchBar";
 import CylinderFilters from "../utils/CylinderFilter";
-import SortBy from "./../utils/SortDropdown";
+import SortBy from "../utils/SortDropdown";
 
 export default function CylinderTable({ overview = false, itemCount, type }) {
     // ----------------- States -----------------
     const [search, setSearch] = useState("");
     const [selectedSize, setSelectedSize] = useState("12");
     const [selectedType, setSelectedType] = useState("22");
-    const [sortBy, setSortBy] = useState("name"); // ✅ default: name
-    const [sortOrder, setSortOrder] = useState("asc"); // ✅ default: ascending
+    const [sortBy, setSortBy] = useState("name");
+    const [sortOrder, setSortOrder] = useState("asc");
 
     // ----------------- Constants -----------------
     const headers = [
@@ -43,7 +43,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
             : [...cylinders];
 
     // Search
-    if (search.trim() !== "") {
+    if (search.trim() !== "" && displayedCylinders.length > 0) {
         displayedCylinders = displayedCylinders.filter((item) =>
             String(item.brandName || "")
                 .toLowerCase()
@@ -51,23 +51,33 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         );
     }
 
-    // Sorting
-    const sortMultiplier = sortOrder === "asc" ? 1 : -1;
+    // Sort by name, full count, empty count, or problem count
     displayedCylinders.sort((a, b) => {
+        let valueA, valueB;
+
         switch (sortBy) {
             case "full":
-                return (a.full - b.full) * sortMultiplier;
+                valueA = a.fullCount || 0;
+                valueB = b.fullCount || 0;
+                break;
             case "empty":
-                return (a.empty - b.empty) * sortMultiplier;
+                valueA = a.emptyCount || 0;
+                valueB = b.emptyCount || 0;
+                break;
             case "problem":
-                return (a.problem - b.problem) * sortMultiplier;
+                valueA = a.problemCount || 0;
+                valueB = b.problemCount || 0;
+                break;
             case "name":
             default:
-                return (
-                    (a.brandName || "").localeCompare(b.brandName || "") *
-                    sortMultiplier
-                );
+                valueA = String(a.brandName || "").toLowerCase();
+                valueB = String(b.brandName || "").toLowerCase();
+                break;
         }
+
+        if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+        if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+        return 0;
     });
 
     // ----------------- Conditional UI -----------------
@@ -77,47 +87,47 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
     // ----------------- Render -----------------
     return (
         <div className="w-full bg-transparent p-4">
-            {/* Controls */}
-            <div className="mb-4 flex flex-wrap items-center gap-4">
-                {!overview && (
-                    <SearchBar
-                        value={search}
-                        onChange={setSearch}
-                        placeholder={`Search ${type}...`}
-                        className="min-w-[200px] flex-1"
-                    />
-                )}
+            {/* ----------------- Top Controls ----------------- */}
+            {/* Search */}
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    {!overview && (
+                        <SearchBar
+                            value={search}
+                            onChange={setSearch}
+                            placeholder={`Search ${type}...`}
+                            className="w-[200px]"
+                        />
+                    )}
 
-                {type === "cylinders" && (
-                    <CylinderFilters
-                        sizes={sizes}
-                        types={types}
-                        selectedSize={selectedSize}
-                        selectedType={selectedType}
-                        onSizeChange={setSelectedSize}
-                        onTypeChange={setSelectedType}
-                    />
-                )}
+                    {/* Size & Type Filters */}
+                    {type === "cylinders" && (
+                        <CylinderFilters
+                            sizes={sizes}
+                            types={types}
+                            selectedSize={selectedSize}
+                            selectedType={selectedType}
+                            onSizeChange={setSelectedSize}
+                            onTypeChange={setSelectedType}
+                        />
+                    )}
+                </div>
 
-                {/* ✅ Sorting Component */}
+                {/* Sort By */}
                 <SortBy
                     sortBy={sortBy}
+                    setSortBy={setSortBy}
                     sortOrder={sortOrder}
-                    onChange={setSortBy}
-                    onToggleOrder={() =>
-                        setSortOrder((prev) =>
-                            prev === "asc" ? "desc" : "asc",
-                        )
-                    }
+                    setSortOrder={setSortOrder}
                 />
             </div>
 
-            {/* Inventory Table */}
+            {/* ----------------- Table ----------------- */}
             <InventoryTable headers={headers}>
                 {displayedCylinders.map((item, index) => (
                     <TableRow
                         key={item.id || index}
-                        index={index + 1}
+                        index={index}
                         product={item}
                         type={type}
                         selectedSize={selectedSize}

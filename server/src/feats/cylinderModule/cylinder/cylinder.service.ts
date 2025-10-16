@@ -3,9 +3,14 @@ import { Types } from 'mongoose';
 import { Cylinder, cylinderSanitizers } from './index.js';
 
 /**
- * ----------------- Cylinder Inventory -----------------
+ * ----------------- Cylinder Inventory Service -----------------
+ *
+ * Rules:
+ * - Skip cylinders whose LocalBrand is inactive.
+ * - Full count = sum of `count` for cylinders where `isFull = true`.
+ * - Empty count = sum of `count` for cylinders where `isFull = false`.
+ * - Group by brand.
  */
-
 /**
  * @function getCylinderInventory
  * @description Get cylinder inventory for a store, optionally filtered by size and regulator type.
@@ -21,30 +26,64 @@ export const getCylinderInventory = async (
 ): Promise<any> => {
   const match: any = { store: new Types.ObjectId(storeId) };
 
-  // Build base match filter
+  // Filters
   if (size && size !== 0) match.size = size;
   if (regulatorType && regulatorType.trim() !== '') match.regulatorType = regulatorType;
 
   const summary = await Cylinder.aggregate([
-    // Filter
+    // Base filter
     { $match: match },
+
+    // Lookup brand details (to access isActive)
+    {
+      $lookup: {
+        from: 'localbrands',
+        localField: 'brand',
+        foreignField: '_id',
+        as: 'brandData',
+      },
+    },
+    { $unwind: '$brandData' },
+
+    // Skip inactive brands
+    {
+      $match: {
+        'brandData.isActive': true,
+      },
+    },
+
     // Group by brand
     {
       $group: {
         _id: '$brand',
-        brandName: { $first: '$name' },
-        cylinderImage: { $first: '$cylinderImage' },
-        fullCount: { $sum: { $cond: [{ $eq: ['$isFull', true] }, 1, 0] } },
-        emptyCount: { $sum: { $cond: [{ $eq: ['$isFull', false] }, 1, 0] } },
+        brandName: { $first: '$brandData.name' },
+        cylinderImage: { $first: '$brandData.cylinderImage' },
+        fullCount: {
+          $sum: {
+            $cond: [{ $eq: ['$isFull', true] }, '$count', 0],
+          },
+        },
+        emptyCount: {
+          $sum: {
+            $cond: [{ $eq: ['$isFull', false] }, '$count', 0],
+          },
+        },
+        problemCount: {
+          $sum: {
+            $cond: [{ $eq: ['$isDefected', true] }, '$count', 0],
+          },
+        },
       },
     },
-    // Add extra fields
+
+    // Add extra fields (if needed for frontend display)
     {
       $addFields: {
         id: '$_id',
-        problemCount: 0,
       },
     },
+
+    // Final projection
     {
       $project: {
         _id: 0,

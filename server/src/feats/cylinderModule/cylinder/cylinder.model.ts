@@ -15,6 +15,7 @@ export interface ICylinder extends Document {
   price: number;
   count: number;
   isFull: boolean;
+  isDefected: boolean;
   isActive: boolean;
 
   createdBy: Types.ObjectId;
@@ -36,6 +37,7 @@ const cylinderSchema: Schema<ICylinder> = new Schema(
     price: { type: Number, required: true, default: 1250 },
     count: { type: Number, default: 0 },
     isFull: { type: Boolean, default: true },
+    isDefected: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
