@@ -73,6 +73,7 @@ export const getCylinderInventory = async (
             $cond: [{ $eq: ['$isDefected', true] }, '$count', 0],
           },
         },
+        price: { $first: '$price' },
       },
     },
 
@@ -93,6 +94,7 @@ export const getCylinderInventory = async (
         fullCount: 1,
         emptyCount: 1,
         problemCount: 1,
+        price: 1,
       },
     },
   ]);

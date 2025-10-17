@@ -42,17 +42,6 @@ export const TableRow = ({
                     }
                     className="h-6 w-6"
                 />
-                {/* {type === "stoves" && index === 2 && (
-                    <img
-                        src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
-                        alt={
-                            product.brandName
-                                ? product.brandName
-                                : product.itemName
-                        }
-                        className="h-6 w-6"
-                    />
-                )} */}
                 {product.brandName}
             </td>
             <td data-cell={"Status"} className="min-w-35 p-4">
@@ -64,6 +53,9 @@ export const TableRow = ({
                 >
                     {status}
                 </span>
+            </td>
+            <td data-cell={"Price"} className="p-4">
+                {product.price}
             </td>
 
             {/* Cylinder exclusive columns */}

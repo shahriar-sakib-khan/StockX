@@ -10,6 +10,7 @@ export default function CylinderTable({ type }) {
         "#",
         "Regulator Type",
         "Status",
+        "Price",
         "In Stock",
         "Problem",
         "Action",

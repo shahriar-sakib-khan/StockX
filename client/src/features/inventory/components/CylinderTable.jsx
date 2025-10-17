@@ -20,6 +20,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         "#",
         "Brand",
         "Status",
+        "Price",
         "Full",
         "Empty",
         "Problem",

@@ -6,6 +6,8 @@
  * These constants are used to define the structure and types of transactions in the vehicle transaction module.
  */
 
+import { constants } from '@/constants';
+
 /**
  * ----------------- Transaction Categories -----------------
  */
@@ -19,16 +21,8 @@ export type VehicleTxCategoryType = (typeof VehicleTxCategory)[keyof typeof Vehi
 /**
  * ----------------- Payment Methods -----------------
  */
-export const VehiclePaymentMethod = {
-  CASH: 'cash',
-  BANK: 'bank',
-  MOBILE: 'mobile',
-  DUE: 'due',
-  OTHER: 'other',
-} as const;
-
-export type VehiclePaymentMethodType =
-  (typeof VehiclePaymentMethod)[keyof typeof VehiclePaymentMethod];
+export const VehiclePaymentMethod = constants.PaymentMethods;
+export type VehiclePaymentMethodType = constants.PaymentMethodType;
 
 /**
  * ----------------- Counterparty Kind -----------------
@@ -36,6 +30,5 @@ export type VehiclePaymentMethodType =
 export const VehicleCounterpartyKind = {
   VEHICLE: 'vehicle',
 } as const;
-
 export type VehicleCounterpartyKindType =
   (typeof VehicleCounterpartyKind)[keyof typeof VehicleCounterpartyKind];
