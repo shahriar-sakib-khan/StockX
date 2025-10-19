@@ -60,12 +60,20 @@ export const getCylinderInventory = async (
         cylinderImage: { $first: '$brandData.cylinderImage' },
         fullCount: {
           $sum: {
-            $cond: [{ $eq: ['$isFull', true] }, '$count', 0],
+            $cond: [
+              { $and: [{ $eq: ['$isFull', true] }, { $eq: ['$isDefected', false] }] },
+              '$count',
+              0,
+            ],
           },
         },
         emptyCount: {
           $sum: {
-            $cond: [{ $eq: ['$isFull', false] }, '$count', 0],
+            $cond: [
+              { $and: [{ $eq: ['$isFull', false] }, { $eq: ['$isDefected', false] }] },
+              '$count',
+              0,
+            ],
           },
         },
         problemCount: {

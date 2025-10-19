@@ -32,6 +32,8 @@ export const cylinderSanitizer = (cylinder: ICylinder | HydratedDocument<ICylind
   isActive: cylinder.isActive,
 
   createdBy: resolveRef(cylinder.createdBy, userSanitizer),
+  updatedBy: resolveRef(cylinder.updatedBy, userSanitizer),
+  
   createdAt: cylinder.createdAt,
   updatedAt: cylinder.updatedAt,
 });

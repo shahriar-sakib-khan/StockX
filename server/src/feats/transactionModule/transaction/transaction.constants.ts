@@ -6,6 +6,7 @@ export const TransactionCategory = [
   'cylinder_sale_cash', // cash retail sales
   'cylinder_sale_credit', // credit retail sales
   'cylinder_swap_retail', // cylinder swap in retail
+  'cylinder_swap_empty', // empty cylinder swap
 
   // ========== Wholesale Purchases ==========
   'cylinder_purchase_wholesale_cash', // buy cylinders in cash

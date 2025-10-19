@@ -1,4 +1,4 @@
-export * as CylinderTxConstants from './cylinder.tx.constants.js';
+export * as cylinderTxConstants from './cylinder.tx.constants.js';
 
 // export { cylinderTxMiddleware } from './cylinder.tx.middleware';
 

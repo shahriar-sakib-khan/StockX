@@ -17,6 +17,9 @@ export const transactionSanitizer = (
 
   debitAccountId: String(transaction.debitAccountId),
   creditAccountId: String(transaction.creditAccountId),
+
+  price: transaction.price,
+  count: transaction.count,
   amount: transaction.amount,
 
   category: transaction.category,

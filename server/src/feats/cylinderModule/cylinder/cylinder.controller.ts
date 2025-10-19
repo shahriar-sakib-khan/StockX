@@ -58,6 +58,9 @@ export const detailedCylinders = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({ total, page, limit, cylinders });
 };
 
+/**
+* ----------------- Default exports : cylinderController -----------------
+*/
 export default {
   getCylinderInventory,
 

@@ -19,6 +19,7 @@ export interface ICylinder extends Document {
   isActive: boolean;
 
   createdBy: Types.ObjectId;
+  updatedBy?: Types.ObjectId;
 
   createdAt: Date;
   updatedAt: Date;
@@ -40,6 +41,7 @@ const cylinderSchema: Schema<ICylinder> = new Schema(
     isDefected: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );

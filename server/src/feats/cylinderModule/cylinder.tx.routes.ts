@@ -1,49 +1,64 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/validateRequest.js';
-
-import { cylinderTxValidator, cylinderTxController } from './cylinder-tx/index.js';
-
-const router = Router({ mergeParams: true });
+import { cylinderTxController } from './index.js';
 
 /**
  * @swagger
  * tags:
- *   name: Cylinder
- *   description: Cylinder transaction management
+ * name: Cylinder Transaction
+ * description: Manage cylinder buy, sell, defected, and exchange transactions
  */
+
+const router = Router({ mergeParams: true });
 
 /**
  * ----------------- Cylinder Transaction Routes -----------------
  */
 
 /**
- * @route   POST /stores/:storeId/cylinders/:cylinderId/buy
- * @desc    Purchase a cylinder from a store
+ * @route   POST /stores/:storeId/cylinders/buy
+ * @desc    Record a purchase transaction for cylinders (buy from supplier or add to stock)
  * @access  Authenticated
  */
-router.post(
-  '/cylinders/:cylinderId/buy',
-  validateRequest(cylinderTxValidator.buyCylinderSchema),
-  cylinderTxController.buyCylinder
-);
+router.post('/cylinders/buy', cylinderTxController.buyCylinders);
 
 /**
- * @route   POST /stores/:storeId/cylinders/:cylinderId/sell
- * @desc    Sell a cylinder to a store
+ * @route   POST /stores/:storeId/cylinders/sell
+ * @desc    Record a sale transaction for cylinders (sell to customers)
  * @access  Authenticated
  */
-router.post(
-  '/cylinders/:cylinderId/sell',
-  validateRequest(cylinderTxValidator.sellCylinderSchema),
-  cylinderTxController.sellCylinder
-);
+router.post('/cylinders/sell', cylinderTxController.sellCylinder);
 
 /**
- * @route   GET /cylinders/:cylinderId/txs
- * @desc    Get all transactions for a specific cylinder
+ * @route   POST /stores/:storeId/cylinders/defected
+ * @desc    Mark cylinders as defected and update inventory
  * @access  Authenticated
  */
-router.get('/cylinders/:cylinderId/txs', cylinderTxController.allCylinderTransactions);
+router.post('/cylinders/defected', cylinderTxController.markDefected);
+
+/**
+ * @route   POST /stores/:storeId/cylinders/undefected
+ * @desc    Mark cylinders as defected and update inventory
+ * @access  Authenticated
+ */
+router.post('/cylinders/undefected', cylinderTxController.unmarkDefected);
+
+/**
+ * ----------------- Cylinder Exchange Routes -----------------
+ */
+
+/**
+ * @route   POST /stores/:storeId/cylinders/exchange/full-for-empty
+ * @desc    Exchange empty cylinders for full ones (gas pricing applies)
+ * @access  Authenticated
+ */
+router.post('/cylinders/exchange/full-for-empty', cylinderTxController.exchangeFullForEmpty);
+
+/**
+ * @route   POST /stores/:storeId/cylinders/exchange/empty-for-empty
+ * @desc    Exchange empty cylinders between stores (inter-store swap)
+ * @access  Authenticated
+ */
+router.post('/cylinders/exchange/empty-for-empty', cylinderTxController.exchangeEmptyForEmpty);
 
 export default router;

@@ -27,6 +27,8 @@ export const recordTransaction = async (
 ): Promise<transactionSanitizers.SanitizedTransaction> => {
   const {
     category, // must exist, used to figure out debit/credit
+    price,
+    count,
     amount,
     paymentMethod,
     counterpartyType,
@@ -59,6 +61,8 @@ export const recordTransaction = async (
     store: new Types.ObjectId(storeId),
     debitAccountId: debitAccount._id,
     creditAccountId: creditAccount._id,
+    price,
+    count,
     amount,
     category,
     transactionType: config.categoryType,
