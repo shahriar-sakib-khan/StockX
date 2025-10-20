@@ -11,8 +11,11 @@ import { StatusCodes } from 'http-status-codes';
 import * as cylinderTxService from './cylinder.tx.service.js';
 import { assertAuth } from '@/common/assertions.js';
 
+/** ----------------- Cylinder buy and sell controllers ----------------- */
+
 /**
- * ----------------- Cylinder buy and sell controllers -----------------
+ * @function buyCylinders
+ * @description Handles cylinder purchase transactions
  */
 export const buyCylinders = async (req: Request, res: Response) => {
   assertAuth(req);
@@ -28,9 +31,17 @@ export const buyCylinders = async (req: Request, res: Response) => {
 
   const tx = await cylinderTxService.buyCylinders(buyData, transactorId, storeId);
 
-  res.status(StatusCodes.CREATED).json(tx);
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: 'Cylinders bought successfully',
+    data: tx,
+  });
 };
 
+/**
+ * @function sellCylinder
+ * @description Handles selling (outgoing) full cylinders to customers
+ */
 export const sellCylinder = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId: transactorId } = req.user;
@@ -45,11 +56,18 @@ export const sellCylinder = async (req: Request, res: Response) => {
 
   const tx = await cylinderTxService.sellCylinder(sellData, transactorId, storeId);
 
-  res.status(StatusCodes.OK).json(tx);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cylinder sold successfully',
+    data: tx,
+  });
 };
 
+/** ----------------- Cylinder marking controllers ----------------- */
+
 /**
- * ----------------- Cylinder marking controllers -----------------
+ * @function markDefected
+ * @description Handles marking of defected cylinders
  */
 export const markDefected = async (req: Request, res: Response) => {
   assertAuth(req);
@@ -65,9 +83,17 @@ export const markDefected = async (req: Request, res: Response) => {
 
   const cylinder = await cylinderTxService.markDefected(defectData, transactorId, storeId);
 
-  res.status(StatusCodes.OK).json(cylinder);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cylinder marked as defected successfully',
+    data: cylinder,
+  });
 };
 
+/**
+ * @function unmarkDefected
+ * @description Handles unmarking of defected cylinders
+ */
 export const unmarkDefected = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId: transactorId } = req.user;
@@ -82,11 +108,18 @@ export const unmarkDefected = async (req: Request, res: Response) => {
 
   const cylinder = await cylinderTxService.unmarkDefected(nonDefectData, transactorId, storeId);
 
-  res.status(StatusCodes.OK).json(cylinder);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cylinder marked as not defected successfully',
+    data: cylinder,
+  });
 };
 
+/** ----------------- Cylinder exchange controllers ----------------- */
+
 /**
- * ----------------- Cylinder exchange controllers -----------------
+ * @function exchangeFullForEmpty
+ * @description Handles exchange of full cylinders between stores
  */
 export const exchangeFullForEmpty = async (req: Request, res: Response) => {
   assertAuth(req);
@@ -94,7 +127,7 @@ export const exchangeFullForEmpty = async (req: Request, res: Response) => {
   const { storeId } = req.params;
   const { emptyOut, fullIn, paymentMethod } = req.body;
 
-  const Tx = await cylinderTxService.exchangeFullForEmpty(
+  const tx = await cylinderTxService.exchangeFullForEmpty(
     storeId,
     transactorId,
     emptyOut,
@@ -102,9 +135,17 @@ export const exchangeFullForEmpty = async (req: Request, res: Response) => {
     paymentMethod
   );
 
-  res.status(StatusCodes.OK).json(Tx);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Full cylinders exchanged successfully',
+    data: tx,
+  });
 };
 
+/**
+ * @function exchangeEmptyForEmpty
+ * @description Handles exchange of empty cylinders between stores
+ */
 export const exchangeEmptyForEmpty = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId: transactorId } = req.user;
@@ -119,7 +160,38 @@ export const exchangeEmptyForEmpty = async (req: Request, res: Response) => {
     storeId
   );
 
-  res.status(StatusCodes.OK).json(tx);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Empty cylinders exchanged successfully',
+    data: tx,
+  });
+};
+
+/**
+ * @function getAllCylinderTransactions
+ * @description Retrieves paginated list of all cylinder transactions for a store
+ */
+export const getAllCylinderTransactions = async (req: Request, res: Response) => {
+  const { storeId } = req.params;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const { transactions: txs, total } = await cylinderTxService.allCylinderTransactions(
+    storeId,
+    page,
+    limit
+  );
+
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cylinder transactions fetched successfully',
+    data: {
+      total,
+      page,
+      limit,
+      transactions: txs,
+    },
+  });
 };
 
 /**
@@ -134,4 +206,6 @@ export default {
 
   exchangeFullForEmpty,
   exchangeEmptyForEmpty,
+
+  getAllCylinderTransactions,
 };

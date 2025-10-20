@@ -31,19 +31,19 @@ export const addRepair = async (
   storeId: string,
   vehicleId: string
 ) => {
-  const { amount, paymentMethod, ref, details } = repairData;
+  const { totalAmount, paymentMethod, ref, details } = repairData;
 
   const vehicle = await Vehicle.findById(vehicleId);
   if (!vehicle) throw new Errors.NotFoundError('Vehicle not found');
 
   // Update total repair cost
-  vehicle.totalRepairCost += amount;
+  vehicle.totalRepairCost += totalAmount;
   await vehicle.save();
 
   // Transaction-specific fields
   const txData = {
     category: vehicleTxConstants.VehicleTxCategory.VEHICLE_REPAIR_PAYMENT,
-    amount,
+    totalAmount,
     paymentMethod,
     counterpartyType: vehicleTxConstants.VehicleCounterpartyKind.VEHICLE,
     vehicleId,
@@ -70,19 +70,19 @@ export const addFuel = async (
   storeId: string,
   vehicleId: string
 ) => {
-  const { amount, paymentMethod, ref, details } = fuelData;
+  const { totalAmount, paymentMethod, ref, details } = fuelData;
 
   const vehicle = await Vehicle.findById(vehicleId);
   if (!vehicle) throw new Errors.NotFoundError('Vehicle not found');
 
   // Update total fuel cost
-  vehicle.totalFuelCost += amount;
+  vehicle.totalFuelCost += totalAmount;
   await vehicle.save();
 
   // Transaction-specific fields
   const txData = {
     category: vehicleTxConstants.VehicleTxCategory.VEHICLE_FUEL_PAYMENT,
-    amount,
+    totalAmount,
     paymentMethod,
     counterpartyType: vehicleTxConstants.VehicleCounterpartyKind.VEHICLE,
     vehicleId,
@@ -129,7 +129,7 @@ export const singleVehicleTransactions = async (
   return {
     transactions: transactionSanitizers.allTransactionSanitizer(transactions, [
       'id',
-      'amount',
+      'totalAmount',
       'transactionType',
       'details',
     ]).transactions,
@@ -166,7 +166,7 @@ export const allVehicleTransactions = async (
   return {
     transactions: transactionSanitizers.allTransactionSanitizer(transactions, [
       'id',
-      'amount',
+      'totalAmount',
       'transactionType',
       'vehicleId',
       'details',

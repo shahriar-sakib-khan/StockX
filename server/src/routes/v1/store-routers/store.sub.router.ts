@@ -5,8 +5,8 @@ import localBrandRouter from '@/feats/brandModule/local.brand.routes.js';
 import { cylinderRouter, cylinderTxRouter } from '@/feats/cylinderModule/index.js';
 import { vehicleRouter, vehicleTxRouter } from '@/feats/vehicleModule/index.js';
 import { transactionRouter } from '@/feats/transactionModule/index.js';
-import { regulatorRouter } from '@/feats/regulatorModule';
-import { stoveRouter } from '@/feats/stoveModule';
+import { regulatorRouter } from '@/feats/regulatorModule/index.js';
+import { stoveRouter } from '@/feats/stoveModule/index.js';
 
 /**
  * @swagger

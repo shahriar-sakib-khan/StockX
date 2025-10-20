@@ -9,8 +9,8 @@ export interface ITransaction extends Document {
   creditAccountId: Types.ObjectId;
 
   price?: number;
-  count?: number;
-  amount: number;
+  quantity?: number;
+  totalAmount: number;
 
   category: transactionConstants.TxCategoryType;
   transactionType: transactionConstants.CategoryTypeType;
@@ -39,8 +39,8 @@ const transactionSchema: Schema<ITransaction> = new Schema(
     creditAccountId: { type: Schema.Types.ObjectId, ref: 'Account', required: true, index: true },
 
     price: { type: Number, min: 0 },
-    count: { type: Number, min: 1 },
-    amount: { type: Number, required: true, min: 0 },
+    quantity: { type: Number, min: 1 },
+    totalAmount: { type: Number, required: true, min: 0 },
     category: {
       type: String,
       enum: transactionConstants.TransactionCategory,

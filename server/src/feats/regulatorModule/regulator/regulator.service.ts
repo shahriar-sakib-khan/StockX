@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-import Regulator from './regulator.model';
+import Regulator from './regulator.model.js';
 import { regulatorSanitizers } from './index.js';
 
 /**

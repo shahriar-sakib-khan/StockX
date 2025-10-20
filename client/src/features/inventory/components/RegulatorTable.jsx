@@ -1,8 +1,7 @@
 import { useAuthStore } from "@/stores/useAuthStore";
-import { TableRow } from "../utils/TableRow";
-import SearchBar from "../utils/SearchBar";
+import { TableRow, SearchBar } from "../utils";
+import { useRegulatorInventory } from "../hooks";
 import InventoryTable from "./InventoryTable";
-import { useRegulatorInventory } from "../hooks/useRegulatorInventory";
 
 export default function CylinderTable({ type }) {
     // ----------------- Constants -----------------

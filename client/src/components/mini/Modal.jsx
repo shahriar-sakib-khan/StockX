@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import clsx from "clsx";
 
 export default function Modal({
@@ -10,15 +11,14 @@ export default function Modal({
 }) {
     if (!isOpen) return null;
 
-    // Size variants
     const sizeClasses = {
         sm: "max-w-sm",
         md: "max-w-md",
         lg: "max-w-3xl",
-        full: "max-w-[95vw] h-[90vh]", // large modal for full-screen use
+        full: "max-w-[95vw] h-[90vh]",
     };
 
-    return (
+    const modalContent = (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
             {/* Backdrop */}
             <div
@@ -69,4 +69,6 @@ export default function Modal({
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }

@@ -33,3 +33,29 @@ export const getRegulatorInventory = async ({ storeId }) => {
     const data = await API.get(`/stores/${storeId}/regulator-inventory`);
     return data;
 };
+
+
+import axios from "axios";
+/**
+ * Mark cylinders as defected
+ */
+export const markDefected = async ({ storeId, size, regulatorType, payload }) => {
+  const { data } = await axios.patch(
+    `${API}/stores/${storeId}/cylinders/mark-defected`,
+    payload,
+    { params: { size, regulatorType } }
+  );
+  return data;
+};
+
+/**
+ * Unmark cylinders as defected
+ */
+export const unmarkDefected = async ({ storeId, size, regulatorType, payload }) => {
+  const { data } = await axios.patch(
+    `${API}/stores/${storeId}/cylinders/unmark-defected`,
+    payload,
+    { params: { size, regulatorType } }
+  );
+  return data;
+};

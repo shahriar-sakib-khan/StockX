@@ -12,15 +12,14 @@ export const transactionSanitizer = (
   transaction: ITransaction | HydratedDocument<ITransaction>
 ) => ({
   id: String(transaction._id),
-
   store: String(transaction.store),
 
   debitAccountId: String(transaction.debitAccountId),
   creditAccountId: String(transaction.creditAccountId),
 
   price: transaction.price,
-  count: transaction.count,
-  amount: transaction.amount,
+  quantity: transaction.quantity,
+  totalAmount: transaction.totalAmount,
 
   category: transaction.category,
   transactionType: transaction.transactionType,

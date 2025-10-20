@@ -28,8 +28,8 @@ export const recordTransaction = async (
   const {
     category, // must exist, used to figure out debit/credit
     price,
-    count,
-    amount,
+    quantity,
+    totalAmount,
     paymentMethod,
     counterpartyType,
     ref,
@@ -62,8 +62,8 @@ export const recordTransaction = async (
     debitAccountId: debitAccount._id,
     creditAccountId: creditAccount._id,
     price,
-    count,
-    amount,
+    quantity,
+    totalAmount,
     category,
     transactionType: config.categoryType,
     paymentMethod: paymentMethod ?? 'cash',

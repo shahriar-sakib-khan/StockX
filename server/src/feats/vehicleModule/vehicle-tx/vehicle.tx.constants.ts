@@ -6,7 +6,7 @@
  * These constants are used to define the structure and types of transactions in the vehicle transaction module.
  */
 
-import { constants } from '@/constants';
+import { constants } from '@/constants/index.js';
 
 /**
  * ----------------- Transaction Categories -----------------

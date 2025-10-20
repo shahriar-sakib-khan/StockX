@@ -1,5 +1,4 @@
-// Reusable TableHeader component
-export const TableHeader = ({ headers }) => (
+const TableHeader = ({ headers }) => (
     <tr>
         {headers.map((h) => (
             <th key={h} className="p-4 text-gray-500">
@@ -8,3 +7,5 @@ export const TableHeader = ({ headers }) => (
         ))}
     </tr>
 );
+
+export default TableHeader;

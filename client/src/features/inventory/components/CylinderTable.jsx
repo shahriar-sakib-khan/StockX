@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useCylinderInventory } from "../hooks/useCylinderInventory";
+import { useCylinderInventory } from "../hooks";
 import InventoryTable from "./InventoryTable";
-import { TableRow } from "../utils/TableRow";
-import SearchBar from "../utils/SearchBar";
-import CylinderFilters from "../utils/CylinderFilter";
-import SortBy from "../utils/SortDropdown";
+import { TableRow, SearchBar, CylinderFilters, SortBy } from "../utils";
 
 export default function CylinderTable({ overview = false, itemCount, type }) {
     // ----------------- States -----------------
@@ -26,7 +23,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         "Problem",
         "Action",
     ];
-    const sizes = ["5", "12", "20", "45"];
+    const sizes = ["5", "12", "20"];
     const types = ["20", "22"];
     const storeId = useAuthStore((s) => s.currentStore?.id);
 
@@ -37,13 +34,13 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         error,
     } = useCylinderInventory(storeId, selectedSize, selectedType);
 
-    // ----------------- Filter + Sort Logic -----------------
+    // ----------------- Filter + Sort -----------------
     let displayedCylinders =
         typeof itemCount === "number"
             ? cylinders.slice(0, itemCount)
             : [...cylinders];
 
-    // Search
+    // ----------------- Search -----------------
     if (search.trim() !== "" && displayedCylinders.length > 0) {
         displayedCylinders = displayedCylinders.filter((item) =>
             String(item.brandName || "")
@@ -55,7 +52,6 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
     // Sort by name, full count, empty count, or problem count
     displayedCylinders.sort((a, b) => {
         let valueA, valueB;
-
         switch (sortBy) {
             case "full":
                 valueA = a.fullCount || 0;
@@ -82,8 +78,12 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
     });
 
     // ----------------- Conditional UI -----------------
-    if (isLoading) return <p>Loading {type}s...</p>;
-    if (error) return <p className="text-red-500">Failed to load {type}s.</p>;
+    if (error)
+        return (
+            <p className="mt-4 text-center text-red-500">
+                Failed to load {type}s.
+            </p>
+        );
 
     // ----------------- Render -----------------
     return (
@@ -114,7 +114,6 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
                     )}
                 </div>
 
-                {/* Sort By */}
                 <SortBy
                     sortBy={sortBy}
                     setSortBy={setSortBy}
@@ -138,6 +137,27 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
                     />
                 ))}
             </InventoryTable>
+
+            {/* ----------------- Loading Indicator ----------------- */}
+            {isLoading && (
+                <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 italic">
+                    <svg
+                        className="h-5 w-5 animate-spin text-emerald-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.36 6.36l-1.42-1.42M6.36 6.36 4.94 4.94m12.02 0-1.42 1.42M6.36 17.64l-1.42 1.42"
+                        />
+                    </svg>
+                    Loading {type} data...
+                </div>
+            )}
         </div>
     );
 }

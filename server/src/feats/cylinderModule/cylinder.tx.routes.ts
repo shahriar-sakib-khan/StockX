@@ -11,9 +11,7 @@ import { cylinderTxController } from './index.js';
 
 const router = Router({ mergeParams: true });
 
-/**
- * ----------------- Cylinder Transaction Routes -----------------
- */
+/** ----------------- Cylinder Transaction Routes ----------------- */
 
 /**
  * @route   POST /stores/:storeId/cylinders/buy
@@ -30,22 +28,20 @@ router.post('/cylinders/buy', cylinderTxController.buyCylinders);
 router.post('/cylinders/sell', cylinderTxController.sellCylinder);
 
 /**
- * @route   POST /stores/:storeId/cylinders/defected
+ * @route   POST /stores/:storeId/cylinders/mark-defected
  * @desc    Mark cylinders as defected and update inventory
  * @access  Authenticated
  */
-router.post('/cylinders/defected', cylinderTxController.markDefected);
+router.post('/cylinders/mark-defected', cylinderTxController.markDefected);
 
 /**
- * @route   POST /stores/:storeId/cylinders/undefected
+ * @route   POST /stores/:storeId/cylinders/unmark-defected
  * @desc    Mark cylinders as defected and update inventory
  * @access  Authenticated
  */
-router.post('/cylinders/undefected', cylinderTxController.unmarkDefected);
+router.post('/cylinders/unmark-defected', cylinderTxController.unmarkDefected);
 
-/**
- * ----------------- Cylinder Exchange Routes -----------------
- */
+/** ----------------- Cylinder Exchange Routes ----------------- */
 
 /**
  * @route   POST /stores/:storeId/cylinders/exchange/full-for-empty
@@ -60,5 +56,14 @@ router.post('/cylinders/exchange/full-for-empty', cylinderTxController.exchangeF
  * @access  Authenticated
  */
 router.post('/cylinders/exchange/empty-for-empty', cylinderTxController.exchangeEmptyForEmpty);
+
+/** ----------------- Cylinder transaction history ----------------- */
+
+/**
+ * @route GET /stores/:storeId/cylinders/transactions
+ * @desc Get all cylinder transactions (paginated)
+ * @access Authenticated
+ */
+router.get('/cylinders/transactions', cylinderTxController.getAllCylinderTransactions);
 
 export default router;

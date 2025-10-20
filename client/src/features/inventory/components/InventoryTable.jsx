@@ -1,4 +1,4 @@
-import { TableHeader } from "../utils/TableHeader";
+import { TableHeader } from "../utils";
 
 export default function InventoryTable({ headers, children }) {
     return (

@@ -7,13 +7,13 @@ import { Regulator } from '@/feats/regulatorModule/index.js';
  */
 const defaultRegulators = [
   {
-    name: '20mmRegulator',
+    name: '20mm Regulator',
     regulatorImage: 'regulatorImageURL',
     regulatorType: '20mm',
     price: 500,
   },
   {
-    name: '22mmRegulator',
+    name: '22mm Regulator',
     regulatorImage: 'regulatorImageURL',
     regulatorType: '22mm',
     price: 600,
