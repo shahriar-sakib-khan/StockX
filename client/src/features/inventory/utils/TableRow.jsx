@@ -1,13 +1,15 @@
-// src/features/cylinders/components/TableRow.jsx
 import { useState } from "react";
 import clsx from "clsx";
 
 import { FaCartPlus as BuyIcon } from "react-icons/fa";
 import { FaCashRegister as SellIcon } from "react-icons/fa";
-import TransactionModal from "./TransactionModal";
+import { FaPencilAlt as EditIcon } from "react-icons/fa";
+
+import { TransactionModal, DefectedCylinderModal } from "./index";
 
 const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
     const [modalType, setModalType] = useState(null);
+    const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
 
     const fullCount = product?.fullCount ?? 0;
     const emptyCount = product?.emptyCount ?? 0;
@@ -61,7 +63,6 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                 <td data-cell="Price" className="p-4">
                     {product.price}
                 </td>
-
                 {type === "cylinders" && (
                     <>
                         <td data-cell="Full" className="p-4">
@@ -72,19 +73,30 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                         </td>
                     </>
                 )}
-
                 {(type === "stoves" || type === "regulators") && (
                     <td data-cell="In Stock" className="p-4">
                         {stockCount}
                     </td>
                 )}
-
-                <td data-cell="Problem" className="p-4">
-                    {problemCount}
+                <td
+                    data-cell="Problem"
+                    className="products-center flex flex-nowrap gap-2 p-4"
+                >
+                    <span>{problemCount}</span>
+                    <button
+                        onClick={() => setIsProblemModalOpen(true)}
+                        className="rounded-sm p-1 hover:bg-yellow-100"
+                    >
+                        <EditIcon className="size-4 text-yellow-500" />
+                    </button>
                 </td>
 
-                {/* Actions */}
-                <td data-cell="Action" className="flex gap-4">
+                {/** TODO : resolve why this extra td here is needed */}
+                <td data-cell="Action" className="flex gap-4"></td>
+                <td
+                    data-cell="Action"
+                    className="rounded-sm p-1 hover:bg-yellow-100"
+                >
                     <button
                         onClick={() => setModalType("buy")}
                         className="rounded-sm p-1 hover:bg-green-100"
@@ -106,6 +118,16 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                     isBuyModal={modalType === "buy"}
                     isOpen={!!modalType}
                     onClose={() => setModalType(null)}
+                    product={product}
+                    selectedSize={selectedSize}
+                    selectedType={selectedType}
+                />
+            )}
+
+            {isProblemModalOpen && (
+                <DefectedCylinderModal
+                    isOpen={isProblemModalOpen}
+                    onClose={() => setIsProblemModalOpen(false)}
                     product={product}
                     selectedSize={selectedSize}
                     selectedType={selectedType}

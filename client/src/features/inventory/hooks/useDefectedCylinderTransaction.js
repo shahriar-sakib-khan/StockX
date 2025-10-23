@@ -1,58 +1,52 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { markDefected, unmarkDefected } from "../services/problemServices";
 
+import { markDefected } from "../services/defectedCylinderServices";
+
+/**
+ * Hook for marking/unmarking problem cylinders
+ */
 export const useDefectedCylinderTransaction = (
     storeId,
     size,
     regulatorType,
+    isDefected,
 ) => {
     const queryClient = useQueryClient();
 
     const invalidateInventory = () =>
         queryClient.invalidateQueries({
-            queryKey: ["cylinderInventory", storeId, size, regulatorType],
+            queryKey: [
+                "cylinderInventory",
+                storeId,
+                size,
+                regulatorType,
+            ],
         });
 
     const markDefectedMutation = useMutation({
         mutationFn: (payload) =>
-            markDefected({ storeId, size, regulatorType, payload }),
+            markDefected({ storeId, size, regulatorType, isDefected, payload }),
+
         onSuccess: (data) => {
             if (data?.success) {
-                toast.success(data.message || "Cylinders marked as defected!");
+                toast.success(data.message || "Cylinders marked as problem!");
             } else {
-                toast.error(data?.message || "Failed to mark defected.");
+                toast.error(
+                    data?.message || "Failed to mark problem cylinders.",
+                );
             }
             invalidateInventory();
         },
+
         onError: (err) => {
-            toast.error(
+            const message =
                 err?.response?.data?.message ||
-                    err?.message ||
-                    "Error marking defected cylinders.",
-            );
+                err?.message ||
+                "Error while marking problem cylinders.";
+            toast.error(message);
         },
     });
 
-    const unmarkDefectedMutation = useMutation({
-        mutationFn: (payload) =>
-            unmarkDefected({ storeId, size, regulatorType, payload }),
-        onSuccess: (data) => {
-            if (data?.success) {
-                toast.success(data.message || "Defected cylinders removed!");
-            } else {
-                toast.error(data?.message || "Failed to unmark defected.");
-            }
-            invalidateInventory();
-        },
-        onError: (err) => {
-            toast.error(
-                err?.response?.data?.message ||
-                    err?.message ||
-                    "Error unmarking defected cylinders.",
-            );
-        },
-    });
-
-    return { markDefectedMutation, unmarkDefectedMutation };
+    return { markDefectedMutation };
 };

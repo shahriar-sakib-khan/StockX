@@ -12,3 +12,5 @@ export {
     getDetailedBrands,
     saveSelectedBrands,
 } from "./brandServices";
+
+export { markDefected } from "./defectedCylinderServices";

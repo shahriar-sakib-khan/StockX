@@ -73,12 +73,13 @@ export const markDefected = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId: transactorId } = req.user;
   const { storeId } = req.params;
-  const { size, regulatorType } = req.query;
+  const { size, regulatorType, isDefected } = req.query;
   const userData = req.body;
   const defectData = {
     ...userData,
     size: Number(size) || 0,
     regulatorType: String(regulatorType).trim() || '',
+    isDefected: Boolean(isDefected === 'true'),
   };
 
   const cylinder = await cylinderTxService.markDefected(defectData, transactorId, storeId);
@@ -86,31 +87,6 @@ export const markDefected = async (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     success: true,
     message: 'Cylinder marked as defected successfully',
-    data: cylinder,
-  });
-};
-
-/**
- * @function unmarkDefected
- * @description Handles unmarking of defected cylinders
- */
-export const unmarkDefected = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId: transactorId } = req.user;
-  const { storeId } = req.params;
-  const { size, regulatorType } = req.query;
-  const userData = req.body;
-  const nonDefectData = {
-    ...userData,
-    size: Number(size) || 0,
-    regulatorType: String(regulatorType).trim() || '',
-  };
-
-  const cylinder = await cylinderTxService.unmarkDefected(nonDefectData, transactorId, storeId);
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: 'Cylinder marked as not defected successfully',
     data: cylinder,
   });
 };
@@ -202,7 +178,6 @@ export default {
   sellCylinder,
 
   markDefected,
-  unmarkDefected,
 
   exchangeFullForEmpty,
   exchangeEmptyForEmpty,

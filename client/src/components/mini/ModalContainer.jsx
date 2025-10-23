@@ -1,4 +1,3 @@
-// src/components/ModalContainer.jsx
 import { useRef, useEffect } from "react";
 import useClickOutside from "@/hooks/useClickOutside"; // adjust path if your hook location differs
 

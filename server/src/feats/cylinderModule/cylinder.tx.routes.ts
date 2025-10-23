@@ -32,14 +32,7 @@ router.post('/cylinders/sell', cylinderTxController.sellCylinder);
  * @desc    Mark cylinders as defected and update inventory
  * @access  Authenticated
  */
-router.post('/cylinders/mark-defected', cylinderTxController.markDefected);
-
-/**
- * @route   POST /stores/:storeId/cylinders/unmark-defected
- * @desc    Mark cylinders as defected and update inventory
- * @access  Authenticated
- */
-router.post('/cylinders/unmark-defected', cylinderTxController.unmarkDefected);
+router.patch('/cylinders/mark-defected', cylinderTxController.markDefected);
 
 /** ----------------- Cylinder Exchange Routes ----------------- */
 

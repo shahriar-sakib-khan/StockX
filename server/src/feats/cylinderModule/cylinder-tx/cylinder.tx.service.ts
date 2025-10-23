@@ -136,17 +136,14 @@ export const sellCylinder = async (
 
 /**
  * @function markDefected
- * @description Marks cylinders as defected and records a transaction for inventory tracking.
+ * @description Marks or unmarks cylinders as defected based on `isDefected` flag.
+ * If `isDefected` is true → mark as defected (increment defected count).
+ * If `isDefected` is false → unmark defected (decrement defected count).
  */
-export const markDefected = async (
-  // defectData: cylinderTxValidator.DefectTxInput,
-  defectData: any,
-  transactorId: string,
-  storeId: string
-) => {
-  const { id: brandId, problemCylinderQuantity, regulatorType, size } = defectData;
+export const markDefected = async (defectData: any, transactorId: string, storeId: string) => {
+  const { id: brandId, cylinderCount, regulatorType, size, isDefected } = defectData;
 
-  // Find defected cylinder
+  // Find defected cylinder record
   const defectedCylinder = await Cylinder.findOne({
     brand: brandId,
     store: new Types.ObjectId(storeId),
@@ -156,65 +153,36 @@ export const markDefected = async (
     isDefected: true,
   }).select('store brand name regulatorType size count');
 
-  console.log(defectedCylinder);
+  if (!defectedCylinder) throw new Errors.NotFoundError('Defected cylinder record not found');
 
-  if (!defectedCylinder) throw new Errors.NotFoundError('Defected cylinder not found');
+  if (isDefected) {
+    // --- MARK AS DEFECTED ---
+    const fullCylinder = await Cylinder.findOne({
+      brand: brandId,
+      store: new Types.ObjectId(storeId),
+      regulatorType,
+      size,
+      isFull: true,
+      isDefected: false,
+    })
+      .select('count')
+      .lean();
 
-  // Find corresponding full cylinder
-  const cylinder = await Cylinder.findOne({
-    brand: brandId,
-    store: new Types.ObjectId(storeId),
-    regulatorType,
-    size,
-    isFull: true,
-    isDefected: false,
-  })
-    .select('count')
-    .lean();
+    if (!fullCylinder) throw new Errors.NotFoundError('Full cylinder not found');
+    if (fullCylinder.count < cylinderCount)
+      throw new Errors.BadRequestError('Not enough cylinders to mark as defected');
 
-  if (!cylinder) throw new Errors.NotFoundError('Cylinder not found');
+    defectedCylinder.updatedBy = new Types.ObjectId(transactorId);
+    defectedCylinder.count += cylinderCount;
+  } else {
+    // --- UNMARK DEFECTED ---
+    if (defectedCylinder.count < cylinderCount)
+      throw new Errors.BadRequestError('Not enough defected cylinders to unmark');
 
-  // Update inventory
-  if (cylinder.count < problemCylinderQuantity)
-    throw new Errors.BadRequestError('Not enough cylinders to mark as defected');
+    defectedCylinder.updatedBy = new Types.ObjectId(transactorId);
+    defectedCylinder.count -= cylinderCount;
+  }
 
-  defectedCylinder.updatedBy = new Types.ObjectId(transactorId);
-  defectedCylinder.count += problemCylinderQuantity;
-  await defectedCylinder.save();
-
-  return cylinderSanitizers.cylinderSanitizer(defectedCylinder);
-};
-
-/**
- * @function unmarkDefected
- * @description Marks cylinders as defected and records a transaction for inventory tracking.
- */
-export const unmarkDefected = async (
-  // defectData: cylinderTxValidator.DefectTxInput,
-  nonDefectData: any,
-  transactorId: string,
-  storeId: string
-) => {
-  const { id: brandId, problemCylinderQuantity, regulatorType, size } = nonDefectData;
-
-  // Find defected cylinder
-  const defectedCylinder = await Cylinder.findOne({
-    brand: brandId,
-    store: new Types.ObjectId(storeId),
-    regulatorType,
-    size,
-    isFull: true,
-    isDefected: true,
-  }).select('store brand name regulatorType size count');
-
-  if (!defectedCylinder) throw new Errors.NotFoundError('Defected cylinder not found');
-
-  // Update inventory
-  if (defectedCylinder.count < problemCylinderQuantity)
-    throw new Errors.BadRequestError('Not enough defected cylinders to unmark');
-
-  defectedCylinder.updatedBy = new Types.ObjectId(transactorId);
-  defectedCylinder.count -= problemCylinderQuantity;
   await defectedCylinder.save();
 
   return cylinderSanitizers.cylinderSanitizer(defectedCylinder);
@@ -390,7 +358,6 @@ export default {
   sellCylinder,
 
   markDefected,
-  unmarkDefected,
 
   exchangeFullForEmpty,
   exchangeEmptyForEmpty,

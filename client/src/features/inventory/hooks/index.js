@@ -4,4 +4,6 @@ export {
     useStoveInventory,
 } from "./useInventory";
 
-export { useCylinderTransaction } from "./useTransaction";
+export { useCylinderTransaction } from "./useCylinderTransaction";
+
+export { useDefectedCylinderTransaction } from "./useDefectedCylinderTransaction";

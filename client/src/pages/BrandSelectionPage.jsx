@@ -1,13 +1,16 @@
-import { useNavigate } from "react-router-dom";
-import SelectionCard from "../features/selection/components/SelectionCard";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useAuthStore } from "@/stores/useAuthStore";
+import { logOnce } from "@/pages/utils/logOnce";
+
+import brandLogo from "@/assets/images/bashundhara.webp";
+
+import SelectionCard from "../features/selection/components/SelectionCard";
 import {
     useBrands,
     useSaveSelectedBrands,
 } from "../features/brands/hooks/brandHooks";
-import brandLogo from "@/assets/images/bashundhara.webp";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { logOnce } from "@/pages/utils/logOnce";
 
 export default function BrandSelection({ onDone }) {
     const navigate = useNavigate();
@@ -56,11 +59,19 @@ export default function BrandSelection({ onDone }) {
             return;
         }
 
+        // saveBrands(draftBrands, {
+        //     onSuccess: () => {
+        //         // If opened inside modal -> close modal instead of redirecting
+        //         if (onDone) onDone();
+        //         else navigate("/dashboard"); // default for onboarding flow
+        //     },
+        //     onError: (err) => console.error("Failed to update brands:", err),
+        // });
         saveBrands(draftBrands, {
-            onSuccess: () => {
-                // If opened inside modal -> close modal instead of redirecting
-                if (onDone) onDone();
-                else navigate("/dashboard"); // default for onboarding flow
+            onSuccess: (updated) => {
+                if (onDone)
+                    onDone(updated); // pass updated brands
+                else navigate("/dashboard");
             },
             onError: (err) => console.error("Failed to update brands:", err),
         });

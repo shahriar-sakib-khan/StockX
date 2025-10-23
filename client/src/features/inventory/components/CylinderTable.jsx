@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useCylinderInventory } from "../hooks";
+
 import InventoryTable from "./InventoryTable";
+import { useCylinderInventory } from "../hooks";
 import { TableRow, SearchBar, CylinderFilters, SortBy } from "../utils";
 
 export default function CylinderTable({ overview = false, itemCount, type }) {
