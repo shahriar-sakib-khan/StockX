@@ -55,7 +55,7 @@ const seedLocalCylinders = async (userId: string, storeId: string): Promise<void
             fullCount: 0,
             emptyCount: 0,
             defectedCount: 0,
-            isActive: true,
+            isActive: false,
             createdBy: userObjectId,
           });
         }

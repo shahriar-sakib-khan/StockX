@@ -19,21 +19,24 @@ export const cylinderSanitizer = (cylinder: ICylinder | HydratedDocument<ICylind
   brand: resolveRef(cylinder.brand, localBrandSanitizer),
 
   sku: cylinder.sku,
-  name: cylinder.name,
+  brandName: cylinder.brandName,
+  name: `${cylinder.brandName} ${cylinder.size}${cylinder.unit} ${cylinder.regulatorType}`,
+
   cylinderImage: cylinder.cylinderImage ?? null,
   regulatorType: cylinder.regulatorType,
   size: cylinder.size,
-
   unit: cylinder.unit ?? null,
   price: cylinder.price,
-  count: cylinder.count,
 
-  isFull: cylinder.isFull,
+  fullCount: cylinder.fullCount,
+  emptyCount: cylinder.emptyCount,
+  defectedCount: cylinder.defectedCount,
+
   isActive: cylinder.isActive,
 
   createdBy: resolveRef(cylinder.createdBy, userSanitizer),
   updatedBy: resolveRef(cylinder.updatedBy, userSanitizer),
-  
+
   createdAt: cylinder.createdAt,
   updatedAt: cylinder.updatedAt,
 });

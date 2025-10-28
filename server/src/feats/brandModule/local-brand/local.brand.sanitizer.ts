@@ -20,7 +20,9 @@ export const localBrandSanitizer = (localBrand: ILocalBrand | HydratedDocument<I
 
   name: localBrand.name,
   brandImage: localBrand.brandImage ?? null,
+  brandImagePublicId: localBrand.brandImagePublicId ?? null,
   cylinderImage: localBrand.cylinderImage ?? null,
+  cylinderImagePublicId: localBrand.cylinderImagePublicId ?? null,
   regulatorTypes: localBrand.regulatorTypes ?? [],
   sizes: localBrand.sizes ?? [],
   prices:
@@ -31,9 +33,8 @@ export const localBrandSanitizer = (localBrand: ILocalBrand | HydratedDocument<I
     })) ?? [],
 
   isActive: localBrand.isActive,
-  totalFullCount: localBrand.totalFullCount,
-  totalEmptyCount: localBrand.totalEmptyCount,
-  
+
+  createdBy: resolveRef(localBrand.createdBy, userSanitizer),
   selectedBy: resolveRef(localBrand.selectedBy, userSanitizer),
   createdAt: localBrand.createdAt,
   updatedAt: localBrand.updatedAt,

@@ -1,51 +1,43 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
-import { localBrandController, localBrandValidator } from './index.js';
+import { localBrandController } from './index.js';
 
 /**
  * @swagger
  * tags:
- *   name: Local Brands
- *   description: Local brand management routes
+ *   name: LocalBrand
+ *   description: Local brand management and brand-cylinder linkage
  */
 
 const router = Router({ mergeParams: true });
 
 /**
- * ----------------- Local Brand CRUD -----------------
+ * ----------------- General Local Brand Routes -----------------
  */
 
 /**
- * @route   GET /stores/:storeId/brands
- * @desc    Get all active local brands
- * @access  Private
+ * @route   GET /stores/:storeId/brands?page=1&limit=20&mode=active|all|detailed
+ * @desc    Get all local brands in a store with optional mode.
+ * @query   page (optional) - number (default: 1)
+ * @query   limit (optional) - number (default: 20)
+ * @query   mode - string ('active' | 'all' | 'detailed')
+ * @access  Authenticated
  */
-router.get('/brands', localBrandController.activeLocalBrands);
+router.get('/brands', localBrandController.getAllLocalBrands);
 
 /**
- * @route   GET /stores/:storeId/brands/a
- * @desc    Get all local brands
- * @access  Private
+ * ----------------- Local Brand Selection Routes -----------------
  */
-router.get('/brands/a', localBrandController.allLocalBrands);
 
 /**
- * @route   GET /stores/:storeId/brands/d
- * @desc    Get detailed local brand list
- * @access  Private
+ * @route   PATCH /stores/:storeId/brands/select
+ * @desc    Update active/inactive status of local brands and sync with related cylinders.
+ * @body    [{ id: string, isActive: boolean }]
+ * @access  Authenticated
  */
-router.get('/brands/d', localBrandController.detailedLocalBrands);
+router.patch('/brands/select', localBrandController.selectLocalBrands);
 
 /**
- * @route   PATCH /stores/:storeId/brands
- * @desc    Select local brands
- * @access  Private
+ * ----------------- Default Export -----------------
  */
-router.patch(
-  '/brands',
-  validateRequest(localBrandValidator.localBrandSelectionSchema),
-  localBrandController.selectBrands
-);
-
 export default router;

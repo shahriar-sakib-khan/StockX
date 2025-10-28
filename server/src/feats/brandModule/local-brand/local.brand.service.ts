@@ -4,129 +4,113 @@ import { LocalBrand, localBrandSanitizers, localBrandValidator } from './index.j
 import { Cylinder } from '@/models/index.js';
 
 /**
- * @function getActiveLocalBrands
- * Fetches all active local brands for a store with pagination.
+ * ----------------- Unified Local Brand Fetch Service -----------------
  *
- * @param {number} page - Page number.
- * @param {number} limit - Number of items per page.
- * @param {string} storeId - Store ID.
- * @returns {Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }>} Paginated active local brands.
- */
-export const getActiveLocalBrands = async (
-  page: number,
-  limit: number,
-  storeId: string
-): Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }> => {
-  const total: number = await LocalBrand.countDocuments({
-    store: new Types.ObjectId(storeId),
-    isActive: true,
-  });
-  if (total === 0) return { localBrands: [], total };
-
-  const skip: number = (page - 1) * limit;
-  const localBrands = await LocalBrand.find({ store: storeId, isActive: true })
-    .skip(skip)
-    .limit(limit)
-    .select('id name brandImage')
-    .lean();
-
-  return {
-    localBrands: localBrandSanitizers.allLocalBrandSanitizer(localBrands, [
-      'id',
-      'name',
-      'brandImage',
-    ]).localBrands,
-    total,
-  };
-};
-
-/**
  * @function getAllLocalBrands
- * Fetches all local brands for a store with pagination.
+ * @description Fetches local brands for a store with pagination and mode-based detail level.
  *
- * @param {number} page - Page number.
- * @param {number} limit - Number of items per page.
+ * Modes:
+ * - 'active'   → Only active brands.
+ * - 'all'      → All brands (active + inactive).
+ * - 'detailed' → All brands with full detailed data.
+ *
  * @param {string} storeId - Store ID.
- * @returns {Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }>} Paginated local brands.
+ * @param {number} page - Page number.
+ * @param {number} limit - Items per page.
+ * @param {'active' | 'all' | 'detailed'} mode - Mode of retrieval.
+ * @returns {Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }>}
  */
 export const getAllLocalBrands = async (
+  storeId: string,
   page: number,
   limit: number,
-  storeId: string
+  mode: 'active' | 'all' | 'detailed' = 'all'
 ): Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }> => {
-  const total: number = await LocalBrand.countDocuments({ store: new Types.ObjectId(storeId) });
+  const filter: any = { store: new Types.ObjectId(storeId) };
+  if (mode === 'active') filter.isActive = true;
+
+  const total: number = await LocalBrand.countDocuments(filter);
   if (total === 0) return { localBrands: [], total };
 
   const skip: number = (page - 1) * limit;
-  const localBrands = await LocalBrand.find({ store: storeId })
-    .skip(skip)
-    .limit(limit)
-    .select('id name brandImage isActive')
-    .lean();
+
+  const localBrands = await LocalBrand.find(filter).skip(skip).limit(limit).lean();
+
+  // Field selection based on mode
+  let selectedFields: (keyof localBrandSanitizers.SanitizedLocalBrand)[] | undefined;
+
+  switch (mode) {
+    case 'active':
+      selectedFields = ['id', 'name', 'brandImage'];
+      break;
+    case 'all':
+      selectedFields = ['id', 'name', 'brandImage', 'isActive'];
+      break;
+    case 'detailed':
+      selectedFields = undefined; // return all fields
+      break;
+  }
 
   return {
-    localBrands: localBrandSanitizers.allLocalBrandSanitizer(localBrands, [
-      'id',
-      'name',
-      'brandImage',
-      'isActive',
-    ]).localBrands,
+    localBrands: localBrandSanitizers.allLocalBrandSanitizer(localBrands, selectedFields)
+      .localBrands,
     total,
   };
 };
 
 /**
- * @function detailedLocalBrands
- * Fetches detailed local brand data for a store with pagination.
+ * ----------------- Local Brand Selection Service -----------------
  *
- * @param {number} page - Page number.
- * @param {number} limit - Number of items per page.
- * @param {string} storeId - Store ID.
- * @returns {Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }>} Paginated detailed local brands.
- */
-export const detailedLocalBrands = async (
-  page: number,
-  limit: number,
-  storeId: string
-): Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }> => {
-  const total: number = await LocalBrand.countDocuments({ store: new Types.ObjectId(storeId) });
-  if (total === 0) return { localBrands: [], total };
-
-  const skip: number = (page - 1) * limit;
-  const localBrands = await LocalBrand.find({ store: storeId }).skip(skip).limit(limit).lean();
-
-  return {
-    localBrands: localBrandSanitizers.allLocalBrandSanitizer(localBrands).localBrands,
-    total,
-  };
-};
-
-/**
  * @function selectLocalBrands
- * Updates the user's selection of local brands.
+ * @description Updates selected brands and cascades the isActive status to their cylinders.
  *
- * @param {localBrandValidator.LocalBrandSelectionInput} selectedBrands - Array of selected brand objects.
- * @param {string} userId - ID of the user making the selection.
- * @returns {Promise<{ updatedCount: number }>} Number of updated records.
+ * Rules:
+ * - Frontend sends only changed brands (optimized).
+ * - Bulk updates both brands and cylinders.
+ * - Uses lean + bulkWrite for performance.
+ *
+ * @param {localBrandValidator.LocalBrandSelectionInput} selectedBrands - Array of updated brand objects.
+ * @param {string} userId - ID of the user performing the action.
+ * @param {string} storeId - ID of the store.
+ * @returns {Promise<{ brandUpdatedCount: number; cylinderUpdatedCount: number }>}
  */
 export const selectLocalBrands = async (
   selectedBrands: localBrandValidator.LocalBrandSelectionInput,
-  userId: string
+  userId: string,
+  storeId: string
 ): Promise<{ brandUpdatedCount: number; cylinderUpdatedCount: number }> => {
+  if (!selectedBrands?.length) return { brandUpdatedCount: 0, cylinderUpdatedCount: 0 };
+
+  // Bulk update brands
   const brandBulkOps = selectedBrands.map(({ id, isActive }) => ({
     updateOne: {
-      filter: { _id: id },
-      update: { isActive, selectedBy: new Types.ObjectId(userId) },
+      filter: { _id: new Types.ObjectId(id), store: new Types.ObjectId(storeId) },
+      update: {
+        $set: {
+          isActive,
+          selectedBy: new Types.ObjectId(userId),
+          updatedAt: new Date(),
+        },
+      },
     },
   }));
+
   const brandResult = await LocalBrand.bulkWrite(brandBulkOps);
 
+  // Cascade updates to cylinders for same brand
   const cylinderBulkOps = selectedBrands.map(({ id, isActive }) => ({
     updateMany: {
-      filter: { brand: id },
-      update: { isActive, createdBy: new Types.ObjectId(userId) },
+      filter: { brand: new Types.ObjectId(id), store: new Types.ObjectId(storeId) },
+      update: {
+        $set: {
+          isActive,
+          updatedAt: new Date(),
+          updatedBy: new Types.ObjectId(userId),
+        },
+      },
     },
   }));
+
   const cylinderResult = await Cylinder.bulkWrite(cylinderBulkOps);
 
   return {
@@ -139,8 +123,6 @@ export const selectLocalBrands = async (
  * ----------------- Default Exports (localBrandService) -----------------
  */
 export default {
-  getActiveLocalBrands, // Get all active local brands for a store
-  getAllLocalBrands, // Get all local brands for a store
-  detailedLocalBrands, // Get detailed local brands for a store
-  selectLocalBrands, // Update user's selected local brands
+  getAllLocalBrands, // Get all local brands
+  selectLocalBrands, // Select local brands
 };
