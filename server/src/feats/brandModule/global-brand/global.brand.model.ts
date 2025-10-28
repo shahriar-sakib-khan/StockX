@@ -2,8 +2,11 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IGlobalBrand extends Document {
   name: string;
-  brandImage: string;
-  cylinderImage: string;
+  brandImage?: string;
+  brandImagePublicId?: string;
+  cylinderImage?: string;
+  cylinderImagePublicId?: string;
+
   regulatorTypes: string[];
   sizes: number[];
   prices: {
@@ -20,7 +23,9 @@ const globalBrandSchema: Schema<IGlobalBrand> = new Schema(
   {
     name: { type: String, required: true, trim: true },
     brandImage: { type: String, default: 'brandImage' },
+    brandImagePublicId: { type: String },
     cylinderImage: { type: String, default: 'cylinderImage' },
+    cylinderImagePublicId: { type: String },
     regulatorTypes: { type: [String], required: true },
     sizes: { type: [Number], required: true },
     prices: [

@@ -3,8 +3,9 @@ import { Router } from 'express';
 import { requireAuth } from '@/middlewares/index.js';
 
 import { default as AuthRouter } from './auth-router/auth.router.js';
-import { default as UserRouter } from './user-routers/user.router.js';
-import { default as StoreRouter } from './store-routers/store.router.js';
+import { default as AdminRouter } from './admin-router/admin.router.js';
+import { default as UserRouter } from './user-router/user.router.js';
+import { default as StoreRouter } from './store-router/store.router.js';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ const router = Router();
 router.use('/', AuthRouter);
 
 // Authenticated routes
+router.use('/', requireAuth, AdminRouter);
 router.use('/', requireAuth, UserRouter);
 router.use('/', requireAuth, StoreRouter);
 

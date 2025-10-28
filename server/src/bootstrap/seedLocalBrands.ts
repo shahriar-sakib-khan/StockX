@@ -1,36 +1,59 @@
 import { Types } from 'mongoose';
-
 import { GlobalBrand, LocalBrand } from '@/models/index.js';
 
 /**
  * @function seedLocalBrands
- * @description Seed local brands for a store from global brands.
- *
- * @param {string} userId - The ID of the user who created the store.
- * @param {string} storeId - The ID of the store being seeded.
+ * @description
+ * Force re-seeds all local brands for a given store by cloning from global brands.
+ * Deletes existing local brands first if any exist.
  */
 const seedLocalBrands = async (userId: string, storeId: string): Promise<void> => {
-  const globalBrands = await GlobalBrand.find({}).lean();
+  const storeObjectId = new Types.ObjectId(storeId);
+  const userObjectId = new Types.ObjectId(userId);
 
-  const localBrands = globalBrands.map(globalBrand => ({
-    globalBrand: globalBrand._id,
-    store: new Types.ObjectId(storeId),
-    name: globalBrand.name,
-    brandImage: globalBrand.brandImage,
-    cylinderImage: globalBrand.cylinderImage,
-    regulatorTypes: globalBrand.regulatorTypes,
-    sizes: globalBrand.sizes,
-    prices: globalBrand.prices,
+  try {
+    const globalBrands = await GlobalBrand.find({}).lean();
 
-    isActive: false,
-    totalFullCount: 0,
-    totalEmptyCount: 0,
-    selectedBy: new Types.ObjectId(userId),
-  }));
+    if (!globalBrands.length) {
+      console.log('[Seed:Brand] ⚠️ No global brands found. Please seed GlobalBrand first.');
+      return;
+    }
 
-  await LocalBrand.insertMany(localBrands);
+    const existingLocalCount = await LocalBrand.countDocuments({ store: storeObjectId });
+    if (existingLocalCount > 0) {
+      await LocalBrand.deleteMany({ store: storeObjectId });
+      console.log(`[Seed:Brand] 🧹 Deleted ${existingLocalCount} existing local brands.`);
+    }
 
-  console.log('[Seed] Local brands seeded successfully');
+    const localBrandsToInsert = globalBrands.map(gb => ({
+      globalBrand: gb._id,
+      store: storeObjectId,
+
+      name: gb.name,
+      brandImage: gb.brandImage,
+      brandImagePublicId: gb.brandImagePublicId,
+      cylinderImage: gb.cylinderImage,
+      cylinderImagePublicId: gb.cylinderImagePublicId,
+
+      regulatorTypes: gb.regulatorTypes,
+      sizes: gb.sizes,
+      prices: gb.prices,
+
+      totalFullCount: 0,
+      totalEmptyCount: 0,
+
+      isActive: false,
+      createdBy: userObjectId,
+      selectedBy: userObjectId,
+    }));
+
+    await LocalBrand.insertMany(localBrandsToInsert, { ordered: false });
+    console.log(
+      `[Seed:Brand] ✅ Seeded ${localBrandsToInsert.length} local brands for store: ${storeId}`
+    );
+  } catch (err) {
+    console.error('[Seed Error:Brand] ❌ Local brand seeding failed:', err);
+  }
 };
 
 export default seedLocalBrands;

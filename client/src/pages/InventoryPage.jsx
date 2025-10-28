@@ -9,14 +9,9 @@ export default function InventoryPage() {
     const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    // const handleBrandSelectionDone = () => {
-    //     setIsBrandModalOpen(false);
-    //     setRefreshKey((prev) => prev + 1);
-    // };
-    const handleBrandSelectionDone = (updatedBrands) => {
+    const handleBrandSelectionDone = () => {
         setIsBrandModalOpen(false);
-        setRefreshKey((prev) => prev + 1); // this already triggers reloads
-        console.log("Updated brands:", updatedBrands); // optional debug
+        setRefreshKey((prev) => prev + 1);
     };
 
     const tabs = [

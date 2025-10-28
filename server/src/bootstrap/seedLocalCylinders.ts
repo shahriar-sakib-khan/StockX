@@ -1,95 +1,77 @@
 import { Types } from 'mongoose';
-
 import { LocalBrand, Cylinder } from '@/models/index.js';
-import { generateSKU } from '@/common/index.js';
 
 /**
  * @function seedLocalCylinders
  * @description
- * Seeds cylinders for a store when it's first created.
- *
- * For each local brand, generates cylinders for:
- * - each size × regulator type × [full, empty]
- *
- * Runs inside a transaction to ensure atomicity.
- * @param {string} userId
- * @param {string} storeId
+ * Force re-seeds all cylinders for a given store.
+ * Deletes existing cylinders first if any exist.
+ * Creates one cylinder per (size × regulatorType) combination.
  */
-export const seedLocalCylinders = async (userId: string, storeId: string): Promise<void> => {
+const seedLocalCylinders = async (userId: string, storeId: string): Promise<void> => {
   const storeObjectId = new Types.ObjectId(storeId);
   const userObjectId = new Types.ObjectId(userId);
 
-  // Fetch local brands for the store
-  const localBrands = await LocalBrand.find({ store: storeObjectId })
-    .select('id name cylinderImage regulatorTypes sizes prices')
-    .lean();
+  try {
+    const localBrands = await LocalBrand.find({ store: storeObjectId })
+      .select('id name sizes regulatorTypes prices cylinderImage cylinderImagePublicId')
+      .lean();
 
-  if (localBrands.length === 0) {
-    console.log('[Seed] No local brands found for this store.');
-    return;
-  }
-
-  const cylindersToSeed = [];
-  const fullStates = [true, false];
-  const defectedStates = [true, false];
-  const unit = 'L';
-
-  for (const localBrand of localBrands) {
-    const { _id, name, cylinderImage, regulatorTypes, sizes, prices } = localBrand;
-
-    // Pre-map prices for O(1) lookups
-    const priceMap = new Map();
-    if (prices) {
-      for (const p of prices) {
-        priceMap.set(`${p.size}-${p.regulatorType}`, p.price);
-      }
+    if (!localBrands.length) {
+      console.log('[Seed:Cylinder] ⚠️ No local brands found. Skipping cylinder seeding.');
+      return;
     }
 
-    for (const size of sizes) {
-      for (const regulatorType of regulatorTypes) {
-        for (const isFull of fullStates) {
-          for (const isDefected of defectedStates) {
-            const sku = await generateSKU({
-              name,
-              size,
-              unit,
-              regulatorType,
-              storeId: storeObjectId,
-            });
+    const existingCylinderCount = await Cylinder.countDocuments({ store: storeObjectId });
+    if (existingCylinderCount > 0) {
+      await Cylinder.deleteMany({ store: storeObjectId });
+      console.log(`[Seed:Cylinder] 🧹 Deleted ${existingCylinderCount} existing cylinders.`);
+    }
 
-            cylindersToSeed.push({
-              store: storeObjectId,
-              brand: _id,
-              sku,
-              name,
-              cylinderImage,
-              regulatorType,
-              size,
-              unit,
-              price: priceMap.get(`${size}-${regulatorType}`) || 0,
-              count: 0,
-              isFull,
-              isDefected,
-              isActive: false,
-              createdBy: userObjectId,
-            });
-          }
+    const cylindersToInsert: any[] = [];
+    const unit = 'KG';
+
+    for (const brand of localBrands) {
+      for (const size of brand.sizes) {
+        for (const regulatorType of brand.regulatorTypes) {
+          const variantPrice =
+            brand.prices?.find(p => p.size === size && p.regulatorType === regulatorType)?.price ??
+            0;
+
+          cylindersToInsert.push({
+            store: storeObjectId,
+            brand: brand._id,
+            sku: `${brand.name}-${size}-${regulatorType}`.toLowerCase(),
+            brandName: brand.name,
+
+            cylinderImage: brand.cylinderImage,
+            cylinderImagePublicId: brand.cylinderImagePublicId ?? null,
+
+            size,
+            regulatorType,
+            unit,
+            price: variantPrice,
+
+            fullCount: 0,
+            emptyCount: 0,
+            defectedCount: 0,
+            isActive: true,
+            createdBy: userObjectId,
+          });
         }
       }
     }
+
+    if (!cylindersToInsert.length) {
+      console.log('[Seed:Cylinder] ℹ️ No cylinder variants to insert.');
+      return;
+    }
+
+    await Cylinder.insertMany(cylindersToInsert, { ordered: false });
+    console.log(`[Seed:Cylinder] ✅ Seeded ${cylindersToInsert.length} cylinders successfully.`);
+  } catch (err) {
+    console.error('[Seed Error:Cylinder] ❌ Cylinder seeding failed:', err);
   }
-
-  if (cylindersToSeed.length === 0) {
-    console.log('[Seed] No cylinders generated.');
-    return;
-  }
-
-  const result = await Cylinder.insertMany(cylindersToSeed);
-  console.log(
-    `[Seed] ${cylindersToSeed.length} cylinders seeded successfully. ${result.length !== cylindersToSeed.length ? `Failed: ${cylindersToSeed.length - result.length}` : ''}`
-  );
-
-  return;
 };
 
 export default seedLocalCylinders;

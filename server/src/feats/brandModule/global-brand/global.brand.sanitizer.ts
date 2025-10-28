@@ -13,7 +13,9 @@ export const globalBrandSanitizer = (
   id: String(globalBrand._id),
   name: globalBrand.name,
   brandImage: globalBrand.brandImage ?? null,
+  brandImagePublicId: globalBrand.brandImagePublicId ?? null,
   cylinderImage: globalBrand.cylinderImage ?? null,
+  cylinderImagePublicId: globalBrand.cylinderImagePublicId ?? null,
   regulatorTypes: globalBrand.regulatorTypes ?? [],
   sizes: globalBrand.sizes ?? [],
   prices:

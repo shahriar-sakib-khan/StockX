@@ -59,19 +59,11 @@ export default function BrandSelection({ onDone }) {
             return;
         }
 
-        // saveBrands(draftBrands, {
-        //     onSuccess: () => {
-        //         // If opened inside modal -> close modal instead of redirecting
-        //         if (onDone) onDone();
-        //         else navigate("/dashboard"); // default for onboarding flow
-        //     },
-        //     onError: (err) => console.error("Failed to update brands:", err),
-        // });
         saveBrands(draftBrands, {
-            onSuccess: (updated) => {
-                if (onDone)
-                    onDone(updated); // pass updated brands
-                else navigate("/dashboard");
+            onSuccess: () => {
+                // If opened inside modal -> close modal instead of redirecting
+                if (onDone) onDone();
+                else navigate("/dashboard"); // default for onboarding flow
             },
             onError: (err) => console.error("Failed to update brands:", err),
         });
@@ -87,12 +79,14 @@ export default function BrandSelection({ onDone }) {
             <div className="mx-auto max-w-5xl">
                 {/* Header + Actions */}
                 <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                    {!onDone && (
                         <h2 className="text-2xl font-semibold text-gray-700">
                             Select Brands
                         </h2>
+                    )}
 
-                        {/* Submit */}
+                    {/* Submit */}
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                         <button
                             onClick={submitSelectedBrands}
                             disabled={isSubmitDisabled}

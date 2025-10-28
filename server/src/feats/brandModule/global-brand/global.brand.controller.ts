@@ -1,98 +1,48 @@
-/**
- * @module GlobalBrandController
- *
- * @description Controller for managing global brands.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions.js';
-
 import { globalBrandService } from './index.js';
 
-/**
- * ----------------- Create Global Brand -----------------
- */
+export const allGlobalBrands = async (_req: Request, res: Response) => {
+  const brands = await globalBrandService.getAllGlobalBrands();
+
+  res.status(StatusCodes.OK).json({ total: brands.length, brands });
+};
+
+export const getSingleGlobalBrand = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const brand = await globalBrandService.getGlobalBrandById(id);
+
+  res.status(StatusCodes.OK).json({ brand });
+};
+
 export const createGlobalBrand = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
+  const brand = await globalBrandService.createGlobalBrand(req.body, req.files as any);
 
-  const globalBrand = await globalBrandService.createGlobalBrand(req.body, userId);
-
-  res
-    .status(StatusCodes.CREATED)
-    .json({ message: 'Global brand created successfully', globalBrand });
+  res.status(StatusCodes.CREATED).json({ message: 'Brand created successfully', brand });
 };
 
-/**
- * ----------------- Get All Global Brands -----------------
- */
-export const getAllGlobalBrands = async (req: Request, res: Response) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-
-  const { globalBrands, total } = await globalBrandService.getAllGlobalBrands(page, limit);
-
-  res.status(StatusCodes.OK).json({ total, page, limit, globalBrands });
-};
-
-/**
- * ----------------- Get Detailed Global Brands -----------------
- */
-export const getDetailedGlobalBrands = async (req: Request, res: Response) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-
-  const { globalBrands, total } = await globalBrandService.getDetailedGlobalBrands(page, limit);
-
-  res.status(StatusCodes.OK).json({ total, page, limit, globalBrands });
-};
-
-/**
- * ----------------- Get Single Global Brand -----------------
- */
-export const getGlobalBrandById = async (req: Request, res: Response) => {
-  const { brandId } = req.params;
-
-  const globalBrand = await globalBrandService.getGlobalBrandById(brandId);
-
-  res.status(StatusCodes.OK).json({ globalBrand });
-};
-
-/**
- * ----------------- Update Global Brand -----------------
- */
 export const updateGlobalBrand = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-  const { brandId } = req.params;
+  const { id } = req.params;
 
-  const updatedBrand = await globalBrandService.updateGlobalBrand(req.body, userId, brandId);
+  const brand = await globalBrandService.updateGlobalBrand(id, req.body, req.files as any);
 
-  res.status(StatusCodes.OK).json({ message: 'Global brand updated successfully', updatedBrand });
+  res.status(StatusCodes.OK).json({ message: 'Brand updated successfully', brand });
 };
 
-/**
- * ----------------- Delete Global Brand -----------------
- */
 export const deleteGlobalBrand = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { brandId } = req.params;
+  const { id } = req.params;
 
-  const deletedBrand = await globalBrandService.deleteGlobalBrand(brandId);
+  await globalBrandService.deleteGlobalBrand(id);
 
-  res.status(StatusCodes.OK).json({ message: 'Global brand deleted successfully', deletedBrand });
+  res.status(StatusCodes.OK).json({ message: 'Brand deleted successfully' });
 };
 
-/**
- * ----------------- Default Exports (globalBrandController) -----------------
- */
 export default {
+  allGlobalBrands,
+  getSingleGlobalBrand,
   createGlobalBrand,
-  getAllGlobalBrands,
-  getDetailedGlobalBrands,
-  getGlobalBrandById,
   updateGlobalBrand,
   deleteGlobalBrand,
 };

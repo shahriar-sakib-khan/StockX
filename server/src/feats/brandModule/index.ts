@@ -17,10 +17,10 @@ export {
 export {
   GlobalBrand,
   type IGlobalBrand,
-    globalBrandValidator,
+  globalBrandValidator,
   //   globalBrandMiddleware,
-    globalBrandController,
-    globalBrandService,
+  globalBrandController,
+  globalBrandService,
   globalBrandSanitizers,
 } from './global-brand/index.js';
 
@@ -28,4 +28,4 @@ export {
  * ----------------- Router Exports -----------------
  */
 export { default as localBrandRouter } from './local.brand.routes.js';
-// export { default as globalBrandRouter } from './global.brand.routes.js';
+export { default as globalBrandRouter } from './global.brand.routes.js';

@@ -6,7 +6,9 @@ export interface ILocalBrand extends Document {
 
   name: string;
   brandImage: string;
+  brandImagePublicId?: string;
   cylinderImage: string;
+  cylinderImagePublicId?: string;
   regulatorTypes: string[];
   sizes: number[];
   prices: {
@@ -16,8 +18,8 @@ export interface ILocalBrand extends Document {
   }[];
 
   isActive: boolean;
-  totalFullCount: number;
-  totalEmptyCount: number;
+
+  createdBy: Types.ObjectId;
   selectedBy: Types.ObjectId;
 
   createdAt: Date;
@@ -29,8 +31,10 @@ const localBrandSchema: Schema<ILocalBrand> = new Schema(
     store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
     globalBrand: { type: Schema.Types.ObjectId, ref: 'GlobalBrand', required: true },
     name: { type: String, required: true, trim: true },
-    brandImage: { type: String, default: 'brandImage' },
-    cylinderImage: { type: String, default: 'cylinderImage' },
+    brandImage: { type: String, required: true },
+    brandImagePublicId: { type: String },
+    cylinderImage: { type: String, required: true },
+    cylinderImagePublicId: { type: String },
     regulatorTypes: { type: [String], required: true },
     sizes: { type: [Number], required: true },
     prices: [
@@ -41,8 +45,8 @@ const localBrandSchema: Schema<ILocalBrand> = new Schema(
       },
     ],
     isActive: { type: Boolean, default: false },
-    totalFullCount: { type: Number, default: 0 },
-    totalEmptyCount: { type: Number, default: 0 },
+
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     selectedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
