@@ -18,9 +18,6 @@ export { default as CylinderTable } from "./inventory/components/CylinderTable";
 export { default as StoveTable } from "./inventory/components/StoveTable";
 export { default as RegulatorTable } from "./inventory/components/RegulatorTable";
 
-// selection
-export { default as BrandSelection } from "./selection/components/BrandSelection";
-
 // staff
 export { default as StaffCard } from "./staff/components/StaffCard";
 
@@ -32,3 +29,8 @@ export { default as VehicleTransactionModal } from "./vehicle/components/Vehicle
 // shop
 export { default as ShopCard } from "./shop/components/ShopCard";
 export { default as ShopleInfoModal } from "./shop/components/ShopleInfoModal";
+
+// brand
+export { default as BrandCard } from "./brands/components/BrandCard";
+export { default as BrandGrid } from "./brands/components/BrandGrid";
+export { default as BrandHeader } from "./brands/components/BrandHeader";

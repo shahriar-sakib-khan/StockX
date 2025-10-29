@@ -1,147 +1,119 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import { useAuthStore } from "@/stores/useAuthStore";
-import { logOnce } from "@/pages/utils/logOnce";
+import { useBrands, useUpdateBrands } from "@/features/brands/hooks/useBrand";
 
-import brandLogo from "@/assets/images/bashundhara.webp";
+import { BrandHeader, BrandGrid } from "@/features";
 
-import SelectionCard from "../features/selection/components/SelectionCard";
-import {
-    useBrands,
-    useSaveSelectedBrands,
-} from "../features/brands/hooks/brandHooks";
-
-export default function BrandSelection({ onDone }) {
+export default function BrandSelectionPage({ onDone }) {
     const navigate = useNavigate();
-
-    // Fetch brands
     const storeId = useAuthStore((state) => state.currentStore)?.id;
-    const { data: allBrands = [], isLoading: loadingAll } = useBrands(storeId);
-    logOnce(allBrands);
 
-    const { mutate: saveBrands, isLoading: isSaving } =
-        useSaveSelectedBrands(storeId);
+    const { data: brands = [], isLoading, isError } = useBrands(storeId);
+    const updateBrands = useUpdateBrands(
+        storeId,
+        onDone || (() => navigate("/dashboard")),
+    );
 
-    const [draftBrands, setDraftBrands] = useState([]);
+    const [selectedBrands, setSelectedBrands] = useState({});
+    const [changedBrands, setChangedBrands] = useState([]);
 
     useEffect(() => {
-        if (Array.isArray(allBrands) && allBrands.length > 0) {
-            const sortedBrands = [...allBrands]
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((b) => ({ id: b.id, isActive: b.isActive }));
-            setDraftBrands(sortedBrands);
+        if (brands.length > 0) {
+            const map = {};
+            brands.forEach((b) => (map[b.id] = b.isActive));
+            setSelectedBrands(map);
         }
-    }, [allBrands]);
+    }, [brands]);
 
-    // Toggle one brand
-    const toggleSingleBrand = (id) => {
-        setDraftBrands((prev) =>
-            prev.map((b) =>
-                b.id === id ? { ...b, isActive: !b.isActive } : b,
-            ),
-        );
-    };
+    const toggleBrand = (id) => {
+        setSelectedBrands((prev) => {
+            const newState = !prev[id];
+            const updated = { ...prev, [id]: newState };
 
-    // Select/Deselect all
-    const toggleAllBrandsSelection = () => {
-        const allActive = draftBrands.every((b) => b.isActive);
-        setDraftBrands((prev) =>
-            prev.map((b) => ({ ...b, isActive: !allActive })),
-        );
-    };
+            setChangedBrands((prevChanges) => {
+                const existing = prevChanges.find((b) => b.id === id);
+                const original = brands.find((b) => b.id === id)?.isActive;
 
-    // Submit
-    const submitSelectedBrands = () => {
-        if (!Array.isArray(draftBrands) || draftBrands.length === 0) return;
-        if (!storeId) {
-            console.error("No store selected — cannot save brands");
-            return;
-        }
+                if (existing) {
+                    if (original === newState)
+                        return prevChanges.filter((b) => b.id !== id);
+                    return prevChanges.map((b) =>
+                        b.id === id ? { ...b, isActive: newState } : b,
+                    );
+                } else {
+                    if (original !== newState)
+                        return [...prevChanges, { id, isActive: newState }];
+                    return prevChanges;
+                }
+            });
 
-        saveBrands(draftBrands, {
-            onSuccess: () => {
-                // If opened inside modal -> close modal instead of redirecting
-                if (onDone) onDone();
-                else navigate("/dashboard"); // default for onboarding flow
-            },
-            onError: (err) => console.error("Failed to update brands:", err),
+            return updated;
         });
     };
 
-    const allSelected =
-        draftBrands.length > 0 && draftBrands.every((b) => b.isActive);
-    const selectedCount = draftBrands.filter((b) => b.isActive).length;
-    const isSubmitDisabled = draftBrands.length === 0 || isSaving || loadingAll;
+    const toggleAll = () => {
+        const allSelected = Object.values(selectedBrands).every(Boolean);
+        const toggled = {};
+        const newChanges = [];
+
+        Object.keys(selectedBrands).forEach((id) => {
+            toggled[id] = !allSelected;
+            const original = brands.find((b) => b.id === id)?.isActive;
+            if (original !== !allSelected)
+                newChanges.push({ id, isActive: !allSelected });
+        });
+
+        setSelectedBrands(toggled);
+        setChangedBrands(newChanges);
+    };
+
+    const handleSubmit = async () => {
+        if (changedBrands.length === 0) {
+            toast.info("No changes to submit.");
+            return;
+        }
+        updateBrands.mutate(changedBrands);
+    };
+
+    const allSelected = Object.values(selectedBrands).every(Boolean);
+    const selectedCount = Object.values(selectedBrands).filter(Boolean).length;
+
+    if (!storeId)
+        return <div className="p-4 text-red-500">No store selected.</div>;
+    if (isLoading)
+        return (
+            <div className="flex h-64 items-center justify-center text-gray-500">
+                Loading brands...
+            </div>
+        );
+    if (isError)
+        return <div className="p-4 text-red-500">Failed to load brands.</div>;
 
     return (
-        <main className="bg-gray-50 p-6">
-            <div className="mx-auto max-w-5xl">
-                {/* Header + Actions */}
-                <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    {!onDone && (
-                        <h2 className="text-2xl font-semibold text-gray-700">
-                            Select Brands
-                        </h2>
-                    )}
-
-                    {/* Submit */}
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                        <button
-                            onClick={submitSelectedBrands}
-                            disabled={isSubmitDisabled}
-                            className={`rounded-lg px-5 py-2.5 text-sm font-medium shadow transition-all ${
-                                isSubmitDisabled
-                                    ? "cursor-not-allowed bg-gray-300 text-gray-500"
-                                    : "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800"
-                            }`}
-                        >
-                            {isSaving ? "Saving..." : "Submit"}
-                        </button>
-                    </div>
-
-                    {/* Select All / Deselect */}
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={toggleAllBrandsSelection}
-                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100 active:bg-gray-200"
-                        >
-                            {allSelected ? "Deselect All" : "Select All"}
-                        </button>
-
-                        <span className="font-medium text-gray-700">
-                            Selected: {selectedCount} / {draftBrands.length}
-                        </span>
-                    </div>
-                </section>
-
-                {/* Brand list */}
-                <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-                    {loadingAll
-                        ? [...Array(3)].map((_, i) => (
-                              <div
-                                  key={i}
-                                  className="h-20 animate-pulse rounded bg-gray-200/50"
-                              />
-                          ))
-                        : draftBrands.map((brand) => {
-                              const brandInfo = allBrands.find(
-                                  (b) => b.id === brand.id,
-                              );
-                              return (
-                                  <SelectionCard
-                                      key={brand.id}
-                                      id={brand.id}
-                                      name={brandInfo?.name}
-                                      logo={brandLogo}
-                                      isSelected={brand.isActive}
-                                      onSelect={() =>
-                                          toggleSingleBrand(brand.id)
-                                      }
-                                  />
-                              );
-                          })}
-                </section>
+        <main
+            className={`bg-gray-50 p-4 ${
+                onDone ? "max-h-[70vh] overflow-y-auto" : "min-h-screen p-6"
+            }`}
+        >
+            <div
+                className={`mx-auto ${onDone ? "max-w-3xl" : "max-w-7xl"} space-y-8`}
+            >
+                <BrandHeader
+                    allSelected={allSelected}
+                    selectedCount={selectedCount}
+                    totalCount={brands.length}
+                    changedCount={changedBrands.length}
+                    toggleAll={toggleAll}
+                    handleSubmit={handleSubmit}
+                />
+                <BrandGrid
+                    brands={brands}
+                    selectedBrands={selectedBrands}
+                    onToggle={toggleBrand}
+                />
             </div>
         </main>
     );

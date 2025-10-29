@@ -77,7 +77,7 @@ export default function DefectedCylinderModal({
                 <div className="mt-2 flex flex-col rounded-md border border-gray-200 bg-gray-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                         <img
-                            src={`/src/assets/images/cylinderModel.png`}
+                            src={product.cylinderImage}
                             alt={product.brandName || product.name}
                             className="h-8 w-8 object-contain"
                         />

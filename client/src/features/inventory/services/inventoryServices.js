@@ -12,10 +12,11 @@ export const getCylinderInventory = async ({
     size,
     regulatorType,
 }) => {
-    const data = await API.get(`/stores/${storeId}/cylinder-inventory`, {
+    const { data } = await API.get(`/stores/${storeId}/cylinder/inventory`, {
         params: { size, regulatorType },
     });
-    return data;
+
+    return data || [];
 };
 
 /**

@@ -7,11 +7,9 @@ import BrandSelection from "./BrandSelectionPage";
 
 export default function InventoryPage() {
     const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
-    const [refreshKey, setRefreshKey] = useState(0);
 
     const handleBrandSelectionDone = () => {
         setIsBrandModalOpen(false);
-        setRefreshKey((prev) => prev + 1);
     };
 
     const tabs = [
@@ -42,7 +40,6 @@ export default function InventoryPage() {
                         {activeTab === "cylinders" && (
                             <CylinderTable
                                 type="cylinders"
-                                key={`c-${refreshKey}`} // force re-render
                             />
                         )}
                         {activeTab === "stoves" && <StoveTable type="stoves" />}

@@ -113,7 +113,10 @@ export default function TransactionModal({
                 <div className="mt-2 flex flex-col rounded-md border border-gray-200 bg-gray-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                         <img
-                            src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
+                            src={
+                                product.cylinderImage ||
+                                `/src/assets/images/${type.replace(/s$/, "")}Model.png`
+                            }
                             alt={product.brandName || product.name || "Brand"}
                             className="h-8 w-8 object-contain"
                         />

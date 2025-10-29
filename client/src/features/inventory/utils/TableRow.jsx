@@ -13,7 +13,7 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
 
     const fullCount = product?.fullCount ?? 0;
     const emptyCount = product?.emptyCount ?? 0;
-    const problemCount = product?.problemCount ?? 0;
+    const defectedCount = product?.defectedCount ?? 0;
     const stockCount = product?.stockCount ?? 0;
 
     let status = "Out of Stock";
@@ -32,24 +32,29 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                 <td data-cell="#" className="p-4">
                     {index + 1}
                 </td>
+
+                {/* ---------- Brand ---------- */}
                 <td
                     data-cell="Brand"
-                    className="products-center flex flex-nowrap gap-2 p-4"
+                    className="flex items-center gap-2 p-4 whitespace-nowrap"
                 >
-                    <img
-                        src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
-                        alt={product.brandName || product.name}
-                        className="h-6 w-6"
-                    />
-                    {product.name === "Double Burner Stove" && (
+                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50">
                         <img
-                            src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
+                            src={
+                                product.cylinderImage ||
+                                `/src/assets/images/${type.replace(/s$/, "")}Model.png`
+                            }
                             alt={product.brandName || product.name}
-                            className="h-6 w-6"
+                            className="h-6 w-6 object-contain"
+                            loading="lazy"
                         />
-                    )}
-                    {product.name || product.brandName}
+                    </div>
+                    <span className="max-w-[120px] truncate">
+                        {product.brandName || product.name}
+                    </span>
                 </td>
+
+                {/* ---------- Status ---------- */}
                 <td data-cell="Status" className="min-w-35 p-4">
                     <span
                         className={clsx(
@@ -60,9 +65,13 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                         {status}
                     </span>
                 </td>
+
+                {/* ---------- Price ---------- */}
                 <td data-cell="Price" className="p-4">
                     {product.price}
                 </td>
+
+                {/* ---------- Counts ---------- */}
                 {type === "cylinders" && (
                     <>
                         <td data-cell="Full" className="p-4">
@@ -78,11 +87,13 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                         {stockCount}
                     </td>
                 )}
+
+                {/* ---------- Defected ---------- */}
                 <td
-                    data-cell="Problem"
-                    className="products-center flex flex-nowrap gap-2 p-4"
+                    data-cell="Defected"
+                    className="flex items-center gap-2 p-4 whitespace-nowrap"
                 >
-                    <span>{problemCount}</span>
+                    <span>{defectedCount}</span>
                     <button
                         onClick={() => setIsProblemModalOpen(true)}
                         className="rounded-sm p-1 hover:bg-yellow-100"
@@ -91,8 +102,10 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                     </button>
                 </td>
 
-                {/** TODO : resolve why this extra td here is needed */}
+                {/** Extra td here to maintain the table structure */}
                 <td data-cell="Action" className="flex gap-4"></td>
+
+                {/* ---------- Actions ---------- */}
                 <td
                     data-cell="Action"
                     className="rounded-sm p-1 hover:bg-yellow-100"
@@ -112,6 +125,7 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                 </td>
             </tr>
 
+            {/* ---------- Modals ---------- */}
             {modalType && (
                 <TransactionModal
                     type={type}

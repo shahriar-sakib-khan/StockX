@@ -31,6 +31,7 @@ export const useCylinderInventory = (storeId, size, regulatorType) =>
         staleTime: 1000 * 60 * 2,
         cacheTime: 1000 * 60 * 10,
         refetchOnWindowFocus: false,
+        select: (data) => data || [],
     });
 
 /**
