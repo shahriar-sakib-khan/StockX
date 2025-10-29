@@ -31,12 +31,14 @@ export const recordTransaction = async (
     quantity,
     totalAmount,
     paymentMethod,
+
     counterpartyType,
-    ref,
     cylinderId,
     staffId,
     vehicleId,
     customerId,
+
+    ref,
     ...otherDetails // transaction-specific fields from domain service
   } = txData;
 

@@ -28,13 +28,26 @@ const defaultTxCategoryList = [
     categoryType: CategoryType.NON_CASH, // No cash movement yet
     isActive: true,
   },
+
+  // ======================== Cylinder Swaps ========================
   {
     code: 'cylinder_swap_retail',
-    name: 'Cylinder Swap (Retail)',
-    debitAccountCode: '1201-INVENTORY-CYL-FULL', // Asset ↑ (full inventory increases)
-    creditAccountCode: '1202-INVENTORY-CYL-EMPTY', // Asset ↓ (empty inventory decreases)
-    descriptionTemplate: 'Swapped {{quantity}} cylinders for {{customerName}}',
-    categoryType: CategoryType.NON_CASH, // Purely internal movement
+    name: 'Cylinder Swap (Retail Gas Sale)',
+    debitAccountCode: '1000-CASH', // Asset ↑ (cash increases)
+    creditAccountCode: '4101-REV-GAS', // Income ↑ (gas revenue recognized)
+    descriptionTemplate:
+      'Gas-only sale during cylinder swap (empty exchanged for full) — {{quantity}} cylinders sold to {{customerName}}',
+    categoryType: CategoryType.CASH_INFLOW, // Cash coming in from gas sale
+    isActive: true,
+  },
+  {
+    code: 'cylinder_swap_empty',
+    name: 'Empty Cylinder Swap (Inter-Store)',
+    debitAccountCode: '1202-INVENTORY-CYL-EMPTY', // Asset ↑ (receiving store gains empties)
+    creditAccountCode: '1202-INVENTORY-CYL-EMPTY', // Asset ↓ (sending store loses empties)
+    descriptionTemplate:
+      'Transferred {{quantity}} empty cylinders between stores: {{fromStoreName}} → {{toStoreName}}',
+    categoryType: CategoryType.NON_CASH, // Internal non-cash adjustment
     isActive: true,
   },
 

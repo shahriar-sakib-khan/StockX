@@ -7,14 +7,12 @@ export const markDefected = async ({
     storeId,
     size,
     regulatorType,
-    isDefected,
+    doMark,
     payload,
 }) => {
-    const data = await API.patch(
-        `/stores/${storeId}/cylinders/mark-defected`,
-        payload,
-        { params: { size, regulatorType, isDefected } },
-    );
+    const data = await API.patch(`/stores/${storeId}/cylinders/mark`, payload, {
+        params: { size, regulatorType, doMark },
+    });
 
     return data;
 };

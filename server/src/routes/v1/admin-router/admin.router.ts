@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { globalBrandRouter } from '@/feats/brandModule';
+import { globalBrandRouter } from '@/feats/brandModule/index.js';
 
 /**
  * @swagger

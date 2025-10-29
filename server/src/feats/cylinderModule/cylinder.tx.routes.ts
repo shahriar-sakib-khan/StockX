@@ -5,58 +5,65 @@ import { cylinderTxController } from './index.js';
 /**
  * @swagger
  * tags:
- * name: Cylinder Transaction
- * description: Manage cylinder buy, sell, defected, and exchange transactions
+ *   name: CylinderTx
+ *   description: Cylinder transaction and exchange management
  */
 
 const router = Router({ mergeParams: true });
 
-/** ----------------- Cylinder Transaction Routes ----------------- */
+/**
+ * ----------------- Cylinder Transaction Routes -----------------
+ */
 
 /**
- * @route   POST /stores/:storeId/cylinders/buy
- * @desc    Record a purchase transaction for cylinders (buy from supplier or add to stock)
+ * @route   POST /stores/:storeId/cylinders/txs ?size=12&regulatorType=22&mode=buy|sell
+ * @desc    Handle buying or selling cylinders
+ * @query   size - number (required)
+ * @query   regulatorType - number (required)
+ * @query   mode - string ('buy' | 'sell') (required)
  * @access  Authenticated
  */
-router.post('/cylinders/buy', cylinderTxController.buyCylinders);
+router.post('/cylinders/txs', cylinderTxController.handleCylinderTransaction);
 
 /**
- * @route   POST /stores/:storeId/cylinders/sell
- * @desc    Record a sale transaction for cylinders (sell to customers)
+ * @route   PATCH /stores/:storeId/cylinders/mark ?size=12&regulatorType=22&doMark=true|false
+ * @desc    Mark or unmark cylinders as defected
+ * @query   size - number (required)
+ * @query   regulatorType - number (required)
+ * @query   doMark - boolean (default: true)
  * @access  Authenticated
  */
-router.post('/cylinders/sell', cylinderTxController.sellCylinder);
+router.patch('/cylinders/mark', cylinderTxController.markDefected);
 
 /**
- * @route   POST /stores/:storeId/cylinders/mark-defected
- * @desc    Mark cylinders as defected and update inventory
+ * ----------------- Cylinder Exchange Routes -----------------
+ */
+
+/**
+ * @route   POST /stores/:storeId/cylinders/txs/gas
+ * @desc    Exchange full cylinders for empty ones
  * @access  Authenticated
  */
-router.patch('/cylinders/mark-defected', cylinderTxController.markDefected);
-
-/** ----------------- Cylinder Exchange Routes ----------------- */
+router.post('/cylinders/txs/gas', cylinderTxController.exchangeFullForEmpty);
 
 /**
- * @route   POST /stores/:storeId/cylinders/exchange/full-for-empty
- * @desc    Exchange empty cylinders for full ones (gas pricing applies)
+ * @route   POST /stores/:storeId/cylinders/txs/swap
+ * @desc    Exchange empty cylinders between stores
  * @access  Authenticated
  */
-router.post('/cylinders/exchange/full-for-empty', cylinderTxController.exchangeFullForEmpty);
+router.post('/cylinders/txs/swap', cylinderTxController.exchangeEmptyForEmpty);
 
 /**
- * @route   POST /stores/:storeId/cylinders/exchange/empty-for-empty
- * @desc    Exchange empty cylinders between stores (inter-store swap)
+ * ----------------- Cylinder Transaction Retrieval -----------------
+ */
+
+/**
+ * @route   GET /stores/:storeId/cylinders/txs ?page=1&limit=20
+ * @desc    Get all cylinder txs (paginated)
+ * @query   page (optional) - number (default: 1)
+ * @query   limit (optional) - number (default: 20)
  * @access  Authenticated
  */
-router.post('/cylinders/exchange/empty-for-empty', cylinderTxController.exchangeEmptyForEmpty);
-
-/** ----------------- Cylinder transaction history ----------------- */
-
-/**
- * @route GET /stores/:storeId/cylinders/transactions
- * @desc Get all cylinder transactions (paginated)
- * @access Authenticated
- */
-router.get('/cylinders/transactions', cylinderTxController.getAllCylinderTransactions);
+router.get('/cylinders/txs', cylinderTxController.allCylinderTransactions);
 
 export default router;

@@ -13,9 +13,9 @@ import multer from 'multer';
 // Internal Imports
 // ------------------------------
 import apiRouter from './routes/router.js';
-import { connectDB, cloudinary } from '@/config/index.js';
+import { connectDB } from '@/config/index.js';
 import { errorHandler } from '@/error/index.js';
-import runBootstrap from './bootstrap/index.js';
+// import runBootstrap from './bootstrap/index.js';
 
 // ------------------------------
 // Multer Configuration (for temporary file handling)
@@ -70,47 +70,6 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 // ------------------------------
-// Cloudinary Upload Test Endpoint
-// ------------------------------
-// (You’ll later move this inside brand.routes.ts)
-app.post(
-  '/api/test-upload',
-  upload.single('file'), // Expect field name 'file' in Postman
-  async (req: Request, res: Response) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-      }
-
-      // Upload buffer directly to Cloudinary
-      const uploadResult = cloudinary.uploader.upload_stream(
-        { folder: 'brands' }, // You can change the folder name
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary Upload Error:', error);
-            return res.status(500).json({ message: 'Upload failed', error });
-          }
-          return res.status(200).json({
-            message: 'Upload successful',
-            url: result?.secure_url,
-            public_id: result?.public_id,
-          });
-        }
-      );
-
-      // Pipe file buffer to Cloudinary stream
-      if (req.file?.buffer) {
-        // @ts-ignore
-        uploadResult.end(req.file.buffer);
-      }
-    } catch (err) {
-      console.error('Unexpected upload error:', err);
-      res.status(500).json({ message: 'Unexpected server error', err });
-    }
-  }
-);
-
-// ------------------------------
 // Mount API Routes
 // ------------------------------
 app.use('/api', apiRouter);
@@ -141,7 +100,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async (): Promise<void> => {
   try {
     await connectDB();
-    await runBootstrap();
+    // await runBootstrap();
 
     app.listen(PORT, () => {
       if (process.env.NODE_ENV !== 'production') {

@@ -38,7 +38,7 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                     data-cell="Brand"
                     className="flex items-center gap-2 p-4 whitespace-nowrap"
                 >
-                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+                    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50">
                         <img
                             src={
                                 product.cylinderImage ||

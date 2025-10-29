@@ -43,7 +43,7 @@ export type CategoryTypeType = (typeof CategoryType)[keyof typeof CategoryType];
  * ----------------- Other Constants -----------------
  */
 
-export const PaymentMethod = ['cash', 'bank', 'mobile', 'due', 'other'] as const;
+export const PaymentMethod = ['cash', 'bank', 'mobile', 'due', 'non-cash', 'other'] as const;
 export type PaymentMethodType = (typeof PaymentMethod)[number];
 
 export const CounterpartyKind = [

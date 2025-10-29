@@ -21,9 +21,6 @@ export default function DefectedCylinderModal({
         action === "mark",
     );
 
-    /**
-     * Handles form submission for marking/unmarking defected cylinders
-     */
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!count) return;
@@ -65,19 +62,30 @@ export default function DefectedCylinderModal({
             isOpen={isOpen}
             onClose={onClose}
             title={
-                <span className="text-lg font-semibold text-yellow-600">
-                    Mark / Unmark Problem Cylinder
+                <span
+                    className={`text-lg font-semibold ${
+                        action === "mark"
+                            ? "text-yellow-600"
+                            : "text-emerald-600"
+                    }`}
+                >
+                    {action === "mark"
+                        ? "Mark Problem Cylinders"
+                        : "Unmark Problem Cylinders"}
                 </span>
             }
             footer={footer}
             size="md"
         >
             <form className="space-y-5" onSubmit={handleSubmit}>
-                {/* ---------- Brand Info + Cylinder Details ---------- */}
+                {/* ---------- Cylinder Info ---------- */}
                 <div className="mt-2 flex flex-col rounded-md border border-gray-200 bg-gray-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                         <img
-                            src={product.cylinderImage}
+                            src={
+                                product.cylinderImage ||
+                                `/src/assets/images/${selectedType?.replace(/s$/, "")}Model.png`
+                            }
                             alt={product.brandName || product.name}
                             className="h-8 w-8 object-contain"
                         />
@@ -102,7 +110,7 @@ export default function DefectedCylinderModal({
                     </div>
                 </div>
 
-                {/* ---------- Problem Count Input ---------- */}
+                {/* ---------- Cylinder Count ---------- */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600">
                         Cylinder Count
@@ -117,7 +125,7 @@ export default function DefectedCylinderModal({
                     />
                 </div>
 
-                {/* ---------- Action Type (Minimal Toggle Buttons) ---------- */}
+                {/* ---------- Action Buttons ---------- */}
                 <div>
                     <label className="mb-1 block text-sm font-medium text-gray-600">
                         Action

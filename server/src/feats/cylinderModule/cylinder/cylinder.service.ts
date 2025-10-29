@@ -3,17 +3,14 @@ import { Types } from 'mongoose';
 import { Cylinder, cylinderSanitizers } from './index.js';
 import { Errors } from '@/error/index.js';
 
-/**
- * ----------------- Cylinder Inventory Service -----------------
- *
- * Rules:
- * - Skip cylinders that are inactive.
- * - Use fullCount, emptyCount, and defectedCount directly from each cylinder.
- * - Grouped by brand.
- */
+/** ----------------- Cylinder Inventory Service ----------------- */
+
 /**
  * @function getCylinderInventory
  * @description Get cylinder inventory for a store, optionally filtered by size and regulator type.
+ * rules:
+ * - Frontend sends only changed brands (optimized).
+ * - Bulk updates both brands and cylinders.
  * @param {string} storeId - The ID of the store.
  * @param {number} size - The size of the cylinder.
  * @param {number} regulatorType - The type of the regulator.
@@ -50,15 +47,9 @@ export const getCylinderInventory = async (
   };
 };
 
-/**
- * ----------------- General Cylinder Services -----------------
- */
+/** ----------------- General Cylinder Services ----------------- */
 
 /**
- * ----------------- Unified Cylinder Fetch Service -----------------
- *
- * Combines getAllActiveCylinders, getAllCylinders, and detailedCylinders into a single function.
- *
  * @function getAllCylinders
  * @description Fetches cylinders for a store with pagination and mode-based detail level.
  *

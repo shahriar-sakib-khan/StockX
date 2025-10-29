@@ -54,15 +54,19 @@ export default function TransactionModal({
             paymentMethod,
         };
 
-        mutation.mutate(payload, {
-            onSuccess: () => {
-                onClose();
-                setQuantity("");
-                setTotal("");
-                setPaymentMethod("cash");
-                setUserEditedTotal(false);
+        // Use latest state by wrapping in callback
+        mutation.mutate(
+            { ...payload },
+            {
+                onSuccess: () => {
+                    onClose();
+                    setQuantity("");
+                    setTotal("");
+                    setPaymentMethod("cash");
+                    setUserEditedTotal(false);
+                },
             },
-        });
+        );
     };
 
     const footer = (
@@ -176,9 +180,7 @@ export default function TransactionModal({
                             min={0}
                             value={quantity}
                             onChange={(e) =>
-                                setQuantity(
-                                    e.target.value < 0 ? 0 : e.target.value,
-                                )
+                                setQuantity(Math.max(0, e.target.value))
                             }
                             required
                             className="mt-1 w-full rounded-md border border-gray-300 p-2 outline-none focus:ring-2 focus:ring-gray-400"

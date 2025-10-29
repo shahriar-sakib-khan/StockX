@@ -15,6 +15,7 @@ export const CylinderTxCategory = {
   CYLINDER_SALE_CASH: 'cylinder_sale_cash', // cash retail sales
   CYLINDER_SALE_CREDIT: 'cylinder_sale_credit', // credit retail sales
   CYLINDER_SWAP_RETAIL: 'cylinder_swap_retail', // cylinder swap in retail
+  CYLINDER_SWAP_EMPTY: 'cylinder_swap_empty', // empty cylinder swap
 
   // ========== Wholesale Purchases ==========
   CYLINDER_PURCHASE_WHOLESALE_CASH: 'cylinder_purchase_wholesale_cash', // buy cylinders in cash
@@ -32,6 +33,7 @@ export const CylinderPaymentMethod = {
   BANK: 'bank',
   MOBILE: 'mobile',
   DUE: 'due',
+  NON_CASH: 'non-cash',
   OTHER: 'other',
 } as const;
 
@@ -45,6 +47,7 @@ export const CylinderCounterpartyKind = {
   CUSTOMER: 'customer',
   STORE: 'store',
   SUPPLIER: 'supplier',
+  INTERNAL: 'internal',
 } as const;
 
 export type CylinderCounterpartyKindType =

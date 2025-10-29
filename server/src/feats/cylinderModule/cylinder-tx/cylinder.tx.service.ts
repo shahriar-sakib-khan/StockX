@@ -5,8 +5,8 @@
  */
 
 import { Types } from 'mongoose';
-
 import { Errors } from '@/error/index.js';
+
 import {
   Transaction,
   transactionService,
@@ -16,209 +16,168 @@ import {
 import { Cylinder, cylinderSanitizers } from '../index.js';
 import { cylinderTxConstants } from './index.js';
 
+/** ----------------- General Cylinder Transactions ----------------- */
+
 /**
- * @function buyCylinders
- * @description Records a purchase transaction for cylinders (buy from supplier or stock addition).
+ * @function handleCylinderTransaction
+ * @description Handles both buying and selling of cylinders.
+ * Updates the cylinder inventory and creates a transaction record.
+ * Modes:
+ * 'buy' → Purchase full cylinders (incoming stock)
+ * 'sell' → Sell full cylinders (outgoing stock)
  *
- * @param {Object} buyData - The cylinder purchase transaction data.
+ * @param {Object} txData - Transaction payload (price, quantity, brandId, etc.).
+ * @param {number} size - Cylinder size.
+ * @param {number} regulatorType - Regulator type.
+ * @param {'buy' | 'sell'} mode - Transaction mode.
  * @param {string} transactorId - The ID of the user performing the transaction.
  * @param {string} storeId - The ID of the store.
  */
-export const buyCylinders = async (
-  // buyData: cylinderTxValidator.BuyTxInput,
-  buyData: any,
+export const handleCylinderTransaction = async (
+  txData: any,
+  size: number,
+  regulatorType: number,
+  mode: 'buy' | 'sell',
   transactorId: string,
   storeId: string
 ) => {
-  const { id: brandId, price, quantity, totalAmount, paymentMethod, regulatorType, size } = buyData;
+  const { id, price, quantity, totalAmount, paymentMethod } = txData;
 
-  const cylinder = await Cylinder.findOne({
-    brand: brandId,
-    store: new Types.ObjectId(storeId),
-    regulatorType,
-    size,
-    isFull: true,
-    isDefected: false,
-  });
-
+  const cylinder = await Cylinder.findById(id);
   if (!cylinder) throw new Errors.NotFoundError('Cylinder not found for the given parameters');
+  if (cylinder.size !== size || cylinder.regulatorType !== regulatorType) {
+    throw new Errors.BadRequestError('Invalid cylinder parameters');
+  }
 
+  // Update inventory counts
   cylinder.updatedBy = new Types.ObjectId(transactorId);
-  // Update inventory count
-  cylinder.count += quantity;
+  if (mode === 'buy') {
+    cylinder.fullCount += quantity;
+  } else if (mode === 'sell') {
+    if (cylinder.fullCount < quantity)
+      throw new Errors.BadRequestError('Not enough full cylinders available for sale');
+    cylinder.fullCount -= quantity;
+  }
+
   await cylinder.save();
 
   // Record transaction
-  const txData = {
-    category: cylinderTxConstants.CylinderTxCategory.CYLINDER_PURCHASE_WHOLESALE_CASH,
+  const txRecord = {
+    category:
+      mode === 'buy'
+        ? cylinderTxConstants.CylinderTxCategory.CYLINDER_PURCHASE_WHOLESALE_CASH
+        : cylinderTxConstants.CylinderTxCategory.CYLINDER_SALE_CASH,
     price,
     quantity,
     totalAmount,
     paymentMethod,
-    counterpartyType: cylinderTxConstants.CylinderCounterpartyKind.SUPPLIER,
+    counterpartyType:
+      mode === 'buy'
+        ? cylinderTxConstants.CylinderCounterpartyKind.SUPPLIER
+        : cylinderTxConstants.CylinderCounterpartyKind.CUSTOMER,
     cylinderId: cylinder._id,
-    ref: `Purchase_${Date.now()}`,
+    ref: `${mode === 'buy' ? 'Purchase' : 'Sale'}_${Date.now()}`,
     details: {
+      sku: cylinder.sku,
       regulatorType,
       size,
-      brand: brandId,
-      quantity,
       pricePerUnit: price,
+      quantity,
+      totalAmount,
     },
   };
+  const tx = await transactionService.recordTransaction(txRecord, transactorId, storeId);
 
-  const tx = await transactionService.recordTransaction(txData, transactorId, storeId);
-
-  return tx;
+  return { cylinder: cylinderSanitizers.cylinderSanitizer(cylinder), tx };
 };
 
 /**
- * @function sellCylinder
- * @description Handles selling (outgoing) full cylinders to customers.
- *
- * @param {Object} sellData - The sale transaction data.
- * @param {string} transactorId - The ID of the user executing the sale.
+ * @function handleDefectedCylinderMarking
+ * @description Marks or unmarks cylinders as defected based on `doMark` flag.
+ * If `doMark` is true → mark as defected (increment defected count).
+ * If `doMark` is false → unmark defected (decrement defected count).
+ * @param {Object} defectData - Defected cylinder data (id, cylinderCount, regulatorType, size).
+ * @param {string} size - Cylinder size.
+ * @param {number} regulatorType - Regulator type.
+ * @param {boolean} doMark - True to mark as defected, false to unmark.
+ * @param {string} transactorId - The ID of the user performing the operation.
  * @param {string} storeId - The ID of the store.
  */
-export const sellCylinder = async (
-  // sellData: cylinderTxValidator.SellTxInput,
-  sellData: any,
+export const handleDefectedCylinderMarking = async (
+  defectData: any,
+  size: number,
+  regulatorType: number,
+  doMark: boolean,
   transactorId: string,
   storeId: string
 ) => {
-  const {
-    id: brandId,
-    price,
-    quantity,
-    totalAmount,
-    paymentMethod,
-    ref,
-    details,
-    regulatorType,
-    size,
-  } = sellData;
+  const { id, cylinderCount } = defectData;
 
-  // Find matching full cylinder
-  const cylinder = await Cylinder.findOne({
-    store: new Types.ObjectId(storeId),
-    brand: brandId,
-    isFull: true,
-    isDefected: false,
-    regulatorType,
-    size,
-  });
+  const cylinder = await Cylinder.findById(id);
 
-  if (!cylinder) throw new Errors.NotFoundError('Full cylinder not found for sale');
-
-  if (cylinder.count <= 0) throw new Errors.BadRequestError('No full cylinders available for sale');
+  if (!cylinder) throw new Errors.NotFoundError('Cylinder record not found');
+  if (
+    cylinder.store.toString() !== storeId ||
+    cylinder.regulatorType !== regulatorType ||
+    cylinder.size !== size
+  )
+    throw new Errors.BadRequestError('Invalid cylinder parameters');
 
   cylinder.updatedBy = new Types.ObjectId(transactorId);
-  // Decrease count of full cylinders
-  cylinder.count -= quantity;
+
+  if (doMark) {
+    if (cylinder.defectedCount + cylinderCount > cylinder.fullCount + cylinder.emptyCount)
+      throw new Errors.BadRequestError('Not enough cylinders to mark as defected');
+    cylinder.defectedCount += cylinderCount;
+  } else {
+    if (cylinder.defectedCount < cylinderCount)
+      throw new Errors.BadRequestError('Not enough defected cylinders to unmark');
+    cylinder.defectedCount -= cylinderCount;
+  }
   await cylinder.save();
 
-  // Build transaction data
-  const txData = {
-    category: cylinderTxConstants.CylinderTxCategory.CYLINDER_SALE_CASH,
-    price,
-    quantity,
-    totalAmount,
-    paymentMethod,
-    counterpartyType: cylinderTxConstants.CylinderCounterpartyKind.CUSTOMER,
+  const txRecord = {
+    category: cylinderTxConstants.CylinderTxCategory.CYLINDER_SWAP_EMPTY,
+    quantity: cylinderCount,
+    totalAmount: 0,
+    paymentMethod: cylinderTxConstants.CylinderPaymentMethod.NON_CASH,
+    counterpartyType: cylinderTxConstants.CylinderCounterpartyKind.INTERNAL,
     cylinderId: cylinder._id,
-    ref,
-    details,
-  };
-
-  const tx = await transactionService.recordTransaction(txData, transactorId, storeId);
-  return tx;
-};
-
-/**
- * @function markDefected
- * @description Marks or unmarks cylinders as defected based on `isDefected` flag.
- * If `isDefected` is true → mark as defected (increment defected count).
- * If `isDefected` is false → unmark defected (decrement defected count).
- */
-export const markDefected = async (defectData: any, transactorId: string, storeId: string) => {
-  const { id: brandId, cylinderCount, regulatorType, size, isDefected } = defectData;
-
-  // Find defected cylinder record
-  const defectedCylinder = await Cylinder.findOne({
-    brand: brandId,
-    store: new Types.ObjectId(storeId),
-    regulatorType,
-    size,
-    isFull: true,
-    isDefected: true,
-  }).select('store brand name regulatorType size count');
-
-  if (!defectedCylinder) throw new Errors.NotFoundError('Defected cylinder record not found');
-
-  if (isDefected) {
-    // --- MARK AS DEFECTED ---
-    const fullCylinder = await Cylinder.findOne({
-      brand: brandId,
-      store: new Types.ObjectId(storeId),
+    ref: `${Date.now()}`,
+    details: {
+      brand: cylinder.brand,
       regulatorType,
       size,
-      isFull: true,
-      isDefected: false,
-    })
-      .select('count')
-      .lean();
+      cylinderCount,
+    },
+  };
+  const tx = await transactionService.recordTransaction(txRecord, transactorId, storeId);
 
-    if (!fullCylinder) throw new Errors.NotFoundError('Full cylinder not found');
-    if (fullCylinder.count < cylinderCount)
-      throw new Errors.BadRequestError('Not enough cylinders to mark as defected');
-
-    defectedCylinder.updatedBy = new Types.ObjectId(transactorId);
-    defectedCylinder.count += cylinderCount;
-  } else {
-    // --- UNMARK DEFECTED ---
-    if (defectedCylinder.count < cylinderCount)
-      throw new Errors.BadRequestError('Not enough defected cylinders to unmark');
-
-    defectedCylinder.updatedBy = new Types.ObjectId(transactorId);
-    defectedCylinder.count -= cylinderCount;
-  }
-
-  await defectedCylinder.save();
-
-  return cylinderSanitizers.cylinderSanitizer(defectedCylinder);
+  return { cylinder: cylinderSanitizers.cylinderSanitizer(cylinder), tx };
 };
 
 /**
- * ----------------- Exchange: Full-for-Empty -----------------
+ * @function exchangeFullForEmpty
+ * @description Exchange full cylinders for empty cylinders
+ * @param {Array} fullOut - Array of full cylinders to be exchanged
+ * @param {Array} emptyIn - Array of empty cylinders to be received
+ * @param {string} paymentMethod - Payment method used for the transaction
+ * @param {string} transactorId - The ID of the user performing the transaction
+ * @param {string} storeId - The ID of the store
  */
 export const exchangeFullForEmpty = async (
-  storeId: string,
+  fullOut: { brandId: string; quantity: number; pricePerGas: number }[],
+  emptyIn: { brandId: string; quantity: number }[],
+  paymentMethod: string = 'cash',
   transactorId: string,
-  emptyOut: { brandId: string; quantity: number }[],
-  fullIn: { brandId: string; quantity: number; pricePerGas: number }[],
-  paymentMethod: string = 'cash'
+  storeId: string
 ): Promise<any> => {
-  const totalEmpty = emptyOut.reduce((sum, e) => sum + e.quantity, 0);
-  const totalFull = fullIn.reduce((sum, f) => sum + f.quantity, 0);
+  const totalEmpty = emptyIn.reduce((sum, e) => sum + e.quantity, 0);
+  const totalFull = fullOut.reduce((sum, f) => sum + f.quantity, 0);
   if (totalEmpty !== totalFull)
     throw new Errors.BadRequestError('Total empty and full cylinders must be equal.');
 
-  // Update inventory
-  for (const e of emptyOut) {
-    await Cylinder.updateOne(
-      { store: storeId, brand: e.brandId, isFull: false },
-      { $inc: { count: -e.quantity } }
-    );
-  }
-  for (const f of fullIn) {
-    await Cylinder.updateOne(
-      { store: storeId, brand: f.brandId, isFull: true },
-      { $inc: { count: f.quantity } }
-    );
-  }
-
-  // Calculate total gas cost
-  const brandWiseTransactions = fullIn.map(f => ({
+  const brandWiseTransactions = fullOut.map(f => ({
     brandId: f.brandId,
     pricePerGas: f.pricePerGas,
     count: f.quantity,
@@ -226,88 +185,92 @@ export const exchangeFullForEmpty = async (
   }));
   const totalAmount = brandWiseTransactions.reduce((s, b) => s + b.totalAmount, 0);
 
-  // Record as transaction
-  await transactionService.recordTransaction(
-    {
-      category: 'cylinder_swap_retail',
-      quantity: totalFull,
-      totalAmount: totalAmount,
-      paymentMethod,
-      counterpartyType: 'shop',
-      details: {
-        brands: brandWiseTransactions,
-        note: 'Exchange empty cylinders for full ones with gas pricing.',
-      },
+  const txRecord = {
+    category: 'cylinder_swap_retail',
+    quantity: totalFull,
+    totalAmount,
+    paymentMethod,
+    counterpartyType: 'shop',
+    details: {
+      brands: brandWiseTransactions,
+      note: 'Exchange full cylinders for empty ones with gas pricing.',
     },
-    transactorId,
-    storeId
-  );
+  };
+  await transactionService.recordTransaction(txRecord, transactorId, storeId);
 
   return {
-    message: 'Full-for-empty exchange completed successfully',
     totalAmount,
     brandWiseTransactions,
   };
 };
 
 /**
- * ----------------- Exchange: Empty-for-Empty (Inter-store) -----------------
+ * @function exchangeEmptyForEmpty
+ * @description Exchange empty cylinders between stores
+ * @param {Array} cylinderOut
+ * @param {Array} cylinderIn
+ * @param {string} giverStoreId
+ * @param {string} storeId
+ * @param {string} transactorId
  */
 export const exchangeEmptyForEmpty = async (
   cylinderOut: { brandId: string; quantity: number }[],
   cylinderIn: { brandId: string; quantity: number }[],
   giverStoreId: string,
-  transactorId: string,
-  storeId: string
+  storeId: string,
+  transactorId: string
 ): Promise<any> => {
-  const totalOut = cylinderOut.reduce((s, e) => s + e.quantity, 0);
-  const totalIn = cylinderIn.reduce((s, e) => s + e.quantity, 0);
-  if (totalOut !== totalIn)
-    throw new Errors.BadRequestError('Total cylinders exchanged must be equal.');
-
-  // Update inventory
-  let outgoingCylinders = [];
+  let outgoingCylinders = [],
+    totalOut = 0,
+    totalIn = 0;
   for (const c of cylinderOut) {
-    const cylinder = await Cylinder.findOne({ store: storeId, brand: c.brandId, isFull: false });
+    const cylinder = await Cylinder.findOne({ store: storeId, brand: c.brandId });
+
     if (!cylinder) throw new Errors.BadRequestError('Cylinder not found');
-    cylinder.count -= c.quantity;
+    if (cylinder.emptyCount < c.quantity)
+      throw new Errors.BadRequestError('Not enough empty cylinders to exchange');
+
+    cylinder.emptyCount -= c.quantity;
     await cylinder.save();
-    outgoingCylinders.push({ name: cylinder.name, count: c.quantity });
+    totalOut += c.quantity;
+    outgoingCylinders.push({ brandName: cylinder.brandName, count: c.quantity });
   }
 
   let incomingCylinders = [];
   for (const c of cylinderIn) {
-    const cylinder = await Cylinder.findOne({ store: storeId, brand: c.brandId, isFull: false });
+    const cylinder = await Cylinder.findOne({ store: storeId, brand: c.brandId });
+
     if (!cylinder) throw new Errors.BadRequestError('Cylinder not found');
-    cylinder.count += c.quantity;
+
+    cylinder.emptyCount += c.quantity;
+    totalIn += c.quantity;
     await cylinder.save();
-    incomingCylinders.push({ name: cylinder.name, count: c.quantity });
+    incomingCylinders.push({ brandName: cylinder.brandName, count: c.quantity });
   }
 
-  // Record non-cash transaction recording
-  await transactionService.recordTransaction(
-    {
-      category: 'cylinder_swap_empty',
-      quantity: totalOut,
-      totalAmount: 0,
-      counterpartyType: 'other',
-      details: {
-        giverStoreId,
-        storeId,
-        note: 'Exchange of empty cylinders between stores',
-      },
-    },
-    transactorId,
-    storeId
-  );
+  if (totalOut !== totalIn)
+    throw new Errors.BadRequestError('Total cylinders exchanged must be equal.');
 
-  return {
-    outgoingCylinders,
-    incomingCylinders,
+  const txRecord = {
+    category: cylinderTxConstants.CylinderTxCategory.CYLINDER_SWAP_EMPTY,
+    price: 0,
+    quantity: totalOut,
+    totalAmount: 0,
+    paymentMethod: cylinderTxConstants.CylinderPaymentMethod.NON_CASH,
+    counterpartyType: cylinderTxConstants.CylinderCounterpartyKind.STORE,
+    storeId: giverStoreId,
+    ref: `${Date.now()}`,
+    details: {
+      outgoingCylinders,
+      incomingCylinders,
+    },
   };
+  await transactionService.recordTransaction(txRecord, transactorId, storeId);
+
+  return { outgoingCylinders, incomingCylinders };
 };
 
-/** ----------------- Cylinder transaction history ----------------- */
+/** ----------------- Cylinder Transaction History ----------------- */
 
 /**
  * @function allCylinderTransactions
@@ -317,16 +280,14 @@ export const allCylinderTransactions = async (
   storeId: string,
   page: number,
   limit: number
-): Promise<transactionSanitizers.SanitizedTransactions & { total: number }> => {
-  // Get all possible counterparty kinds (e.g., CUSTOMER, SUPPLIER, STORE.)
+): Promise<transactionSanitizers.SanitizedTransactions> => {
   const allCounterpartyKinds = Object.values(cylinderTxConstants.CylinderCounterpartyKind);
-
   const total = await Transaction.countDocuments({
     store: new Types.ObjectId(storeId),
     counterpartyType: { $in: allCounterpartyKinds },
   });
 
-  if (total === 0) return { transactions: [], total };
+  if (total === 0) return { transactions: [] };
 
   const skip = (page - 1) * limit;
 
@@ -337,7 +298,7 @@ export const allCylinderTransactions = async (
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate('cylinderId', 'brand name size regulatorType')
+    .populate('cylinderId', 'brandName size regulatorType')
     .lean();
 
   return {
@@ -348,19 +309,16 @@ export const allCylinderTransactions = async (
       'category',
       'details',
     ]).transactions,
-    total,
   };
 };
 
 /** ----------------- Default Exports (cylinderTxService) ----------------- */
 export default {
-  buyCylinders,
-  sellCylinder,
+  handleCylinderTransaction, // Handles both buying and selling
+  handleDefectedCylinderMarking, // Marks or unmarks cylinders as defected
 
-  markDefected,
+  exchangeFullForEmpty, // Exchange full cylinders for empty ones
+  exchangeEmptyForEmpty, // Exchange empty cylinders between stores
 
-  exchangeFullForEmpty,
-  exchangeEmptyForEmpty,
-
-  allCylinderTransactions,
+  allCylinderTransactions, // Retrieves all cylinder transactions
 };

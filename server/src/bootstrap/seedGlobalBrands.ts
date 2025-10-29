@@ -15,7 +15,7 @@ const BRANDS_DIR = path.join(__dirname, './assets/brands');
 const CYLINDERS_DIR = path.join(__dirname, './assets/cylinders');
 
 const SIZES = [5.5, 12, 12.5, 15, 20, 25, 30, 33, 35, 45];
-const REGULATOR_TYPES = ['20', '22'];
+const REGULATOR_TYPES = [20, 22];
 
 const PRICE_PER_KG = 103.4;
 const CUSTOM_PRICES: Record<number, number> = {

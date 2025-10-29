@@ -8,7 +8,7 @@ export interface ICylinder extends Document {
   cylinderImage: string;
   cylinderImagePublicId?: string;
 
-  regulatorType: string;
+  regulatorType: number;
   size: number;
   unit: string;
   price: number;
@@ -35,7 +35,7 @@ const cylinderSchema: Schema<ICylinder> = new Schema(
     cylinderImage: { type: String, default: 'cylinderImage' },
     cylinderImagePublicId: { type: String, default: '' },
 
-    regulatorType: { type: String, required: true },
+    regulatorType: { type: Number, required: true },
     size: { type: Number, required: true },
     unit: { type: String, default: 'L' },
     price: { type: Number, required: true },

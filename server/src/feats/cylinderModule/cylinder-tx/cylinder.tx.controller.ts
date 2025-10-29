@@ -1,186 +1,194 @@
 /**
- * @module cylinderTx.controller
+ * @module CylinderTxController
  *
- * @description Controllers for managing cylinder transactions:
- * purchase, sell, defect, and both exchange types.
+ * @description Controller for cylinder transaction operations.
  */
 
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-
-import * as cylinderTxService from './cylinder.tx.service.js';
+import { cylinderTxService } from './index.js';
 import { assertAuth } from '@/common/assertions.js';
 
-/** ----------------- Cylinder buy and sell controllers ----------------- */
-
 /**
- * @function buyCylinders
- * @description Handles cylinder purchase transactions
+ * ----------------- Handle Cylinder Transaction (Buy / Sell) -----------------
+ *
+ * @swagger
+ * /stores/{storeId}/cylinders/transactions:
+ *   post:
+ *     summary: Handle buying or selling cylinders
+ *     description: Handles both buying and selling operations based on mode ('buy' or 'sell').
+ *     parameters:
+ *       - in: path
+ *         name: storeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: mode
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [buy, sell]
  */
-export const buyCylinders = async (req: Request, res: Response) => {
+export const handleCylinderTransaction = async (req: Request, res: Response) => {
   assertAuth(req);
-  const { userId: transactorId } = req.user;
+  const { userId } = req.user;
   const { storeId } = req.params;
-  const { size, regulatorType } = req.query;
-  const userData = req.body;
-  const buyData = {
-    ...userData,
-    size: Number(size),
-    regulatorType: String(regulatorType).trim() || '',
-  };
 
-  const tx = await cylinderTxService.buyCylinders(buyData, transactorId, storeId);
+  const size = Number(req.query.size) || 12;
+  const regulatorType = Number(req.query.regulatorType) || 22;
 
-  res.status(StatusCodes.CREATED).json({
-    success: true,
-    message: 'Cylinders bought successfully',
-    data: tx,
-  });
-};
+  let mode = String(req.query.mode) as 'buy' | 'sell' | undefined;
+  if (mode !== 'buy' && mode !== 'sell') {
+    mode = 'sell';
+    console.warn(`[WARN] Invalid mode provided, defaulting to 'sell'`);
+  }
 
-/**
- * @function sellCylinder
- * @description Handles selling (outgoing) full cylinders to customers
- */
-export const sellCylinder = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId: transactorId } = req.user;
-  const { storeId } = req.params;
-  const { size, regulatorType } = req.query;
-  const userData = req.body;
-  const sellData = {
-    ...userData,
-    size: Number(size) || 0,
-    regulatorType: String(regulatorType).trim() || '',
-  };
-
-  const tx = await cylinderTxService.sellCylinder(sellData, transactorId, storeId);
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: 'Cylinder sold successfully',
-    data: tx,
-  });
-};
-
-/** ----------------- Cylinder marking controllers ----------------- */
-
-/**
- * @function markDefected
- * @description Handles marking of defected cylinders
- */
-export const markDefected = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId: transactorId } = req.user;
-  const { storeId } = req.params;
-  const { size, regulatorType, isDefected } = req.query;
-  const userData = req.body;
-  const defectData = {
-    ...userData,
-    size: Number(size) || 0,
-    regulatorType: String(regulatorType).trim() || '',
-    isDefected: Boolean(isDefected === 'true'),
-  };
-
-  const cylinder = await cylinderTxService.markDefected(defectData, transactorId, storeId);
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: 'Cylinder marked as defected successfully',
-    data: cylinder,
-  });
-};
-
-/** ----------------- Cylinder exchange controllers ----------------- */
-
-/**
- * @function exchangeFullForEmpty
- * @description Handles exchange of full cylinders between stores
- */
-export const exchangeFullForEmpty = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId: transactorId } = req.user;
-  const { storeId } = req.params;
-  const { emptyOut, fullIn, paymentMethod } = req.body;
-
-  const tx = await cylinderTxService.exchangeFullForEmpty(
-    storeId,
-    transactorId,
-    emptyOut,
-    fullIn,
-    paymentMethod
-  );
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: 'Full cylinders exchanged successfully',
-    data: tx,
-  });
-};
-
-/**
- * @function exchangeEmptyForEmpty
- * @description Handles exchange of empty cylinders between stores
- */
-export const exchangeEmptyForEmpty = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId: transactorId } = req.user;
-  const { storeId } = req.params;
-  const { giverStoreId, cylinderOut, cylinderIn } = req.body;
-
-  const tx = await cylinderTxService.exchangeEmptyForEmpty(
-    cylinderOut,
-    cylinderIn,
-    giverStoreId,
-    transactorId,
+  const result = await cylinderTxService.handleCylinderTransaction(
+    req.body,
+    size,
+    regulatorType,
+    mode,
+    userId,
     storeId
   );
 
   res.status(StatusCodes.OK).json({
     success: true,
-    message: 'Empty cylinders exchanged successfully',
-    data: tx,
+    message: `Cylinder transaction (${mode}) recorded successfully.`,
+    data: result,
   });
 };
 
 /**
- * @function getAllCylinderTransactions
- * @description Retrieves paginated list of all cylinder transactions for a store
+ * ----------------- Mark or Unmark Defected Cylinders -----------------
+ *
+ * @swagger
+ * /stores/{storeId}/cylinders/mark-defected:
+ *   post:
+ *     summary: Mark or unmark cylinders as defected
  */
-export const getAllCylinderTransactions = async (req: Request, res: Response) => {
+export const markDefected = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
   const { storeId } = req.params;
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
 
-  const { transactions: txs, total } = await cylinderTxService.allCylinderTransactions(
-    storeId,
-    page,
-    limit
+  const size = Number(req.query.size) || 12;
+  const regulatorType = Number(req.query.regulatorType) || 22;
+
+  let doMark = true;
+  if (String(req.query.doMark) === 'false') {
+    doMark = false;
+  } else if (String(req.query.doMark) !== 'true') {
+    console.warn(`[WARN] Invalid mode provided, defaulting to 'true'`);
+  }
+
+  const result = await cylinderTxService.handleDefectedCylinderMarking(
+    req.body,
+    size,
+    regulatorType,
+    doMark,
+    userId,
+    storeId
   );
 
-  return res.status(StatusCodes.OK).json({
+  res.status(StatusCodes.OK).json({
     success: true,
-    message: 'Cylinder transactions fetched successfully',
-    data: {
-      total,
-      page,
-      limit,
-      transactions: txs,
-    },
+    message: `Cylinder defect status updated successfully.`,
+    data: result,
   });
 };
 
 /**
- * ----------------- Default exports : cylinderTxController -----------------
+ * ----------------- Exchange Full-for-Empty Cylinders -----------------
+ *
+ * @swagger
+ * /stores/{storeId}/cylinders/exchange/full-empty:
+ *   post:
+ *     summary: Exchange full cylinders for empty ones
+ */
+export const exchangeFullForEmpty = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { storeId } = req.params;
+  const { fullOut, emptyIn, paymentMethod } = req.body;
+
+  const result = await cylinderTxService.exchangeFullForEmpty(
+    fullOut,
+    emptyIn,
+    paymentMethod,
+    userId,
+    storeId
+  );
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Full-for-empty cylinder exchange completed successfully.',
+    data: result,
+  });
+};
+
+/**
+ * ----------------- Exchange Empty-for-Empty Cylinders -----------------
+ *
+ * @swagger
+ * /stores/{storeId}/cylinders/exchange/empty-empty:
+ *   post:
+ *     summary: Exchange empty cylinders between stores
+ */
+export const exchangeEmptyForEmpty = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { storeId } = req.params;
+  const { cylinderOut, cylinderIn, giverStoreId } = req.body;
+
+  const result = await cylinderTxService.exchangeEmptyForEmpty(
+    cylinderOut,
+    cylinderIn,
+    giverStoreId,
+    storeId,
+    userId
+  );
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Empty-for-empty exchange recorded successfully.',
+    data: result,
+  });
+};
+
+/**
+ * ----------------- Get All Cylinder Transactions -----------------
+ *
+ * @swagger
+ * /stores/{storeId}/cylinders/transactions/all:
+ *   get:
+ *     summary: Retrieve all cylinder transactions with pagination
+ */
+export const allCylinderTransactions = async (req: Request, res: Response) => {
+  const { storeId } = req.params;
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Number(req.query.limit) || 20, 100);
+
+  const result = await cylinderTxService.allCylinderTransactions(storeId, page, limit);
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cylinder transactions fetched successfully.',
+    meta: { page, limit },
+    data: result.transactions,
+  });
+};
+
+/**
+ * ----------------- Default Exports (CylinderTxController) -----------------
  */
 export default {
-  buyCylinders,
-  sellCylinder,
-
+  handleCylinderTransaction,
   markDefected,
 
   exchangeFullForEmpty,
   exchangeEmptyForEmpty,
 
-  getAllCylinderTransactions,
+  allCylinderTransactions,
 };
