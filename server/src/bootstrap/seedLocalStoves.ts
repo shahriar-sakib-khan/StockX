@@ -8,14 +8,14 @@ import { Stove } from '@/feats/stoveModule/index.js';
 const defaultStoves = [
   {
     name: 'Single Burner Stove',
-    stoveImage: 'stoveImageURL',
-    burnerType: 'single',
+    stoveImage: 'singleStoveImageURL',
+    burnerCount: 1,
     price: 900,
   },
   {
     name: 'Double Burner Stove',
-    stoveImage: 'stoveImageURL',
-    burnerType: 'double',
+    stoveImage: 'doubleStoveImageURL',
+    burnerCount: 2,
     price: 1500,
   },
 ];

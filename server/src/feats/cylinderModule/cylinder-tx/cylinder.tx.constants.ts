@@ -16,6 +16,7 @@ export const CylinderTxCategory = {
   CYLINDER_SALE_CREDIT: 'cylinder_sale_credit', // credit retail sales
   CYLINDER_SWAP_RETAIL: 'cylinder_swap_retail', // cylinder swap in retail
   CYLINDER_SWAP_EMPTY: 'cylinder_swap_empty', // empty cylinder swap
+  CYLINDER_SWAP_DEFECTED: 'cylinder_swap_defected', // swap for defected cylinder
 
   // ========== Wholesale Purchases ==========
   CYLINDER_PURCHASE_WHOLESALE_CASH: 'cylinder_purchase_wholesale_cash', // buy cylinders in cash

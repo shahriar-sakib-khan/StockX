@@ -1,23 +1,49 @@
 import { useState, useMemo, useEffect } from "react";
-
 import { Modal } from "@/components";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useCylinderTransaction } from "../hooks";
 
+import {
+    useCylinderTransaction,
+    useRegulatorTransaction,
+    useStoveTransaction,
+} from "../hooks";
+
+/**
+
+* Generic Transaction Modal
+* Handles buy/sell for cylinders, regulators, and stoves.
+  */
 export default function TransactionModal({
     isOpen,
     onClose,
     isBuyModal,
-    type,
+    type, // "cylinders" | "regulators" | "stoves"
     product,
     selectedSize,
-    selectedType,
+    selectedRegulatorType,
 }) {
     const storeId = useAuthStore((s) => s.currentStore?.id);
-    const { buyMutation, sellMutation } = useCylinderTransaction(
-        storeId,
-        selectedSize,
-        selectedType,
+
+    // Hook mapping based on product type
+    const transactionHooks = {
+        cylinders: useCylinderTransaction,
+        regulators: useRegulatorTransaction,
+        stoves: useStoveTransaction,
+    };
+
+    const useTransaction = transactionHooks[type];
+
+    // Dynamic argument resolver based on product type
+    const getTransactionArgs = () => {
+        if (type === "cylinders")
+            return [storeId, selectedSize, selectedRegulatorType];
+        if (type === "stoves") return [storeId, product.burnerCount];
+        if (type === "regulators") return [storeId, product.regulatorType];
+        return [storeId];
+    };
+
+    const { buyMutation, sellMutation } = useTransaction(
+        ...getTransactionArgs(),
     );
 
     const mutation = isBuyModal ? buyMutation : sellMutation;
@@ -29,7 +55,7 @@ export default function TransactionModal({
 
     const computedTotal = useMemo(() => {
         if (!quantity) return 0;
-        return Number(product.price) * Number(quantity);
+        return Number(product.price || 0) * Number(quantity);
     }, [quantity, product.price]);
 
     // Sync total only if user hasn’t manually overridden it
@@ -54,29 +80,31 @@ export default function TransactionModal({
             paymentMethod,
         };
 
-        // Use latest state by wrapping in callback
-        mutation.mutate(
-            { ...payload },
-            {
-                onSuccess: () => {
-                    onClose();
-                    setQuantity("");
-                    setTotal("");
-                    setPaymentMethod("cash");
-                    setUserEditedTotal(false);
-                },
+        mutation.mutate(payload, {
+            onSuccess: () => {
+                onClose();
+                setQuantity("");
+                setTotal("");
+                setPaymentMethod("cash");
+                setUserEditedTotal(false);
             },
-        );
+        });
     };
+
+    // Header text based on type
+    const formattedType = type.charAt(0).toUpperCase() + type.slice(1);
+    const headerColor = isBuyModal ? "text-red-600" : "text-emerald-600";
+    const titleText = `${isBuyModal ? "Buy" : "Sell"} ${formattedType}`;
 
     const footer = (
         <>
+            {" "}
             <button
                 type="button"
                 onClick={onClose}
                 className="rounded-md bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
             >
-                Cancel
+                Cancel{" "}
             </button>
             <button
                 onClick={handleSubmit}
@@ -91,7 +119,7 @@ export default function TransactionModal({
                     ? "Processing..."
                     : isBuyModal
                       ? "Confirm Purchase"
-                      : "Confirm Sale"}
+                      : "Confirm Sale"}{" "}
             </button>
         </>
     );
@@ -101,43 +129,37 @@ export default function TransactionModal({
             isOpen={isOpen}
             onClose={onClose}
             title={
-                <span
-                    className={`text-lg font-semibold ${
-                        isBuyModal ? "text-red-600" : "text-emerald-600"
-                    }`}
-                >
-                    {isBuyModal ? "Buy Cylinders" : "Sell Cylinders"}
+                <span className={`text-lg font-semibold ${headerColor}`}>
+                    {titleText}{" "}
                 </span>
             }
             footer={footer}
             size="md"
         >
+            {" "}
             <form className="space-y-5" onSubmit={handleSubmit}>
-                {/* ---------- Brand Info + Cylinder Details ---------- */}
+                {/* ---------- Product Info ---------- */}{" "}
                 <div className="mt-2 flex flex-col rounded-md border border-gray-200 bg-gray-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                    {" "}
                     <div className="flex items-center gap-3">
                         <img
                             src={
                                 product.cylinderImage ||
+                                product.regulatorImage ||
+                                product.stoveImage ||
+                                product.image ||
                                 `/src/assets/images/${type.replace(/s$/, "")}Model.png`
                             }
                             alt={product.brandName || product.name || "Brand"}
                             className="h-8 w-8 object-contain"
-                        />
-                        {product.name === "Double Burner Stove" && (
-                            <img
-                                src={`/src/assets/images/${type.replace(/s$/, "")}Model.png`}
-                                alt={product.brandName || product.name}
-                                className="h-6 w-6"
-                            />
-                        )}
+                        />{" "}
                         <span className="text-sm font-semibold text-gray-700">
                             {product.brandName ||
                                 product.name ||
-                                "Unknown Brand"}
-                        </span>
+                                "Unknown Brand"}{" "}
+                        </span>{" "}
                     </div>
-
+                    {/* Cylinder extra details */}
                     {type === "cylinders" && (
                         <div className="mt-2 flex flex-wrap gap-3 text-sm text-gray-600 sm:mt-0">
                             <span className="rounded-md border border-gray-200 bg-white px-2 py-1">
@@ -150,13 +172,32 @@ export default function TransactionModal({
                             <span className="rounded-md border border-gray-200 bg-white px-2 py-1">
                                 Regulator:{" "}
                                 <span className="font-medium text-gray-800">
-                                    {selectedType || "N/A"}
+                                    {selectedRegulatorType + "mm" || "N/A"}
+                                </span>
+                            </span>
+                        </div>
+                    )}
+                    {type === "stoves" && (
+                        <div className="mt-2 flex flex-wrap gap-3 text-sm text-gray-600 sm:mt-0">
+                            <span className="rounded-md border border-gray-200 bg-white px-2 py-1">
+                                Burner Count:{" "}
+                                <span className="font-medium text-gray-800">
+                                    {product.burnerCount || "N/A"}
+                                </span>
+                            </span>
+                        </div>
+                    )}
+                    {type === "regulators" && (
+                        <div className="mt-2 flex flex-wrap gap-3 text-sm text-gray-600 sm:mt-0">
+                            <span className="rounded-md border border-gray-200 bg-white px-2 py-1">
+                                Type:{" "}
+                                <span className="font-medium text-gray-800">
+                                    {product.regulatorType || "N/A"}
                                 </span>
                             </span>
                         </div>
                     )}
                 </div>
-
                 {/* ---------- Price & Quantity ---------- */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
@@ -187,7 +228,6 @@ export default function TransactionModal({
                         />
                     </div>
                 </div>
-
                 {/* ---------- Computed + Editable Total ---------- */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <p className="text-sm text-gray-500 italic">
@@ -217,7 +257,6 @@ export default function TransactionModal({
                         />
                     </div>
                 </div>
-
                 {/* ---------- Payment Method (Dropdown) ---------- */}
                 <div>
                     <label className="mb-1 block text-sm font-medium text-gray-600">

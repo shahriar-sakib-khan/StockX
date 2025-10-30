@@ -68,7 +68,7 @@ export const handleCylinderTransaction = async (req: Request, res: Response) => 
  *   post:
  *     summary: Mark or unmark cylinders as defected
  */
-export const markDefected = async (req: Request, res: Response) => {
+export const handleDefectedMarking = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
   const { storeId } = req.params;
@@ -185,7 +185,7 @@ export const allCylinderTransactions = async (req: Request, res: Response) => {
  */
 export default {
   handleCylinderTransaction,
-  markDefected,
+  handleDefectedMarking,
 
   exchangeFullForEmpty,
   exchangeEmptyForEmpty,

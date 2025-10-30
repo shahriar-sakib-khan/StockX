@@ -16,7 +16,7 @@ export const regulatorSanitizer = (regulator: IRegulator | HydratedDocument<IReg
   regulatorType: regulator.regulatorType,
   price: regulator.price,
   stockCount: regulator.stockCount,
-  problemCount: regulator.problemCount,
+  defectedCount: regulator.defectedCount,
 
   createdBy: resolveRef(regulator.createdBy, userSanitizer),
   createdAt: regulator.createdAt,

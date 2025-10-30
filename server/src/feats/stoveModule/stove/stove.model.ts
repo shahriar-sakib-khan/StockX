@@ -12,16 +12,17 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
  * ----------------- Stove Interface -----------------
  */
 export interface IStove extends Document {
-  store: Types.ObjectId; // Reference to parent store
+  store: Types.ObjectId;
+  // Reference to parent stor
 
-  name: string; // Stove name or brand
-  stoveImage: string; // Image representing the stove
-  burnerType: string; // Type/category of stove burner
-  price: number; // Unit price
-  stockCount: number; // Current available stock
-  problemCount: number; // Count of defective or returned stoves
+  name: string;
+  stoveImage: string;
+  burnerCount: number;
+  price: number;
+  stockCount: number;
+  defectedCount: number;
 
-  createdBy: Types.ObjectId; // Reference to user who created the stove
+  createdBy: Types.ObjectId;
 
   createdAt: Date;
   updatedAt: Date;
@@ -35,14 +36,18 @@ const stoveSchema: Schema<IStove> = new Schema(
     store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
     name: { type: String, required: [true, 'Stove name is required'], trim: true },
     stoveImage: { type: String, default: 'stoveImage' },
-    burnerType: { type: String, required: [true, 'Burner type is required'], trim: true },
+    burnerCount: {
+      type: Number,
+      required: [true, 'Burner type is required'],
+      min: [1, 'Burner count cannot be less than 1'],
+    },
     price: {
       type: Number,
       required: [true, 'Price is required'],
       min: [0, 'Price cannot be negative'],
     },
     stockCount: { type: Number, default: 0, min: [0, 'Stock count cannot be negative'] },
-    problemCount: { type: Number, default: 0, min: [0, 'Problem count cannot be negative'] },
+    defectedCount: { type: Number, default: 0, min: [0, 'Defected count cannot be negative'] },
 
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },

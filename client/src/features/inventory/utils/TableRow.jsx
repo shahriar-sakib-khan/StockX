@@ -5,11 +5,10 @@ import { FaCartPlus as BuyIcon } from "react-icons/fa";
 import { FaCashRegister as SellIcon } from "react-icons/fa";
 import { FaPencilAlt as EditIcon } from "react-icons/fa";
 import { FaWrench as DefectedIcon } from "react-icons/fa";
-// import { FaWrench as ProblemIcon } from "react-icons/fa";
 
 import {
     TransactionModal,
-    DefectedCylinderModal,
+    DefectedTransactionModal,
     EditPriceModal,
 } from "./index";
 
@@ -159,9 +158,10 @@ const TableRow = ({
             )}
 
             {isDefectedModalOpen && (
-                <DefectedCylinderModal
+                <DefectedTransactionModal
                     isOpen={isDefectedModalOpen}
                     onClose={() => setIsDefectedModalOpen(false)}
+                    type={type}
                     product={product}
                     selectedSize={selectedSize}
                     selectedRegulatorType={selectedRegulatorType}

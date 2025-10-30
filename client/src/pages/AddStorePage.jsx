@@ -32,11 +32,11 @@ export default function AddStorePage() {
             const store = res?.data || res;
 
             const newStore = {
-                id: store.store.id,
-                name: store.store.name,
-                image: store.store.image ?? "store.storeImageUrl", // fallback if missing
-                location: store.store.location,
-                phone: store.store.phone,
+                id: store.id,
+                name: store.name,
+                image: store.image ?? "store.storeImageUrl", // fallback if missing
+                location: store.location,
+                phone: store.phone,
             };
 
             // Update Zustand store

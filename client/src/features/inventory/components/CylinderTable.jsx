@@ -10,7 +10,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
     // ----------------- States -----------------
     const [search, setSearch] = useState("");
     const [selectedSize, setSelectedSize] = useState("12");
-    const [selectedType, setSelectedType] = useState("22");
+    const [selectedRegulatorType, setSelectedRegulatorType] = useState("22");
     const [sortBy, setSortBy] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
 
@@ -46,7 +46,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         data: cylinders = [],
         isLoading,
         error,
-    } = useCylinderInventory(storeId, selectedSize, selectedType);
+    } = useCylinderInventory(storeId, selectedSize, selectedRegulatorType);
 
     // ----------------- Filter + Sort -----------------
     let displayedCylinders =
@@ -121,9 +121,9 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
                             sizes={sizes}
                             types={types}
                             selectedSize={selectedSize}
-                            selectedType={selectedType}
+                            selectedRegulatorType={selectedRegulatorType}
                             onSizeChange={setSelectedSize}
-                            onTypeChange={setSelectedType}
+                            onTypeChange={setSelectedRegulatorType}
                         />
                     )}
                 </div>
@@ -145,7 +145,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
                         product={item}
                         type={type}
                         selectedSize={selectedSize}
-                        selectedType={selectedType}
+                        selectedRegulatorType={selectedRegulatorType}
                         onEdit={() => {}}
                         onDelete={() => {}}
                     />

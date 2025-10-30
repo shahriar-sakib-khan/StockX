@@ -33,7 +33,7 @@ router.post('/cylinders/txs', cylinderTxController.handleCylinderTransaction);
  * @query   doMark - boolean (default: true)
  * @access  Authenticated
  */
-router.patch('/cylinders/mark', cylinderTxController.markDefected);
+router.patch('/cylinders/mark', cylinderTxController.handleDefectedMarking);
 
 /**
  * ----------------- Cylinder Exchange Routes -----------------

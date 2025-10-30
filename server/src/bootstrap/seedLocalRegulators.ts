@@ -9,13 +9,13 @@ const defaultRegulators = [
   {
     name: '20mm Regulator',
     regulatorImage: 'regulatorImageURL',
-    regulatorType: '20mm',
+    regulatorType: 20,
     price: 500,
   },
   {
     name: '22mm Regulator',
     regulatorImage: 'regulatorImageURL',
-    regulatorType: '22mm',
+    regulatorType: 22,
     price: 600,
   },
 ];

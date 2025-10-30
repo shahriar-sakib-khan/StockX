@@ -12,16 +12,17 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
  * ----------------- Regulator Interface -----------------
  */
 export interface IRegulator extends Document {
-  store: Types.ObjectId; // Reference to parent store
+  store: Types.ObjectId;
 
-  name: string; // Regulator name or brand
-  regulatorImage: string; // Image representing the regulator
-  regulatorType: string; // Type/category of regulator
-  price: number; // Unit price
-  stockCount: number; // Current available stock
-  problemCount: number; // Count of cylinders with problems
+  name: string;
+  regulatorImage: string;
+  regulatorType: number;
+  price: number;
+  stockCount: number;
+  defectedCount: number;
 
-  createdBy: Types.ObjectId; // Reference to user who created the regulator
+  createdBy: Types.ObjectId;
+  updatedBy?: Types.ObjectId;
 
   createdAt: Date;
   updatedAt: Date;
@@ -35,16 +36,17 @@ const regulatorSchema: Schema<IRegulator> = new Schema(
     store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
     name: { type: String, required: [true, 'Regulator name is required'], trim: true },
     regulatorImage: { type: String, default: 'regulatorImage' },
-    regulatorType: { type: String, required: [true, 'Regulator type is required'], trim: true },
+    regulatorType: { type: Number, required: [true, 'Regulator type is required'], trim: true },
     price: {
       type: Number,
       required: [true, 'Price is required'],
       min: [0, 'Price cannot be negative'],
     },
     stockCount: { type: Number, default: 0, min: [0, 'Stock count cannot be negative'] },
-    problemCount: { type: Number, default: 0, min: [0, 'Problem count cannot be negative'] },
+    defectedCount: { type: Number, default: 0, min: [0, 'Defected count cannot be negative'] },
 
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
