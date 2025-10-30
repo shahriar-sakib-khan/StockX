@@ -50,7 +50,7 @@ export const recordTransaction = async (
   const debitAccount = await Account.findOne({ code: config.debitAccountCode, store: storeId });
   const creditAccount = await Account.findOne({ code: config.creditAccountCode, store: storeId });
   if (!debitAccount || !creditAccount)
-    throw new Errors.NotFoundError('Debit or Credit account missing');
+    throw new Errors.NotFoundError(`Debit or Credit account missing for '${config}'`);
 
   // Build transaction description
   const description = config.descriptionTemplate?.replace(

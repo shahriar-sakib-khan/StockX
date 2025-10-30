@@ -4,7 +4,7 @@ export default function CylinderFilters({
     sizes,
     types,
     selectedSize,
-    selectedType,
+    selectedRegulatorType,
     onSizeChange,
     onTypeChange,
 }) {
@@ -46,7 +46,7 @@ export default function CylinderFilters({
                         onClick={() => onTypeChange(t)}
                         className={clsx(
                             "rounded border px-3 py-1 text-sm font-medium transition-colors duration-150",
-                            selectedType === t
+                            selectedRegulatorType === t
                                 ? "border-emerald-500 bg-emerald-500 text-white"
                                 : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100",
                         )}

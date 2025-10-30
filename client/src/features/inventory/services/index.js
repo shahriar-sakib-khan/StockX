@@ -1,4 +1,11 @@
-export { buyCylinders, sellCylinders } from "./transactionServices";
+export {
+    buyCylinders,
+    sellCylinders,
+    buyRegulators,
+    sellRegulators,
+    buyStoves,
+    sellStoves,
+} from "./transactionServices";
 
 export {
     getCylinderInventory,
@@ -13,6 +20,8 @@ export {
     saveSelectedBrands,
 } from "./brandServices";
 
-export { markDefected } from "./defectedCylinderServices";
+// export { markDefected } from "./defectedCylinderServices";
 
 export { updateCylinderPrice } from "./cylinderServices";
+
+export { markDefected } from "./defectedTransactionService";

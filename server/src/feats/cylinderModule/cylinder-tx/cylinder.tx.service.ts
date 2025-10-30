@@ -96,7 +96,7 @@ export const handleCylinderTransaction = async (
  * @description Marks or unmarks cylinders as defected based on `doMark` flag.
  * If `doMark` is true → mark as defected (increment defected count).
  * If `doMark` is false → unmark defected (decrement defected count).
- * @param {Object} defectData - Defected cylinder data (id, cylinderCount, regulatorType, size).
+ * @param {Object} defectData - Defected cylinder data (id, count, regulatorType, size).
  * @param {string} size - Cylinder size.
  * @param {number} regulatorType - Regulator type.
  * @param {boolean} doMark - True to mark as defected, false to unmark.
@@ -111,7 +111,7 @@ export const handleDefectedCylinderMarking = async (
   transactorId: string,
   storeId: string
 ) => {
-  const { id, cylinderCount } = defectData;
+  const { id, count } = defectData;
 
   const cylinder = await Cylinder.findById(id);
 
@@ -126,19 +126,19 @@ export const handleDefectedCylinderMarking = async (
   cylinder.updatedBy = new Types.ObjectId(transactorId);
 
   if (doMark) {
-    if (cylinder.defectedCount + cylinderCount > cylinder.fullCount + cylinder.emptyCount)
+    if (cylinder.defectedCount + count > cylinder.fullCount + cylinder.emptyCount)
       throw new Errors.BadRequestError('Not enough cylinders to mark as defected');
-    cylinder.defectedCount += cylinderCount;
+    cylinder.defectedCount += count;
   } else {
-    if (cylinder.defectedCount < cylinderCount)
+    if (cylinder.defectedCount < count)
       throw new Errors.BadRequestError('Not enough defected cylinders to unmark');
-    cylinder.defectedCount -= cylinderCount;
+    cylinder.defectedCount -= count;
   }
   await cylinder.save();
 
   const txRecord = {
-    category: cylinderTxConstants.CylinderTxCategory.CYLINDER_SWAP_EMPTY,
-    quantity: cylinderCount,
+    category: cylinderTxConstants.CylinderTxCategory.CYLINDER_SWAP_DEFECTED,
+    quantity: count,
     totalAmount: 0,
     paymentMethod: cylinderTxConstants.CylinderPaymentMethod.NON_CASH,
     counterpartyType: cylinderTxConstants.CylinderCounterpartyKind.INTERNAL,
@@ -148,7 +148,7 @@ export const handleDefectedCylinderMarking = async (
       brand: cylinder.brand,
       regulatorType,
       size,
-      cylinderCount,
+      count,
     },
   };
   const tx = await transactionService.recordTransaction(txRecord, transactorId, storeId);

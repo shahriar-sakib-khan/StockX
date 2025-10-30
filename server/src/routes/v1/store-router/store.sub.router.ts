@@ -5,7 +5,7 @@ import localBrandRouter from '@/feats/brandModule/local.brand.routes.js';
 import { cylinderRouter, cylinderTxRouter } from '@/feats/cylinderModule/index.js';
 import { vehicleRouter, vehicleTxRouter } from '@/feats/vehicleModule/index.js';
 import { transactionRouter } from '@/feats/transactionModule/index.js';
-import { regulatorRouter } from '@/feats/regulatorModule/index.js';
+import { regulatorRouter, regulatorTxRouter } from '@/feats/regulatorModule/index.js';
 import { stoveRouter } from '@/feats/stoveModule/index.js';
 
 /**
@@ -28,7 +28,7 @@ router.use('/', cylinderTxRouter);
 
 /** ----------------- Regulator routes ----------------- */
 router.use('/', regulatorRouter);
-// router.use('/', regulatorTxRouter);
+router.use('/', regulatorTxRouter);
 
 /** ----------------- Stove routes ----------------- */
 router.use('/', stoveRouter);
