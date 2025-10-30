@@ -1,16 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { markDefected } from "../services";
+import { updateCylinderPrice } from "../services";
 
 /**
- * Hook for marking/unmarking problem cylinders
+ * Hook for editing cylinder price
  */
-export const useDefectedCylinderTransaction = (
-    storeId,
-    size,
-    regulatorType,
-    doMark,
-) => {
+export const useEditCylinderPrice = (storeId, size, regulatorType) => {
     const queryClient = useQueryClient();
 
     const invalidateInventory = () =>
@@ -18,19 +13,15 @@ export const useDefectedCylinderTransaction = (
             queryKey: ["cylinderInventory", storeId, size, regulatorType],
         });
 
-    const markDefectedMutation = useMutation({
+    const editPriceMutation = useMutation({
         mutationFn: (payload) =>
-            markDefected({ storeId, size, regulatorType, doMark, payload }),
+            updateCylinderPrice({ storeId, size, regulatorType, payload }),
 
         onSuccess: (data) => {
             if (data?.success) {
-                toast.success(
-                    data.message || "Defected cylinders updated successfully!",
-                );
+                toast.success(data.message || "Price updated successfully!");
             } else {
-                toast.error(
-                    data?.message || "Failed to update defected cylinders.",
-                );
+                toast.error(data?.message || "Failed to update price.");
             }
             invalidateInventory();
         },
@@ -39,10 +30,10 @@ export const useDefectedCylinderTransaction = (
             const message =
                 err?.response?.data?.message ||
                 err?.message ||
-                "Error while marking defected cylinders.";
+                "Error while updating price.";
             toast.error(message);
         },
     });
 
-    return { markDefectedMutation };
+    return { editPriceMutation };
 };

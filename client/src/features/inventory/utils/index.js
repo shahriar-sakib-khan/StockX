@@ -5,3 +5,4 @@ export { default as TableHeader } from "./TableHeader";
 export { default as TableRow } from "./TableRow";
 export { default as TransactionModal } from "./TransactionModal";
 export { default as DefectedCylinderModal } from "./DefectedCylinderModal";
+export { default as EditPriceModal } from "./EditPriceModal";

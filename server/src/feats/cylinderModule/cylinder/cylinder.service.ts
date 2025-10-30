@@ -122,10 +122,48 @@ export const getAllCylinders = async (
 };
 
 /**
+ * @function updateCylinderPrice
+ * @description Bulk update price of cylinders in a store filtered by size and regulator type.
+ *
+ * @param {string} storeId - The ID of the store.
+ * @param {number} size - Cylinder size to filter by.
+ * @param {number} regulatorType - Regulator type to filter by.
+ * @param {number} price - New price to set.
+ * @returns {Promise<{ modifiedCount: number }>} Number of updated cylinders.
+ */
+export const updateCylinderPrice = async (
+  userData: any,
+  size: number,
+  regulatorType: number,
+  storeId: string,
+  userId: string
+): Promise<cylinderSanitizers.SanitizedCylinder> => {
+  const { id, price } = userData;
+
+  const cylinder = await Cylinder.findById(id).select('id sku size regulatorType store price');
+
+  if (!cylinder) throw new Errors.NotFoundError('Cylinder not found.');
+  if (
+    cylinder.size !== size ||
+    cylinder.regulatorType !== regulatorType ||
+    cylinder.store.toString() !== storeId
+  )
+    throw new Errors.BadRequestError('Invalid cylinder.');
+
+  cylinder.price = price;
+  cylinder.updatedBy = new Types.ObjectId(userId);
+
+  await cylinder.save();
+
+  return cylinderSanitizers.cylinderSanitizer(cylinder);
+};
+
+/**
  * ----------------- Default Exports (cylinderService) -----------------
  */
 export default {
   getCylinderInventory, // Get active cylinders in a store
 
   getAllCylinders, // Get cylinders for a store
+  updateCylinderPrice, // Update price of cylinders
 };

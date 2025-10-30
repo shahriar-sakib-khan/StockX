@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { useAuthStore } from "@/stores/useAuthStore";
 
 import InventoryTable from "./InventoryTable";
@@ -21,10 +22,22 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         "Price",
         "Full",
         "Empty",
-        "Problem",
+        "Defected",
         "Action",
     ];
-    const sizes = ["5", "12", "20"];
+    // const sizes = ["5", "12", "20"];
+    const sizes = [
+        "5.5",
+        "12",
+        "12.5",
+        "15",
+        "20",
+        "25",
+        "30",
+        "33",
+        "35",
+        "45",
+    ];
     const types = ["20", "22"];
     const storeId = useAuthStore((s) => s.currentStore?.id);
 
@@ -50,7 +63,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         );
     }
 
-    // Sort by name, full count, empty count, or problem count
+    // Sort by name, full count, empty count, or defected cylinder count
     displayedCylinders.sort((a, b) => {
         let valueA, valueB;
         switch (sortBy) {
@@ -62,9 +75,9 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
                 valueA = a.emptyCount || 0;
                 valueB = b.emptyCount || 0;
                 break;
-            case "problem":
-                valueA = a.problemCount || 0;
-                valueB = b.problemCount || 0;
+            case "defected":
+                valueA = a.defectedCount || 0;
+                valueB = b.defectedCount || 0;
                 break;
             case "name":
             default:

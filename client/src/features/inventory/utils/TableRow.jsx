@@ -4,12 +4,25 @@ import clsx from "clsx";
 import { FaCartPlus as BuyIcon } from "react-icons/fa";
 import { FaCashRegister as SellIcon } from "react-icons/fa";
 import { FaPencilAlt as EditIcon } from "react-icons/fa";
+import { FaWrench as DefectedIcon } from "react-icons/fa";
+// import { FaWrench as ProblemIcon } from "react-icons/fa";
 
-import { TransactionModal, DefectedCylinderModal } from "./index";
+import {
+    TransactionModal,
+    DefectedCylinderModal,
+    EditPriceModal,
+} from "./index";
 
-const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
+const TableRow = ({
+    index,
+    product,
+    type,
+    selectedSize,
+    selectedRegulatorType,
+}) => {
     const [modalType, setModalType] = useState(null);
-    const [isProblemModalOpen, setIsProblemModalOpen] = useState(false);
+    const [isDefectedModalOpen, setIsDefectedModalOpen] = useState(false);
+    const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
 
     const fullCount = product?.fullCount ?? 0;
     const emptyCount = product?.emptyCount ?? 0;
@@ -29,6 +42,7 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
     return (
         <>
             <tr className="border-b border-gray-200 bg-white text-gray-600 hover:bg-gray-50">
+                {/* ---------- Index ---------- */}
                 <td data-cell="#" className="p-4">
                     {index + 1}
                 </td>
@@ -58,7 +72,7 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                 <td data-cell="Status" className="min-w-35 p-4">
                     <span
                         className={clsx(
-                            "rounded-full px-3 py-1 text-xs",
+                            "rounded-full px-3 py-1 text-xs font-medium",
                             statusColors[status],
                         )}
                     >
@@ -67,8 +81,14 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                 </td>
 
                 {/* ---------- Price ---------- */}
-                <td data-cell="Price" className="p-4">
-                    {product.price}
+                <td data-cell="Price" className="flex items-center gap-2 p-4">
+                    <span>{product.price}</span>
+                    <button
+                        onClick={() => setIsPriceModalOpen(true)}
+                        className="rounded-sm p-1 hover:bg-blue-100"
+                    >
+                        <EditIcon className="size-4 text-blue-500" />
+                    </button>
                 </td>
 
                 {/* ---------- Counts ---------- */}
@@ -95,10 +115,10 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                 >
                     <span>{defectedCount}</span>
                     <button
-                        onClick={() => setIsProblemModalOpen(true)}
+                        onClick={() => setIsDefectedModalOpen(true)}
                         className="rounded-sm p-1 hover:bg-yellow-100"
                     >
-                        <EditIcon className="size-4 text-yellow-500" />
+                        <DefectedIcon className="size-4 text-yellow-500" />
                     </button>
                 </td>
 
@@ -134,17 +154,27 @@ const TableRow = ({ index, product, type, selectedSize, selectedType }) => {
                     onClose={() => setModalType(null)}
                     product={product}
                     selectedSize={selectedSize}
-                    selectedType={selectedType}
+                    selectedRegulatorType={selectedRegulatorType}
                 />
             )}
 
-            {isProblemModalOpen && (
+            {isDefectedModalOpen && (
                 <DefectedCylinderModal
-                    isOpen={isProblemModalOpen}
-                    onClose={() => setIsProblemModalOpen(false)}
+                    isOpen={isDefectedModalOpen}
+                    onClose={() => setIsDefectedModalOpen(false)}
                     product={product}
                     selectedSize={selectedSize}
-                    selectedType={selectedType}
+                    selectedRegulatorType={selectedRegulatorType}
+                />
+            )}
+
+            {isPriceModalOpen && (
+                <EditPriceModal
+                    isOpen={isPriceModalOpen}
+                    onClose={() => setIsPriceModalOpen(false)}
+                    product={product}
+                    selectedSize={selectedSize}
+                    selectedRegulatorType={selectedRegulatorType}
                 />
             )}
         </>

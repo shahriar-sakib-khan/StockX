@@ -7,3 +7,5 @@ export {
 export { useCylinderTransaction } from "./useCylinderTransaction";
 
 export { useDefectedCylinderTransaction } from "./useDefectedCylinderTransaction";
+
+export { useEditCylinderPrice } from "./useCylinder";

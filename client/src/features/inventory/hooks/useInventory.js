@@ -3,7 +3,7 @@ import {
     getCylinderInventory,
     getRegulatorInventory,
     getStoveInventory,
-} from "../services/inventoryServices";
+} from "../services";
 
 /**
  * Custom hook to fetch cylinder inventory for a store

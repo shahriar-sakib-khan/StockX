@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { cylinderService } from './index.js';
+import { assertAuth } from '@/common/assertions.js';
 
 /**
  * ----------------- Cylinder Inventory Controllers -----------------
@@ -68,9 +69,37 @@ export const getAllCylinders = async (req: Request, res: Response) => {
 };
 
 /**
+ * ----------------- Cylinder Inventory Controllers -----------------
+ */
+export const updateCylinderPrice = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { userId } = req.user;
+  const { storeId } = req.params;
+
+  // Extract and sanitize inputs
+  const size = Number(req.query.size);
+  const regulatorType = Number(req.query.regulatorType);
+
+  const cylinder = await cylinderService.updateCylinderPrice(
+    req.body,
+    size,
+    regulatorType,
+    storeId,
+    userId
+  );
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: `Cylinder price updated successfully.`,
+    data: { cylinder },
+  });
+};
+
+/**
  * ----------------- Default exports : cylinderController -----------------
  */
 export default {
   getCylinderInventory,
   getAllCylinders,
+  updateCylinderPrice,
 };

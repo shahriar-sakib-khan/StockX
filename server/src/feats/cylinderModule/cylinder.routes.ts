@@ -37,4 +37,13 @@ router.get('/cylinder/inventory', cylinderController.getCylinderInventory);
  */
 router.get('/cylinders', cylinderController.getAllCylinders);
 
+/**
+ * @route   PATCH /stores/:storeId/cylinders/price ?size=12&regulatorType=22
+ * @desc    Update price of a cylinder
+ * @query   size - number (required)
+ * @query   regulatorType - number (required)
+ * @access  Authenticated
+ */
+router.patch('/cylinders/price', cylinderController.updateCylinderPrice);
+
 export default router;

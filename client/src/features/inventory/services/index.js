@@ -14,3 +14,5 @@ export {
 } from "./brandServices";
 
 export { markDefected } from "./defectedCylinderServices";
+
+export { updateCylinderPrice } from "./cylinderServices";

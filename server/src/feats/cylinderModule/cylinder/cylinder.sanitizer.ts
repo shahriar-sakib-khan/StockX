@@ -20,7 +20,6 @@ export const cylinderSanitizer = (cylinder: ICylinder | HydratedDocument<ICylind
 
   sku: cylinder.sku,
   brandName: cylinder.brandName,
-  name: `${cylinder.brandName} ${cylinder.size}${cylinder.unit} ${cylinder.regulatorType}`,
 
   cylinderImage: cylinder.cylinderImage ?? null,
   regulatorType: cylinder.regulatorType,

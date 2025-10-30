@@ -5,7 +5,7 @@ export default function SortBy({ sortBy, setSortBy, sortOrder, setSortOrder }) {
         { value: "name", label: "Name" },
         { value: "full", label: "Full Cylinder Count" },
         { value: "empty", label: "Empty Cylinder Count" },
-        { value: "problem", label: "Problem Count" },
+        { value: "defected", label: "Defected Cylinder Count" },
     ];
 
     const toggleSortOrder = () => {

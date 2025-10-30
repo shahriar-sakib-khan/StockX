@@ -11,7 +11,7 @@ export default function CylinderTable({ type }) {
         "Status",
         "Price",
         "In Stock",
-        "Problem",
+        "Defected",
         "Action",
     ];
 
