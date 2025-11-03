@@ -48,7 +48,7 @@ export default function AddStorePage() {
         } catch (err) {
             console.error("Failed to create store:", err);
             setErrorMsg(
-                err?.response?.data?.message || "Failed to create store",
+                err?.errors[0]?.message || err?.message || "Failed err to create store",
             );
         } finally {
             setIsLoading(false);

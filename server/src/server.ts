@@ -15,7 +15,6 @@ import multer from 'multer';
 import apiRouter from './routes/router.js';
 import { connectDB } from '@/config/index.js';
 import { errorHandler } from '@/error/index.js';
-// import runBootstrap from './bootstrap/index.js';
 
 // ------------------------------
 // Multer Configuration (for temporary file handling)
@@ -97,6 +96,7 @@ process.on('SIGTERM', async () => {
 // ------------------------------
 const PORT = process.env.PORT || 5000;
 
+// import runBootstrap from './bootstrap/index.js';
 const startServer = async (): Promise<void> => {
   try {
     await connectDB();

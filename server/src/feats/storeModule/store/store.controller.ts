@@ -37,7 +37,11 @@ export const createStore = async (req: Request, res: Response) => {
   await seedLocalRegulators(userId, store.id);
   await seedLocalStoves(userId, store.id);
 
-  res.status(StatusCodes.CREATED).json({ message: 'Store created successfully', store });
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: 'Store created successfully',
+    data: store,
+  });
 };
 
 export const singleStore = async (req: Request, res: Response) => {
@@ -45,7 +49,10 @@ export const singleStore = async (req: Request, res: Response) => {
 
   const store = await storeService.getSingleStore(storeId);
 
-  res.status(StatusCodes.OK).json({ store });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    data: store,
+  });
 };
 
 export const updateStore = async (req: Request, res: Response) => {
@@ -53,7 +60,11 @@ export const updateStore = async (req: Request, res: Response) => {
 
   const store = await storeService.updateStore(req.body, storeId);
 
-  res.status(StatusCodes.OK).json({ message: 'Store updated successfully', store });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Store updated successfully',
+    data: store,
+  });
 };
 
 export const deleteStore = async (req: Request, res: Response) => {
@@ -61,7 +72,11 @@ export const deleteStore = async (req: Request, res: Response) => {
 
   const store = await storeService.deleteStore(storeId);
 
-  res.status(StatusCodes.OK).json({ message: 'Store deleted successfully', store });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Store deleted successfully',
+    data: store,
+  });
 };
 
 export const allStores = async (req: Request, res: Response) => {
@@ -73,7 +88,11 @@ export const allStores = async (req: Request, res: Response) => {
 
   const { stores, total } = await storeService.getAllStores(userId, page, limit);
 
-  res.status(StatusCodes.OK).json({ total, page, limit, stores });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    meta: { page, limit, total },
+    data: { stores },
+  });
 };
 
 /**
@@ -87,7 +106,10 @@ export const myStoreProfile = async (req: Request, res: Response) => {
 
   const storeProfile = await storeService.getMyStoreProfile(userId, storeId);
 
-  res.status(StatusCodes.OK).json({ storeProfile });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    storeProfile,
+  });
 };
 
 /**

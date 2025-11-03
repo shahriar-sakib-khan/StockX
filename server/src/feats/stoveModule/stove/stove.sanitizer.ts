@@ -13,10 +13,10 @@ export const stoveSanitizer = (stove: IStove | HydratedDocument<IStove>) => ({
 
   name: stove.name,
   stoveImage: stove.stoveImage ?? null,
-  burnerType: stove.burnerType,
+  burnerCount: stove.burnerCount,
   price: stove.price,
   stockCount: stove.stockCount,
-  problemCount: stove.problemCount,
+  defectedCount: stove.defectedCount,
 
   createdBy: resolveRef(stove.createdBy, userSanitizer),
   createdAt: stove.createdAt,

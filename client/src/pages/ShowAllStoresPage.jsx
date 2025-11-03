@@ -18,7 +18,7 @@ export default function ShowAllStores() {
         const fetchStores = async () => {
             try {
                 const res = await getAllStores();
-                setStores(res.stores || []);
+                setStores(res.data.stores || []);
             } catch (err) {
                 console.error("Failed to fetch stores:", err);
             }
