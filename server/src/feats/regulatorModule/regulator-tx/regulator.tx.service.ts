@@ -90,7 +90,7 @@ export const handleDefectedRegulatorMarking = async (
   transactorId: string,
   storeId: string
 ) => {
-  const { id, quantity } = defectData;
+  const { id, count: quantity } = defectData;
 
   const regulator = await Regulator.findById(id);
   if (!regulator) throw new Errors.NotFoundError('Regulator not found');
@@ -98,15 +98,13 @@ export const handleDefectedRegulatorMarking = async (
     throw new Errors.BadRequestError('Invalid regulator type');
 
   if (doMark) {
-    if (regulator.stockCount < quantity)
+    if (regulator.stockCount - regulator.defectedCount < quantity)
       throw new Errors.BadRequestError('Not enough regulators to mark as defected');
-    regulator.stockCount -= quantity;
     regulator.defectedCount += quantity;
   } else {
     if (regulator.defectedCount < quantity)
       throw new Errors.BadRequestError('Not enough defected regulators to unmark');
     regulator.defectedCount -= quantity;
-    regulator.stockCount += quantity;
   }
 
   regulator.updatedAt = new Date();

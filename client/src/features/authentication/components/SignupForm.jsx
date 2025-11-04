@@ -115,7 +115,7 @@ export default function SignupForm() {
             />
             {isError && (
                 <span className="text-md text-center text-red-400">
-                    {error?.message || "Account creation failed"}
+                    {error?.errors[0]?.message || "Account creation failed"}
                 </span>
             )}
             <Button

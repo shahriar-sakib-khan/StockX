@@ -6,7 +6,7 @@ import { cylinderRouter, cylinderTxRouter } from '@/feats/cylinderModule/index.j
 import { vehicleRouter, vehicleTxRouter } from '@/feats/vehicleModule/index.js';
 import { transactionRouter } from '@/feats/transactionModule/index.js';
 import { regulatorRouter, regulatorTxRouter } from '@/feats/regulatorModule/index.js';
-import { stoveRouter } from '@/feats/stoveModule/index.js';
+import { stoveRouter, stoveTxRouter } from '@/feats/stoveModule/index.js';
 
 /**
  * @swagger
@@ -32,7 +32,7 @@ router.use('/', regulatorTxRouter);
 
 /** ----------------- Stove routes ----------------- */
 router.use('/', stoveRouter);
-// router.use('/', stoveTxRouter);
+router.use('/', stoveTxRouter);
 
 /** ----------------- Vehicle routes ----------------- */
 router.use('/', vehicleRouter);

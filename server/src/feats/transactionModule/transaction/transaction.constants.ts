@@ -154,41 +154,37 @@ export type AccountTypeType = (typeof AccountType)[number];
 * Prefixed numerically by type for easy sorting.
 */
 export const AccountCodes = [
-  // ---------------- Assets ----------------
+  // ======================== Assets ========================
   '1000-ASSET-CASH',
-  '1001-ASSET-BANK',
-  '1002-ASSET-MOBILE',
   '1100-ASSET-AR',
-  // Cylinder
-  '1200-INVENTORY-CYL',
+
+  // -------- Cylinder Inventory --------
   '1201-INVENTORY-CYL-FULL',
   '1202-INVENTORY-CYL-EMPTY',
   '1203-INVENTORY-CYL-DEFECTED',
 
-  // Regulator
+  // -------- Regulator Inventory --------
   '1300-INVENTORY-REG',
-  '1301-INVENTORY-REG-FULL',
-  '1302-INVENTORY-REG-DEFECTED',
+  '1301-INVENTORY-REG-DEFECTED',
 
-  // Stove
+  // -------- Stove Inventory --------
   '1400-INVENTORY-STOVE',
-  '1401-INVENTORY-STOVE-FULL',
   '1402-INVENTORY-STOVE-DEFECTED',
 
-  // ---------------- Liabilities ----------------
+  // ======================== Liabilities ========================
   '2100-LIAB-AP',
 
-  // ---------------- Equity ----------------
+  // ======================== Equity ========================
   '3100-EQUITY-OWNER',
   '3200-EQUITY-CAPITAL',
 
-  // ---------------- Revenue ----------------
+  // ======================== Revenue ========================
   '4100-REV-CYL',
   '4101-REV-REG',
   '4102-REV-STOVE',
   '4200-REV-OTHER',
 
-  // ---------------- Expenses ----------------
+  // ======================== Expenses ========================
   '5000-EXP-SALARY',
   '5001-EXP-FUEL',
   '5002-EXP-REPAIR',
@@ -198,7 +194,7 @@ export const AccountCodes = [
   '5006-EXP-MAINTENANCE',
   '5007-EXP-UTILITY',
 
-  // ---------------- Miscellaneous ----------------
+  // ======================== Miscellaneous ========================
   '9999-MISC-EXPENSE',
 ] as const;
 

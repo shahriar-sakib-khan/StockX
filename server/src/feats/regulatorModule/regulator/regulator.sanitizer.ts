@@ -19,6 +19,7 @@ export const regulatorSanitizer = (regulator: IRegulator | HydratedDocument<IReg
   defectedCount: regulator.defectedCount,
 
   createdBy: resolveRef(regulator.createdBy, userSanitizer),
+  updatedBy: resolveRef(regulator.updatedBy, userSanitizer),
   createdAt: regulator.createdAt,
   updatedAt: regulator.updatedAt,
 });

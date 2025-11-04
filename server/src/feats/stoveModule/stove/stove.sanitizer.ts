@@ -1,7 +1,11 @@
+/**
+ * @module StoveSanitizer
+ *
+ * @description Sanitizers for Stove model.
+ */
+
 import { HydratedDocument } from 'mongoose';
-
 import { resolveRef, listSanitizer, storeSanitizer, userSanitizer } from '@/sanitizers/index.js';
-
 import { IStove } from './index.js';
 
 /**
@@ -19,6 +23,7 @@ export const stoveSanitizer = (stove: IStove | HydratedDocument<IStove>) => ({
   defectedCount: stove.defectedCount,
 
   createdBy: resolveRef(stove.createdBy, userSanitizer),
+  updatedBy: resolveRef(stove.updatedBy, userSanitizer),
   createdAt: stove.createdAt,
   updatedAt: stove.updatedAt,
 });

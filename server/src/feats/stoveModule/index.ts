@@ -12,13 +12,10 @@ export {
 /**
  * ----------------- Stove Transaction Exports -----------------
  */
-// export {
-//   stoveTxController,
-//   stoveTxService,
-// } from './stove-tx/index.js';
+export { stoveTxController, stoveTxService } from './stove-tx/index.js';
 
 /**
  * ----------------- Router Exports -----------------
  */
 export { default as stoveRouter } from './stove.routes.js';
-// export { default as stoveTxRouter } from './stove-tx.routes.js';
+export { default as stoveTxRouter } from './stove.tx.routes.js';

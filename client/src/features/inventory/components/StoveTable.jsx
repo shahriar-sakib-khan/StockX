@@ -3,11 +3,11 @@ import { TableRow, SearchBar } from "../utils";
 import { useStoveInventory } from "../hooks";
 import InventoryTable from "./InventoryTable";
 
-export default function CylinderTable({ type }) {
+export default function StoveTable({ type }) {
     // ----------------- Constants -----------------
     const headers = [
         "#",
-        "Burner Type",
+        "Burner Count",
         "Status",
         "Price",
         "In Stock",

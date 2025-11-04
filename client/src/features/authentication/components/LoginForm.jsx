@@ -88,7 +88,9 @@ export default function LoginForm() {
             />
             {isError && (
                 <span className="text-md text-center text-red-400">
-                    {error?.message || "Invalid email or password"}
+                    {error?.message ||
+                        error?.errors[0]?.message ||
+                        "Invalid email or password"}
                 </span>
             )}
             <Button

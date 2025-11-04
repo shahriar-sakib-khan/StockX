@@ -13,16 +13,17 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
  */
 export interface IStove extends Document {
   store: Types.ObjectId;
-  // Reference to parent stor
 
   name: string;
   stoveImage: string;
   burnerCount: number;
+
   price: number;
   stockCount: number;
   defectedCount: number;
 
   createdBy: Types.ObjectId;
+  updatedBy?: Types.ObjectId;
 
   createdAt: Date;
   updatedAt: Date;
@@ -50,6 +51,7 @@ const stoveSchema: Schema<IStove> = new Schema(
     defectedCount: { type: Number, default: 0, min: [0, 'Defected count cannot be negative'] },
 
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );

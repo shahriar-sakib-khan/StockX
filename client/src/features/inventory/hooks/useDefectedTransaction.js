@@ -19,8 +19,8 @@ export const useDefectedTransaction = ({
     // Construct a unique query key depending on type
     const queryKey = {
         cylinders: ["cylinderInventory", storeId, size, regulatorType],
-        regulators: ["regulatorInventory", storeId, regulatorType],
-        stoves: ["stoveInventory", storeId, burnerCount],
+        regulators: ["regulatorInventory", storeId],
+        stoves: ["stoveInventory", storeId, ],
     }[type];
 
     const invalidateInventory = () =>

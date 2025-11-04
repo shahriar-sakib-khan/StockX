@@ -3,10 +3,9 @@ import { Types } from 'mongoose';
 import { TxCategory } from '@/models/index.js';
 
 /**
-
-* ----------------- Default Transaction Category List -----------------
-* Each category defines its accounting impact and cash flow behavior.
-  */
+ * ----------------- Default Transaction Category List -----------------
+ * Each category defines its accounting impact and cash flow behavior.
+ */
 const defaultTxCategoryList = [
   /* ======================== CYLINDERS ======================== */
 

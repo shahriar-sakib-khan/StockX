@@ -3,7 +3,7 @@ import { TableRow, SearchBar } from "../utils";
 import { useRegulatorInventory } from "../hooks";
 import InventoryTable from "./InventoryTable";
 
-export default function CylinderTable({ type }) {
+export default function RegulatorTable({ type }) {
     // ----------------- Constants -----------------
     const headers = [
         "#",

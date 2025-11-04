@@ -17,6 +17,7 @@ export interface IRegulator extends Document {
   name: string;
   regulatorImage: string;
   regulatorType: number;
+  
   price: number;
   stockCount: number;
   defectedCount: number;

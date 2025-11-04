@@ -23,7 +23,7 @@ export const getCylinderInventory = async ({
  * Fetch stove inventory for a store
  */
 export const getStoveInventory = async ({ storeId }) => {
-    const data = await API.get(`/stores/${storeId}/stoves/inventory`);
+    const { data } = await API.get(`/stores/${storeId}/stoves/inventory`);
     return data;
 };
 
