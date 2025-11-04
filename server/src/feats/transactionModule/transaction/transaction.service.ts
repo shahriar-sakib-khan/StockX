@@ -9,19 +9,20 @@ import { Types } from 'mongoose';
 import { Errors } from '@/error/index.js';
 import { TxCategory, Account } from '@/models/index.js';
 
-import { Transaction, transactionSanitizers } from './index.js';
+import { Transaction, transactionSanitizers, transactionConstants } from './index.js';
 
+/** ----------------- Universal Record Transaction Function ----------------- */
 /**
  * @function recordTransaction
  * @description Records a transaction with transactions.
  *
- * @param {Object} txData - The data for the transaction.
+ * @param {any} txData - The data for the transaction.
  * @param {string} transactorId - The ID of the transactor.
  * @param {string} storeId - The ID of the store.
  * @returns {Promise<transactionSanitizers.SanitizedTransaction>} The recorded transaction.
  */
 export const recordTransaction = async (
-  txData: Record<string, any>,
+  txData: any,
   transactorId: string,
   storeId: string
 ): Promise<transactionSanitizers.SanitizedTransaction> => {
@@ -55,7 +56,7 @@ export const recordTransaction = async (
   // Build transaction description
   const description = config.descriptionTemplate?.replace(
     /\{\{(\w+)\}\}/g,
-    (_, key) => txData[key] ?? ''
+    (_, key: string) => (txData as any)[key] ?? ''
   );
 
   // Construct transaction object

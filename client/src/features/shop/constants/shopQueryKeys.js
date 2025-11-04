@@ -1,10 +1,4 @@
-// @ts-check
-
-/**
- * @typedef {"shop" | "shops"} VehicleQueryKey
- */
-
-/** @type {VehicleQueryKey} */
 export const SHOP = "shop";
-/** @type {VehicleQueryKey} */
 export const SHOPS = "shops";
+export const SHOP_TRANSACTION = "shop_transaction";
+export const SHOP_TRANSACTIONS = "shop_transactions";

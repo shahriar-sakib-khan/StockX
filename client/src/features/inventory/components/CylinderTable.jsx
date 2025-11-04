@@ -25,7 +25,7 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
         "Defected",
         "Action",
     ];
-    // const sizes = ["5", "12", "20"];
+
     const sizes = [
         "5.5",
         "12",

@@ -6,14 +6,16 @@ export default function ShopCard({
     onUpdate,
     onDelete,
     onShowHistory,
+    onRecordTransaction,
+    onExchangeCylinder,
 }) {
     return (
         <div className="flex w-70 flex-col overflow-hidden rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
-            {/* Top section (shop image + delete) */}
-            <section className="relative flex items-center justify-center bg-gray-100/90 py-2">
+            {/* ---------- IMAGE SECTION ---------- */}
+            <section className="relative flex items-center justify-center bg-gray-100/90">
                 <img
                     src={shopInfo?.image || DefaultImage}
-                    alt={shopInfo?.name || "Shop"}
+                    alt={shopInfo?.shopName || "Shop"}
                     className="h-40 rounded-t-md object-cover"
                 />
                 <button
@@ -23,54 +25,59 @@ export default function ShopCard({
                     <DeleteIcon className="size-5 text-red-500/80" />
                 </button>
             </section>
-
-            {/* Shop info section */}
+            {/* ---------- SHOP INFO SECTION ---------- */}
             <section className="flex flex-col gap-1 px-6 py-4">
                 <span className="text-lg font-semibold text-gray-700">
-                    {shopInfo?.name || "Unnamed Shop"}
+                    {shopInfo?.shopName || "Unknown Shop"}
                 </span>
-                {shopInfo?.contactName && (
-                    <span className="text-sm text-gray-500">
-                        Name: {shopInfo.contactName}
-                    </span>
-                )}
-                {shopInfo?.phone && (
-                    <span className="text-sm text-gray-500">
-                        Phone: {shopInfo.phone}
-                    </span>
-                )}
-                {shopInfo?.address && (
-                    <span className="text-sm text-gray-500">
-                        Address: {shopInfo.address}
-                    </span>
-                )}
-                {shopInfo?.due && (
-                    <span
-                        className={`text-sm ${shopInfo.due !== "0" ? "text-red-600" : "text-green-600"}`}
-                    >
-                        Due: {shopInfo.due}/-
-                    </span>
-                )}
+                <span className="text-sm text-gray-500">
+                    Owner: {shopInfo?.ownerName || "Unknown Owner"}
+                </span>
+                <span className="text-sm text-gray-500">
+                    Phone: {shopInfo?.phoneNumber || "N/A"}
+                </span>
+                <span className="truncate text-sm text-gray-500">
+                    {shopInfo?.location || "No location provided"}
+                </span>
             </section>
+            {/* ---------- ACTION BUTTONS ---------- */}
+            <section className="mt-2 mb-4 flex flex-col items-center gap-2 px-4">
+                {/* Total Due before Clear Due */}
+                <span className="text-md font-semibold text-gray-700">
+                    Total Due: ৳{shopInfo?.totalDue || 0}
+                </span>
 
-            {/* Buttons Section */}
-            <section className="mb-4 flex items-center justify-center gap-3 px-4">
-                <button className="primary-button px-4 py-1">
-                    Due payment
-                </button>
-                <button
-                    onClick={onShowHistory}
-                    className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
-                >
-                    History
-                </button>
+                <div className="flex items-center justify-center gap-3">
+                    <button
+                        onClick={onRecordTransaction}
+                        className="primary-button px-4 py-1"
+                    >
+                        Clear Due
+                    </button>
+                    <button
+                        onClick={onShowHistory}
+                        className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
+                    >
+                        History
+                    </button>
+                </div>
             </section>
-            <button
-                onClick={onUpdate}
-                className="bg-gray-200 px-4 py-1 font-semibold text-gray-400 transition-all duration-100 hover:bg-gray-300/70"
-            >
-                Update
-            </button>
+            {/* ---------- UPDATE & EXCHANGE ---------- */}
+            <div className="flex flex-col items-center gap-2 px-4 pb-4">
+                <button
+                    onClick={onUpdate}
+                    className="w-full bg-gray-200 px-4 py-1 font-semibold text-gray-500 transition-all duration-100 hover:bg-gray-300/70"
+                >
+                    Update
+                </button>
+
+                <button
+                    onClick={onExchangeCylinder}
+                    className="w-full rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
+                >
+                    Exchange
+                </button>
+            </div>
         </div>
     );
 }

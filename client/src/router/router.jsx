@@ -7,7 +7,6 @@ import {
     Dashboard,
     SettingsPage,
     InventoryPage,
-    ShopsPage,
     VehiclesPage,
     ProfilePage,
     HistoryPage,
@@ -19,10 +18,13 @@ import {
     AddStore,
     InvitationsPage,
     BrandSelectionPage,
+    ShopsPage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
 import StaffPage from "../pages/StaffPage";
+
+import { default as ExchangePage } from "../features/exchange/ExchangePage";
 
 const router = createBrowserRouter([
     {
@@ -109,6 +111,14 @@ const router = createBrowserRouter([
                 element: (
                     <AppContainer>
                         <SettingsPage />
+                    </AppContainer>
+                ),
+            },
+            {
+                path: "exchange",
+                element: (
+                    <AppContainer>
+                        <ExchangePage />
                     </AppContainer>
                 ),
             },

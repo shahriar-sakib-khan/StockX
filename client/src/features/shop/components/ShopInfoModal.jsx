@@ -22,19 +22,17 @@ export default function ShopInfoModal({
                 </h3>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    {/* Shop Name */}
                     <div className="flex items-center gap-3">
                         <label
-                            htmlFor="name"
+                            htmlFor="shopName"
                             className="text-sm font-medium text-gray-600"
                         >
                             Shop Name
                         </label>
                         <input
-                            id="name"
-                            type="text"
-                            name="name"
-                            value={formData.name}
+                            id="shopName"
+                            name="shopName"
+                            value={formData.shopName}
                             onChange={handleChange}
                             placeholder="Shop Name"
                             className="flex-1 rounded border border-gray-300 px-3 py-2"
@@ -42,83 +40,75 @@ export default function ShopInfoModal({
                         />
                     </div>
 
-                    {/* Contact Name */}
                     <div className="flex items-center gap-3">
                         <label
-                            htmlFor="contactName"
+                            htmlFor="ownerName"
                             className="text-sm font-medium text-gray-600"
                         >
-                            Contact Name
+                            Owner Name
                         </label>
                         <input
-                            id="contactName"
-                            type="text"
-                            name="contactName"
-                            value={formData.contactName}
+                            id="ownerName"
+                            name="ownerName"
+                            value={formData.ownerName}
                             onChange={handleChange}
-                            placeholder="Contact Name"
+                            placeholder="Owner Name"
                             className="flex-1 rounded border border-gray-300 px-3 py-2"
                         />
                     </div>
 
-                    {/* Phone */}
                     <div className="flex items-center gap-3">
                         <label
-                            htmlFor="phone"
+                            htmlFor="phoneNumber"
                             className="text-sm font-medium text-gray-600"
                         >
-                            Phone
+                            Phone Number
                         </label>
                         <input
-                            id="phone"
-                            type="text"
-                            name="phone"
-                            value={formData.phone}
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            value={formData.phoneNumber}
                             onChange={handleChange}
-                            placeholder="Phone"
+                            placeholder="Phone Number"
                             className="flex-1 rounded border border-gray-300 px-3 py-2"
                         />
                     </div>
 
-                    {/* Address */}
                     <div className="flex items-center gap-3">
                         <label
-                            htmlFor="address"
+                            htmlFor="location"
                             className="text-sm font-medium text-gray-600"
                         >
-                            Address
+                            Location
                         </label>
                         <input
-                            id="address"
-                            type="text"
-                            name="address"
-                            value={formData.address}
+                            id="location"
+                            name="location"
+                            value={formData.location}
                             onChange={handleChange}
-                            placeholder="Address"
+                            placeholder="Location"
                             className="flex-1 rounded border border-gray-300 px-3 py-2"
+                            required
                         />
                     </div>
 
-                    {/* Due Amount */}
                     {/* <div className="flex items-center gap-3">
                         <label
-                            htmlFor="due"
-                            className=" text-sm font-medium text-gray-600"
+                            htmlFor="image"
+                            className="text-sm font-medium text-gray-600"
                         >
-                            Due Amount
+                            Image URL
                         </label>
                         <input
-                            id="due"
-                            type="text"
-                            name="due"
-                            value={formData.due}
+                            id="image"
+                            name="image"
+                            value={formData.image}
                             onChange={handleChange}
-                            placeholder="Due Amount"
+                            placeholder="Image URL (optional)"
                             className="flex-1 rounded border border-gray-300 px-3 py-2"
                         />
                     </div> */}
 
-                    {/* Buttons */}
                     <div className="flex justify-end gap-3 pt-3">
                         <button
                             type="button"
@@ -127,6 +117,7 @@ export default function ShopInfoModal({
                         >
                             Cancel
                         </button>
+
                         <button
                             type="submit"
                             disabled={isCreating || isUpdating}

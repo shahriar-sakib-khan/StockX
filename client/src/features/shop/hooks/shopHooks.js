@@ -1,81 +1,76 @@
-// @ts-check
 import { useQuery, useMutation } from "@tanstack/react-query";
-import {
-    getShops,
-    getSingleShop,
-    updateShopInfo,
-    deleteShop,
-    createShop,
-} from "../services/shopServices";
 import queryClient from "@/services/queryClient";
-import { SHOP, SHOPS } from "../constants/shopQueryKeys";
 
-/** type imports
- * @typedef {import("../types/shop").Shop} Shop
- * @typedef {import("../types/shop").NewShop} NewShop
- * @typedef {import("../types/shop").UpdatedShop} UpdatedShop
- * @typedef {import("../types/shop").AllShopsResponse} AllShopsResponse
- * @typedef {import("../types/shop").SingleShopResponse} SingleShopResponse
- * @typedef {import("../types/shop").CreateShopResponse} CreateShopResponse
- * @typedef {import("../types/shop").UpdateShopResponse} UpdateShopResponse
- * @typedef {import("../types/shop").DeleteShopResponse} DeleteShopResponse
- */
+import {
+    getAllShops,
+    getSingleShop,
+    createShop,
+    updateShop,
+    deleteShop,
+    clearShopDue,
+    getShopTransactions,
+    getAllShopTransactions,
+    exchangeCylinder,
+} from "../services/shopService";
+import {
+    SHOP,
+    SHOPS,
+    SHOP_TRANSACTION,
+    SHOP_TRANSACTIONS,
+} from "../constants/shopQueryKeys";
 
-/** Shop CRUD query hooks */
+/*
+  Note: API wrapper in your project returns response.data (the payload).
+  Backend responses are shaped like:
+  { success: true, message: "...", data: <payload>, ... }
+  Hooks below are defensive: they check both `data?.data` and direct `data` shapes.
+*/
 
-/**
- * Get all shops in a division.
- *
- * @param {string} workspaceId
- * @param {string} divisionId
- * @param {import("@tanstack/react-query").UseQueryOptions<AllShopsResponse, unknown, AllShopsResponse, [string, string, string]>} [options]
- */
-export const useAllShops = (workspaceId, divisionId, options) => {
-    /** @type {import("@tanstack/react-query").UseQueryResult<AllShopsResponse, unknown>} */
+const extractPayload = (resp) => {
+    if (!resp) return resp;
+    // resp might already be the payload; if wrapper returns { success, message, data }
+    if (resp.data !== undefined) return resp.data;
+    // otherwise assume resp is the payload
+    return resp;
+};
+
+/* CRUD */
+
+/** Get all shops for a store */
+export const useAllShops = (storeId, options) => {
     const { data, ...rest } = useQuery({
-        queryKey: [SHOPS, workspaceId, divisionId],
-        queryFn: () => getShops(workspaceId, divisionId),
+        queryKey: [SHOPS, storeId],
+        queryFn: () => getAllShops(storeId),
         ...options,
     });
 
-    return { data: data?.stores || [], ...rest };
+    // backend returns { success, message, pagination, data: shops }
+    const payload = extractPayload(data);
+    // handle payload.data (controller uses `data: shops`) or direct { shops, total }
+    const shops = payload?.data ?? payload?.shops ?? payload ?? [];
+    return { data: shops || [], ...rest };
 };
 
-/**
- * Get details of a single shop by ID.
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @param {string} shopId - The ID of the shop.
- * @param {import("@tanstack/react-query").UseQueryOptions<SingleShopResponse, unknown, SingleShopResponse, [string, string, string, string]>} [options]
- */
-export const useSingleShop = (workspaceId, divisionId, shopId, options) => {
-    /** @type {import("@tanstack/react-query").UseQueryResult<SingleShopResponse, unknown>} */
+/** Get single shop */
+export const useSingleShop = (storeId, shopId, options) => {
     const { data, ...rest } = useQuery({
-        queryKey: [SHOP, workspaceId, divisionId, shopId],
-        queryFn: () => getSingleShop(workspaceId, divisionId, shopId),
+        queryKey: [SHOP, storeId, shopId],
+        queryFn: () => getSingleShop(storeId, shopId),
+        enabled: !!shopId,
         ...options,
     });
 
-    return { data: data?.store || {}, ...rest };
+    const payload = extractPayload(data);
+    const shop = payload?.data ?? payload ?? {};
+    return { data: shop || {}, ...rest };
 };
 
-/**
- * Create a new shop in a division.
- *
- * @param {string} workspaceId
- * @param {string} divisionId
- * @param {import("@tanstack/react-query").UseMutationOptions<CreateShopResponse, unknown, NewShop>} [options]
- */
-export const useCreateShop = (workspaceId, divisionId, options) => {
-    /** @type {import("@tanstack/react-query").UseMutationResult<CreateShopResponse, unknown, NewShop>} */
+/** Create shop */
+export const useCreateShop = (storeId, options) => {
     const { mutate, ...rest } = useMutation({
-        mutationFn: /** @param {NewShop} shopInfo */ (shopInfo) =>
-            createShop(workspaceId, divisionId, shopInfo),
+        mutationFn: (shopInfo) => createShop(storeId, shopInfo),
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: [SHOPS, workspaceId, divisionId],
-            });
+            queryClient.invalidateQueries({ queryKey: [SHOPS, storeId] });
         },
         ...options,
     });
@@ -83,28 +78,18 @@ export const useCreateShop = (workspaceId, divisionId, options) => {
     return { mutate, ...rest };
 };
 
-/**
- * Update an existing shop's information.
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @param {import("@tanstack/react-query").UseMutationOptions<UpdateShopResponse, unknown, { shopId: string } & UpdatedShop>} [options]
- */
-export const useUpdateShop = (workspaceId, divisionId, options) => {
-    /** @type {import("@tanstack/react-query").UseMutationResult<UpdateShopResponse, unknown, { shopId: string } & UpdatedShop>} */
+/** Update shop */
+export const useUpdateShop = (storeId, options) => {
     const { mutate, ...rest } = useMutation({
-        /** @param {{ shopId: string } & UpdatedShop} payload */
-        mutationFn: (payload) => {
-            const { shopId, ...shopInfo } = payload;
-            return updateShopInfo(workspaceId, divisionId, shopId, shopInfo);
-        },
+        mutationFn: ({ shopId, ...shopInfo }) =>
+            updateShop(storeId, shopId, shopInfo),
         onSuccess: (_, payload) => {
-            queryClient.invalidateQueries({
-                queryKey: [SHOPS, workspaceId, divisionId],
-            });
-            queryClient.invalidateQueries({
-                queryKey: [SHOP, workspaceId, divisionId, payload.shopId],
-            });
+            queryClient.invalidateQueries({ queryKey: [SHOPS, storeId] });
+            if (payload?.shopId) {
+                queryClient.invalidateQueries({
+                    queryKey: [SHOP, storeId, payload.shopId],
+                });
+            }
         },
         ...options,
     });
@@ -112,25 +97,76 @@ export const useUpdateShop = (workspaceId, divisionId, options) => {
     return { mutate, ...rest };
 };
 
-/**
- * Delete a shop from a division.
- *
- * @param {string} workspaceId - The ID of the workspace.
- * @param {string} divisionId - The ID of the division.
- * @param {import("@tanstack/react-query").UseMutationOptions<DeleteShopResponse, unknown, string>} [options]
- */
-export const useDeleteShop = (workspaceId, divisionId, options) => {
-    /** @type {import("@tanstack/react-query").UseMutationResult<DeleteShopResponse, unknown, string>} */
+/** Delete shop */
+export const useDeleteShop = (storeId, options) => {
     const { mutate, ...rest } = useMutation({
-        mutationFn: /** @param {string} shopId */ (shopId) =>
-            deleteShop(workspaceId, divisionId, shopId),
+        mutationFn: (shopId) => deleteShop(storeId, shopId),
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: [SHOPS, workspaceId, divisionId],
-            });
+            queryClient.invalidateQueries({ queryKey: [SHOPS, storeId] });
         },
         ...options,
     });
 
     return { mutate, ...rest };
+};
+
+/* ---------------- Transactions / shop tx hooks ---------------- */
+
+/** Clear shop due */
+export const useClearShopDue = (storeId, shopId, options) => {
+    const { mutate, ...rest } = useMutation({
+        mutationFn: (data) => clearShopDue(storeId, shopId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [SHOP_TRANSACTION, storeId, shopId],
+            });
+            queryClient.invalidateQueries({ queryKey: [SHOPS, storeId] });
+        },
+        ...options,
+    });
+
+    return { mutate, ...rest };
+};
+
+/** Exchange cylinder (shop sale) */
+export const useExchangeCylinder = (storeId, options) => {
+    const { mutate, ...rest } = useMutation({
+        mutationFn: (data) => exchangeCylinder(storeId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [SHOP_TRANSACTIONS, storeId],
+            });
+            queryClient.invalidateQueries({ queryKey: [SHOPS, storeId] });
+        },
+        ...options,
+    });
+
+    return { mutate, ...rest };
+};
+
+/** Get transactions for a single shop */
+export const useShopTransactions = (storeId, shopId, options) => {
+    const { data, ...rest } = useQuery({
+        queryKey: [SHOP_TRANSACTION, storeId, shopId],
+        queryFn: () => getShopTransactions(storeId, shopId),
+        enabled: !!shopId && Boolean(options?.enabled ?? true),
+        ...options,
+    });
+
+    const payload = extractPayload(data);
+    const txs = payload?.data ?? payload?.transactions ?? payload ?? [];
+    return { data: txs || [], ...rest };
+};
+
+/** Get all shop-related transactions for a store */
+export const useAllShopTransactions = (storeId, options) => {
+    const { data, ...rest } = useQuery({
+        queryKey: [SHOP_TRANSACTIONS, storeId],
+        queryFn: () => getAllShopTransactions(storeId),
+        ...options,
+    });
+
+    const payload = extractPayload(data);
+    const txs = payload?.data ?? payload?.transactions ?? payload ?? [];
+    return { data: txs || [], ...rest };
 };

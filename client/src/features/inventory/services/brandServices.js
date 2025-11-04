@@ -1,4 +1,3 @@
-// @ts-check
 import API from "@/services/apiClient";
 
 // ================= BRANDS ==================

@@ -1,76 +1,89 @@
-import { ConfirmDialog, Spinner } from "@/components";
-import ShopInfoModal from "@/features/shop/components/ShopleInfoModal";
+import { useState } from "react";
+
+import { useAuthStore } from "@/stores/useAuthStore";
+import { logOnce } from "./utils/logOnce";
+
+import { ShopCard, ShopInfoModal, ShopTransactionModal } from "@/features";
+import { ConfirmDialog, ModalContainer, Spinner } from "@/components";
+
 import {
     useAllShops,
     useCreateShop,
-    useDeleteShop,
     useUpdateShop,
+    useDeleteShop,
+    useShopTransactions,
+    useClearShopDue,
+    useExchangeCylinder,
 } from "@/features/shop/hooks/shopHooks";
-import { useState } from "react";
-import { ShopCard } from "../features";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function ShopsPage() {
-    const workspaceId = useAuthStore((state) => state.currentWorkspace).id;
-    const divisionId = useAuthStore((state) => state.currentDivision).id;
-    
-    // Fetch: all shops
+    const storeId = useAuthStore((state) => state.currentStore?.id);
+
     const {
         data: shops = [],
         isLoading,
         isError,
         error,
-    } = useAllShops(workspaceId, divisionId);
+    } = useAllShops(storeId);
 
-    // useEffect(() => {
-    //     console.log(shops);
-    // }, [shops]);
+    const { mutate: createShop, isLoading: isCreating } =
+        useCreateShop(storeId);
+    const { mutate: updateShop, isLoading: isUpdating } =
+        useUpdateShop(storeId);
+    const { mutate: deleteShop } = useDeleteShop(storeId);
 
-    // Shop Mutations: CRUD
-    const { mutate: createShop, isLoading: isCreating } = useCreateShop(
-        workspaceId,
-        divisionId,
-    );
-
-    const { mutate: updateShop, isLoading: isUpdating } = useUpdateShop(
-        workspaceId,
-        divisionId,
-    );
-
-    const { mutate: deleteShop } = useDeleteShop(workspaceId, divisionId);
-
-    // Shop States: CRUD
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [transactionType, setTransactionType] = useState("clear_due"); // or "exchange"
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+
     const [formData, setFormData] = useState({
-        name: "",
-        contactName: "",
-        phone: "",
-        address: "",
-        // image: "",
-        // due: "",
+        shopName: "",
+        ownerName: "",
+        phoneNumber: "",
+        location: "",
+        image: "",
     });
+
     const [editingShop, setEditingShop] = useState(null);
     const [deletingShopId, setDeletingShopId] = useState(null);
+    const [transactionShopId, setTransactionShopId] = useState(null);
+    const [historyShopId, setHistoryShopId] = useState(null);
 
-    // Shop Handlers: CRUD
+    const [transactionData, setTransactionData] = useState({
+        amount: "",
+        paymentMethod: "cash",
+        ref: "",
+        details: "",
+    });
+
+    /* CRUD handlers */
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((p) => ({ ...p, [name]: value }));
     };
 
     const openAddModal = () => {
         setEditingShop(null);
-        setFormData({ name: "", contactName: "", phone: "", address: "" });
+        setFormData({
+            shopName: "",
+            ownerName: "",
+            phoneNumber: "",
+            location: "",
+            image: "",
+        });
         setIsInfoModalOpen(true);
     };
 
     const openEditModal = (shop) => {
         setEditingShop(shop);
         setFormData({
-            name: shop.name,
-            contactName: shop.contactName,
-            phone: shop.phone,
-            address: shop.address,
+            shopName: shop.shopName ?? shop.name ?? "",
+            ownerName: shop.ownerName ?? "",
+            phoneNumber: shop.phoneNumber ?? "",
+            location: shop.location ?? "",
+            image: shop.image ?? "",
+            id: shop.id ?? shop._id,
         });
         setIsInfoModalOpen(true);
     };
@@ -78,46 +91,44 @@ export default function ShopsPage() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (editingShop) {
-            // Update shop
             updateShop(
                 {
-                    shopId: editingShop.id,
-                    name: formData.name,
-                    contactName: formData.contactName,
-                    phone: formData.phone,
-                    address: formData.address,
+                    shopId: editingShop.id || editingShop._id,
+                    shopName: formData.shopName,
+                    ownerName: formData.ownerName,
+                    phoneNumber: formData.phoneNumber,
+                    location: formData.location,
+                    image: formData.image,
                 },
                 {
                     onSuccess: () => {
                         setIsInfoModalOpen(false);
                         setEditingShop(null);
                     },
-                    onError: (err) =>
-                        console.error("Error updating shop:", err),
+                    onError: (err) => console.error("Update shop error:", err),
                 },
             );
         } else {
-            // Add new shop
             createShop(
                 {
-                    name: formData.name,
-                    contactName: formData.contactName,
-                    phone: formData.phone,
-                    address: formData.address,
+                    shopName: formData.shopName,
+                    ownerName: formData.ownerName,
+                    phoneNumber: formData.phoneNumber,
+                    location: formData.location,
+                    image: formData.image,
                 },
                 {
                     onSuccess: () => {
-                        // console.log("new shop created successfully", formData);
                         setFormData({
-                            name: "",
-                            contactName: "",
-                            phone: "",
-                            address: "",
+                            shopName: "",
+                            ownerName: "",
+                            phoneNumber: "",
+                            location: "",
+                            image: "",
                         });
                         setIsInfoModalOpen(false);
                     },
-                    onError: (err) =>
-                        console.error("Error creating shop:", err),
+                    onError: (err) => console.error("Create shop error:", err),
                 },
             );
         }
@@ -126,16 +137,87 @@ export default function ShopsPage() {
     const handleConfirmDelete = () => {
         if (deletingShopId) {
             deleteShop(deletingShopId, {
-                onError: (err) => console.error("Error deleting shop:", err),
+                onError: (err) => console.error("Delete shop error:", err),
             });
         }
-        setDeletingShopId(null); // close dialog
+        setDeletingShopId(null);
     };
+
+    /* Transactions */
+    const clearDueMutation = useClearShopDue(storeId, transactionShopId);
+    const exchangeMutation = useExchangeCylinder(storeId);
+
+    const {
+        data: transactionsHistory = [],
+        isLoading: isTransactionsLoading,
+        isError: isTransactionsError,
+    } = useShopTransactions(storeId, historyShopId, {
+        enabled: !!historyShopId && isHistoryOpen,
+    });
+
+    const openTransactionModal = (shopId, type = "clear_due") => {
+        setTransactionShopId(shopId);
+        setTransactionType(type);
+        setTransactionData({
+            amount: "",
+            paymentMethod: "cash",
+            ref: "",
+            details: "",
+        });
+        setIsTransactionModalOpen(true);
+    };
+
+    const openHistoryModal = (shopId) => {
+        setHistoryShopId(shopId);
+        setIsHistoryOpen(true);
+    };
+
+    const closeHistoryModal = () => {
+        setIsHistoryOpen(false);
+        setHistoryShopId(null);
+    };
+
+    const handleTransactionChange = (e) => {
+        const { name, value } = e.target;
+        setTransactionData((p) => ({ ...p, [name]: value }));
+    };
+
+    const handleTransactionSubmit = (e) => {
+        e.preventDefault();
+        if (!transactionShopId) return;
+
+        const payload = {
+            totalAmount: Number(transactionData.amount) || 0,
+            paymentMethod: transactionData.paymentMethod,
+            ref: transactionData.ref || undefined,
+            details: transactionData.details || undefined,
+        };
+
+        if (transactionType === "exchange") {
+            // exchange expects store-level payload (controller expects body)
+            exchangeMutation.mutate(
+                { shopId: transactionShopId, ...payload },
+                {
+                    onSuccess: () => setIsTransactionModalOpen(false),
+                    onError: (err) => console.error("Exchange error:", err),
+                },
+            );
+        } else {
+            clearDueMutation.mutate(payload, {
+                onSuccess: () => setIsTransactionModalOpen(false),
+                onError: (err) => console.error("Clear due error:", err),
+            });
+        }
+    };
+
+    logOnce(shops);
 
     return (
         <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-6 overflow-y-auto bg-gray-100 pt-5 text-gray-700">
             <div className="flex items-center justify-between px-4">
-                <h2 className="text-2xl font-semibold text-gray-500">Shops</h2>
+                <h2 className="text-2xl font-semibold text-gray-500">
+                    Shop List
+                </h2>
                 <button
                     onClick={openAddModal}
                     className="primary-button flex items-center gap-3 px-3 py-1"
@@ -147,46 +229,57 @@ export default function ShopsPage() {
             {isLoading ? (
                 <Spinner size={32} />
             ) : isError ? (
-                <p className="text-red-500">Error: {error.message}</p>
+                <p className="text-red-500">
+                    Error: {error?.message || "Failed"}
+                </p>
             ) : (
                 <div className="mb-10 flex flex-wrap gap-5">
                     {shops.map((shop) => (
                         <ShopCard
-                            key={shop.id}
+                            key={shop.id ?? shop._id}
                             shopInfo={{
-                                id: shop.id,
-                                name: shop.name,
-                                contactName: shop.contactName,
-                                phone: shop.phone,
-                                address: shop.address,
+                                shopName: shop.shopName ?? shop.name,
+                                ownerName: shop.ownerName ?? "",
+                                phoneNumber: shop.phoneNumber ?? "",
+                                location: shop.location ?? "",
+                                image: shop.image ?? "",
+                                totalDue: shop.totalDue ?? 0,
+                                id: shop.id ?? shop._id,
                             }}
-                            onDelete={() => setDeletingShopId(shop.id)}
+                            onDelete={() =>
+                                setDeletingShopId(shop.id ?? shop._id)
+                            }
                             onUpdate={() =>
                                 openEditModal({
-                                    id: shop.id,
-                                    name: shop.name,
-                                    contactName: shop.contactName,
-                                    phone: shop.phone,
-                                    address: shop.address,
+                                    shopName: shop.shopName ?? shop.name,
+                                    ownerName: shop.ownerName ?? "",
+                                    phoneNumber: shop.phoneNumber ?? "",
+                                    location: shop.location ?? "",
+                                    image: shop.image ?? "",
+                                    id: shop.id ?? shop._id,
                                 })
                             }
-                            // onShowHistory={() => openHistoryModal(shop.id)}
+                            onRecordTransaction={() =>
+                                openTransactionModal(
+                                    shop.id ?? shop._id,
+                                    "clear_due",
+                                )
+                            }
+                            onExchangeCylinder={() =>
+                                openTransactionModal(
+                                    shop.id ?? shop._id,
+                                    "exchange",
+                                )
+                            }
+                            onShowHistory={() =>
+                                openHistoryModal(shop.id ?? shop._id)
+                            }
                         />
                     ))}
                 </div>
             )}
 
-            {/* <div className="flex flex-wrap gap-5 px-4">
-                {shops.map((shop) => (
-                    <ShopCard
-                        key={shop.id}
-                        shopInfo={shop}
-                        onDelete={() => onDelete(shop.id)}
-                    />
-                ))}
-            </div> */}
-
-            {/* Modal */}
+            {/* Info Modal */}
             {isInfoModalOpen && (
                 <ShopInfoModal
                     isOpen={isInfoModalOpen}
@@ -200,7 +293,7 @@ export default function ShopsPage() {
                 />
             )}
 
-            {/* Confirm Delete Modal */}
+            {/* Confirm Delete */}
             <ConfirmDialog
                 isOpen={!!deletingShopId}
                 title="Confirm Delete"
@@ -208,6 +301,73 @@ export default function ShopsPage() {
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setDeletingShopId(null)}
             />
+
+            {/* Transaction Modal */}
+            {isTransactionModalOpen && (
+                <ShopTransactionModal
+                    isOpen={isTransactionModalOpen}
+                    onClose={() => setIsTransactionModalOpen(false)}
+                    transactionType={transactionType}
+                    shop={shops.find(
+                        (s) => (s.id ?? s._id) === transactionShopId,
+                    )}
+                    transactionData={transactionData}
+                    handleTransactionChange={handleTransactionChange}
+                    handleTransactionSubmit={handleTransactionSubmit}
+                    isRecording={
+                        clearDueMutation.isLoading || exchangeMutation.isLoading
+                    }
+                />
+            )}
+
+            {/* History Modal */}
+            <ModalContainer isOpen={isHistoryOpen} onClose={closeHistoryModal}>
+                <div>
+                    <h2 className="mb-4 text-lg font-semibold">
+                        Transaction History
+                    </h2>
+
+                    {isTransactionsLoading ? (
+                        <p>Loading...</p>
+                    ) : isTransactionsError ? (
+                        <p className="text-red-500">
+                            Failed to load transactions.
+                        </p>
+                    ) : transactionsHistory &&
+                      transactionsHistory.length > 0 ? (
+                        <ul className="space-y-3">
+                            {transactionsHistory.map((txn) => (
+                                <li
+                                    key={txn.id ?? txn._id}
+                                    className="rounded border p-3 text-sm text-gray-700"
+                                >
+                                    <p>
+                                        <span className="font-medium">
+                                            Type:
+                                        </span>{" "}
+                                        {txn.type ?? txn.transactionType}
+                                    </p>
+                                    <p>
+                                        <span className="font-medium">
+                                            Amount:
+                                        </span>{" "}
+                                        {txn.amount ??
+                                            txn.totalAmount ??
+                                            txn.total}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {txn.details?.description ||
+                                            txn.details ||
+                                            JSON.stringify(txn.details ?? {})}
+                                    </p>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-gray-500">No transactions found.</p>
+                    )}
+                </div>
+            </ModalContainer>
         </div>
     );
 }

@@ -8,16 +8,15 @@ import { Account } from '@/models/index.js';
  * This chart covers Cash, Bank, Mobile, AR, Inventory, Liabilities, Equity,
  * Revenues, and Expenses, synchronized with the AccountCodes enum.
  */
-/**
- * ----------------- Default Chart of Accounts -----------------
- * Source of truth derived from defaultTxCategoryList
- * Covers all debit/credit accounts used across all transaction categories.
- */
-
 export const defaultChartOfAccounts = [
   /* ======================== ASSETS ======================== */
-  { code: '1000-ASSET-CASH', name: 'Cash in Hand', type: 'asset' },
-  { code: '1100-ASSET-AR', name: 'Accounts Receivable', type: 'asset' },
+  { code: '1000-ASSET-CASH', name: 'Cash (General)', type: 'asset' },
+  { code: '1001-ASSET-CASH-ON-HAND', name: 'Cash on Hand', type: 'asset' },
+  { code: '1002-ASSET-CASH-BANK', name: 'Cash at Bank', type: 'asset' },
+  { code: '1003-ASSET-CASH-MOBILE', name: 'Mobile Banking Balance', type: 'asset' },
+  { code: '1100-ASSET-AR', name: 'Accounts Receivable (General)', type: 'asset' },
+  { code: '1101-AR-CUSTOMERS', name: 'Accounts Receivable - Customers', type: 'asset' },
+  { code: '1102-AR-SHOPS', name: 'Accounts Receivable - Shops', type: 'asset' },
 
   // ---------------- Cylinder Inventory ----------------
   { code: '1201-INVENTORY-CYL-FULL', name: 'Cylinder Inventory - Full', type: 'asset' },
@@ -32,31 +31,49 @@ export const defaultChartOfAccounts = [
   { code: '1400-INVENTORY-STOVE', name: 'Stove Inventory', type: 'asset' },
   { code: '1402-INVENTORY-STOVE-DEFECTED', name: 'Stove Inventory - Defected', type: 'asset' },
 
+  // ---------------- Internal & Fixed Assets ----------------
+  { code: '1500-ASSET-INTERSTORE', name: 'Inter-Store Account', type: 'asset' },
+  { code: '1501-ASSET-INTERNAL-TRANSFER', name: 'Internal Transfer Asset', type: 'asset' },
+  { code: '1600-ASSET-FIXED', name: 'Fixed Assets', type: 'asset' },
+  { code: '6001-ASSET-VAT-RECEIVABLE', name: 'VAT Receivable (Asset)', type: 'asset' },
+
   /* ======================== LIABILITIES ======================== */
-  { code: '2100-LIAB-AP', name: 'Accounts Payable', type: 'liability' },
+  { code: '2100-LIAB-AP', name: 'Accounts Payable (General)', type: 'liability' },
+  { code: '2101-AP-SUPPLIERS', name: 'Accounts Payable - Suppliers', type: 'liability' },
+  { code: '2102-AP-STAFF', name: 'Accounts Payable - Staff', type: 'liability' },
+  { code: '2103-AP-OWNERS', name: 'Accounts Payable - Owners', type: 'liability' },
+  { code: '2104-AP-TAX', name: 'Tax Payable', type: 'liability' },
+  { code: '6000-LIAB-VAT-PAYABLE', name: 'VAT Payable (Liability)', type: 'liability' },
 
   /* ======================== EQUITY ======================== */
-  { code: '3100-EQUITY-OWNER', name: 'Owner Equity / Withdrawal', type: 'equity' },
+  { code: '3100-EQUITY-OWNER', name: 'Owner’s Equity / Withdrawal', type: 'equity' },
   { code: '3200-EQUITY-CAPITAL', name: 'Capital Investment', type: 'equity' },
 
   /* ======================== INCOME ======================== */
   { code: '4100-REV-CYL', name: 'Cylinder Sales Revenue', type: 'income' },
   { code: '4101-REV-REG', name: 'Regulator Sales Revenue', type: 'income' },
   { code: '4102-REV-STOVE', name: 'Stove Sales Revenue', type: 'income' },
-  { code: '4200-REV-OTHER', name: 'Other Income / Adjustments', type: 'income' },
+  { code: '4103-REV-SHOP', name: 'Shop Sales / Exchange Revenue', type: 'income' },
+  { code: '4200-REV-OTHER', name: 'Other Income', type: 'income' },
+  { code: '4201-REV-DISCOUNT', name: 'Discounts & Allowances', type: 'income' },
+  { code: '4202-REV-TAX', name: 'Tax Collection (Output VAT)', type: 'income' },
 
   /* ======================== EXPENSES ======================== */
   { code: '5000-EXP-SALARY', name: 'Salary Expense', type: 'expense' },
   { code: '5001-EXP-FUEL', name: 'Fuel Expense', type: 'expense' },
   { code: '5002-EXP-REPAIR', name: 'Repair Expense', type: 'expense' },
   { code: '5003-EXP-OFFICE', name: 'Office Expense', type: 'expense' },
-  { code: '5004-EXP-OTHER', name: 'Other / Miscellaneous Expense', type: 'expense' },
+  { code: '5004-EXP-OTHER', name: 'Other Expense', type: 'expense' },
   { code: '5005-EXP-TRANSPORT', name: 'Transport Expense', type: 'expense' },
   { code: '5006-EXP-MAINTENANCE', name: 'Maintenance Expense', type: 'expense' },
   { code: '5007-EXP-UTILITY', name: 'Utility Expense', type: 'expense' },
+  { code: '5008-EXP-WRITEOFF', name: 'Inventory Write-off Expense', type: 'expense' },
+  { code: '5009-EXP-TAX', name: 'Tax Payment (Input VAT / AIT)', type: 'expense' },
+  { code: '5010-EXP-MISC', name: 'Miscellaneous Expense', type: 'expense' },
+  { code: '5600-EXP-DEPRECIATION', name: 'Depreciation Expense', type: 'expense' },
 
   /* ======================== MISCELLANEOUS ======================== */
-  { code: '9999-MISC-EXPENSE', name: 'Miscellaneous Expense (Catch-All)', type: 'expense' },
+  { code: '9999-MISC-EXPENSE', name: 'Catch-All Miscellaneous Expense', type: 'expense' },
 ];
 
 /**

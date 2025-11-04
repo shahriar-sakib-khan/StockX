@@ -26,11 +26,10 @@ export { default as VehicleCard } from "./vehicle/components/VehicleCard";
 export { default as VehicleInfoModal } from "./vehicle/components/VehicleInfoModal";
 export { default as VehicleTransactionModal } from "./vehicle/components/VehicleTransactionModal";
 
-// shop
-export { default as ShopCard } from "./shop/components/ShopCard";
-export { default as ShopleInfoModal } from "./shop/components/ShopleInfoModal";
-
 // brand
 export { default as BrandCard } from "./brands/components/BrandCard";
 export { default as BrandGrid } from "./brands/components/BrandGrid";
 export { default as BrandHeader } from "./brands/components/BrandHeader";
+
+// shop
+export { ShopCard, ShopInfoModal, ShopTransactionModal } from "./shop";
