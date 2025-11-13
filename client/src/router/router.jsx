@@ -19,12 +19,15 @@ import {
     InvitationsPage,
     BrandSelectionPage,
     ShopsPage,
+    ExchangePage,
 } from "../pages";
 import Layout from "../components/layouts/Layout";
 import { AppContainer } from "../components";
 import StaffPage from "../pages/StaffPage";
 
-import { default as ExchangePage } from "../features/exchange/ExchangePage";
+// import { default as ExchangePage } from "@/features/exchange/pages/ExchangePage";
+// import { default as ExchangePage } from "@/features/exchange/exchange/ExchangePage";
+// import { default as ExchangePage } from "@/features/src/pages/ExchangePage";
 
 const router = createBrowserRouter([
     {
@@ -115,7 +118,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "exchange",
+                path: "exchange/:shopId",
                 element: (
                     <AppContainer>
                         <ExchangePage />

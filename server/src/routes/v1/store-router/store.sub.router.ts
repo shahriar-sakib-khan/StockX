@@ -11,6 +11,7 @@ import { transactionRouter } from '@/feats/transactionModule/index.js';
 import { cylinderRouter, cylinderTxRouter } from '@/feats/cylinderModule/index.js';
 import { regulatorRouter, regulatorTxRouter } from '@/feats/regulatorModule/index.js';
 import { stoveRouter, stoveTxRouter } from '@/feats/stoveModule/index.js';
+import { exchangeRouter } from '@/feats/exchangeModule/index.js';
 
 /**
  * @swagger
@@ -48,5 +49,8 @@ router.use('/', stoveTxRouter);
 
 /** ----------------- Transaction routes ----------------- */
 router.use('/', transactionRouter);
+
+/** ----------------- Exchange routes ----------------- */
+router.use('/', exchangeRouter);
 
 export default router;

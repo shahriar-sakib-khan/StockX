@@ -11,7 +11,7 @@ export default function ShopCard({
 }) {
     return (
         <div className="flex w-70 flex-col overflow-hidden rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
-            {/* ---------- IMAGE SECTION ---------- */}
+            {/* ---------- Image Section ---------- */}
             <section className="relative flex items-center justify-center bg-gray-100/90">
                 <img
                     src={shopInfo?.image || DefaultImage}
@@ -25,7 +25,8 @@ export default function ShopCard({
                     <DeleteIcon className="size-5 text-red-500/80" />
                 </button>
             </section>
-            {/* ---------- SHOP INFO SECTION ---------- */}
+
+            {/* ---------- Info Section ---------- */}
             <section className="flex flex-col gap-1 px-6 py-4">
                 <span className="text-lg font-semibold text-gray-700">
                     {shopInfo?.shopName || "Unknown Shop"}
@@ -39,45 +40,43 @@ export default function ShopCard({
                 <span className="truncate text-sm text-gray-500">
                     {shopInfo?.location || "No location provided"}
                 </span>
-            </section>
-            {/* ---------- ACTION BUTTONS ---------- */}
-            <section className="mt-2 mb-4 flex flex-col items-center gap-2 px-4">
-                {/* Total Due before Clear Due */}
-                <span className="text-md font-semibold text-gray-700">
-                    Total Due: ৳{shopInfo?.totalDue || 0}
+
+                {/* ---------- Total Due Display ---------- */}
+                <span className="mt-2 text-sm font-semibold text-red-500">
+                    Total Due: {shopInfo?.totalDue ?? 0} ৳
                 </span>
-
-                <div className="flex items-center justify-center gap-3">
-                    <button
-                        onClick={onRecordTransaction}
-                        className="primary-button px-4 py-1"
-                    >
-                        Clear Due
-                    </button>
-                    <button
-                        onClick={onShowHistory}
-                        className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
-                    >
-                        History
-                    </button>
-                </div>
             </section>
-            {/* ---------- UPDATE & EXCHANGE ---------- */}
-            <div className="flex flex-col items-center gap-2 px-4 pb-4">
-                <button
-                    onClick={onUpdate}
-                    className="w-full bg-gray-200 px-4 py-1 font-semibold text-gray-500 transition-all duration-100 hover:bg-gray-300/70"
-                >
-                    Update
-                </button>
 
+            {/* ---------- Action Buttons ---------- */}
+            <section className="mt-2 mb-4 flex items-center justify-center gap-3 px-4">
                 <button
-                    onClick={onExchangeCylinder}
-                    className="w-full rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
+                    onClick={onRecordTransaction}
+                    className="primary-button px-4 py-1"
                 >
-                    Exchange
+                    Clear Due
                 </button>
-            </div>
+                <button
+                    onClick={onShowHistory}
+                    className="rounded bg-gray-200 px-4 py-1 hover:bg-gray-300/70"
+                >
+                    History
+                </button>
+            </section>
+
+            {/* ---------- Footer Buttons ---------- */}
+            <button
+                onClick={onUpdate}
+                className="bg-gray-200 px-4 py-1 font-semibold text-gray-400 transition-all duration-100 hover:bg-gray-300/70"
+            >
+                Update
+            </button>
+
+            <button
+                onClick={onExchangeCylinder}
+                className="bg-gray-100 px-4 py-1 font-semibold text-gray-600 transition-all duration-100 hover:bg-gray-200/70"
+            >
+                Exchange
+            </button>
         </div>
     );
 }

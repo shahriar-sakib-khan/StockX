@@ -19,8 +19,17 @@ export const getCylinderInventory = async (req: Request, res: Response) => {
   // Defaulting to standard domestic 12kg and 22mm regulator
   const size = Number(req.query.size) || 12;
   const regulatorType = Number(req.query.regulatorType) || 22;
+  const mode =
+    req.query.mode === 'active' || req.query.mode === 'detailed' || req.query.mode === 'all'
+      ? (req.query.mode as 'active' | 'all' | 'detailed')
+      : 'all'; // fallback to 'all' if invalid mode is given
 
-  const { cylinders } = await cylinderService.getCylinderInventory(storeId, size, regulatorType);
+  const { cylinders } = await cylinderService.getCylinderInventory(
+    storeId,
+    size,
+    regulatorType,
+    mode
+  );
 
   res.status(StatusCodes.OK).json({
     success: true,
