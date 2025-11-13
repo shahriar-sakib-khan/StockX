@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "@/stores/useAuthStore";
 import { logOnce } from "./utils/logOnce";
@@ -17,6 +18,7 @@ import {
 } from "@/features/shop/hooks/shopHooks";
 
 export default function ShopsPage() {
+    const navigate = useNavigate();
     const storeId = useAuthStore((state) => state.currentStore?.id);
 
     const {
@@ -265,12 +267,10 @@ export default function ShopsPage() {
                                     "clear_due",
                                 )
                             }
-                            onExchangeCylinder={() =>
-                                openTransactionModal(
-                                    shop.id ?? shop._id,
-                                    "exchange",
-                                )
-                            }
+                            onExchangeCylinder={() => {
+                                // Navigate to exchange page with shop ID in the URL
+                                navigate(`/exchange/${shop.id ?? shop._id}`);
+                            }}
                             onShowHistory={() =>
                                 openHistoryModal(shop.id ?? shop._id)
                             }

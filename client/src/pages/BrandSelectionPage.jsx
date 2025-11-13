@@ -7,11 +7,11 @@ import { useBrands, useUpdateBrands } from "@/features/brands/hooks/useBrand";
 
 import { BrandHeader, BrandGrid } from "@/features";
 
-export default function BrandSelectionPage({ onDone }) {
+export default function BrandSelectionPage({ onDone, mode }) {    
     const navigate = useNavigate();
     const storeId = useAuthStore((state) => state.currentStore)?.id;
 
-    const { data: brands = [], isLoading, isError } = useBrands(storeId);
+    const { data: brands = [], isLoading, isError } = useBrands(storeId, mode);
     const updateBrands = useUpdateBrands(
         storeId,
         onDone || (() => navigate("/dashboard")),

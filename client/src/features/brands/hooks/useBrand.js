@@ -5,10 +5,10 @@ import { getBrands, updateBrands } from "../services/brandServices";
 /**
  * Fetch brands for a given store
  */
-export const useBrands = (storeId) => {
+export const useBrands = (storeId, mode = "all") => {
     return useQuery({
-        queryKey: ["brands", storeId],
-        queryFn: () => getBrands(storeId),
+        queryKey: ["brands", storeId, mode],
+        queryFn: () => getBrands(storeId, mode),
         enabled: !!storeId,
     });
 };

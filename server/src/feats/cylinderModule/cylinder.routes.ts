@@ -15,10 +15,11 @@ const router = Router({ mergeParams: true });
  * ----------------- Cylinder Inventory Routes -----------------
  */
 /**
- * @route   GET /stores/:storeId/cylinders/inventory ?size=12&regulatorType=22
+ * @route   GET /stores/:storeId/cylinders/inventory ?size=12&regulatorType=22?mode=active|all|detailed
  * @desc    Get active cylinders in a store, optionally filtered by size and regulator type
  * @query   size - number (default 12)
  * @query   regulatorType - number (default 22)
+ * @query   mode - string ('active' | 'all' | 'detailed')
  * @access  Authenticated
  */
 router.get('/cylinders/inventory', cylinderController.getCylinderInventory);

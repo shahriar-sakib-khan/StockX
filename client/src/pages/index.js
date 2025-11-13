@@ -18,7 +18,7 @@ export { default as ShopsPage } from "./ShopsPage";
 export { default as VehiclesPage } from "./VehiclesPage";
 export { default as HistoryPage } from "./HistoryPage";
 export { default as MembersPage } from "./MembersPage";
-// export { default as ExchangePage } from "./ExchangePage";
+export { default as ExchangePage } from "./ExchangePage";
 
 export { default as ShowAllStores } from "./ShowAllStoresPage";
 export { default as AddStore } from "./AddStorePage";
