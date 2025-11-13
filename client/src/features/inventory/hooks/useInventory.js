@@ -10,21 +10,24 @@ import {
  * @param {string} storeId - The ID of the store
  * @param {number} size - The size of the cylinder
  * @param {string} regulatorType - The type of the regulator
+ * @param {string} mode - The mode of the inventory
  * @returns {object} React Query object containing { data, isLoading, isError, error }
  */
-export const useCylinderInventory = (storeId, size, regulatorType) =>
+export const useCylinderInventory = (storeId, size, regulatorType, mode) =>
     useQuery({
         queryKey: [
             "cylinderInventory",
             storeId,
             String(size || "all"),
             String(regulatorType || "all"),
+            String(mode || "active"),
         ],
         queryFn: () =>
             getCylinderInventory({
                 storeId,
                 size: size ? Number(size) : 0,
                 regulatorType: regulatorType ? String(regulatorType) : "",
+                mode: mode ? String(mode) : "active",
             }),
         enabled: !!storeId,
         keepPreviousData: true,

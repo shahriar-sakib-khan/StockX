@@ -6,44 +6,83 @@ import { Errors } from '@/error/index.js';
 /** ----------------- Cylinder Inventory Service ----------------- */
 
 /**
+ * ----------------- Unified Cylinder Inventory Fetch Service -----------------
+ *
  * @function getCylinderInventory
- * @description Get cylinder inventory for a store, optionally filtered by size and regulator type.
- * rules:
- * - Frontend sends only changed brands (optimized).
- * - Bulk updates both brands and cylinders.
- * @param {string} storeId - The ID of the store.
- * @param {number} size - The size of the cylinder.
- * @param {number} regulatorType - The type of the regulator.
- * @returns {Promise<any>} A promise that resolves to an array of cylinder inventory.
+ * @description Fetch cylinder inventory for a store with mode-based detail level.
+ *
+ * Modes:
+ * - 'active'   → Only active cylinders.
+ * - 'all'      → All cylinders (active + inactive).
+ * - 'detailed' → All fields with no filtering.
+ *
+ * @param {string} storeId - Store ID.
+ * @param {number} size - Cylinder size.
+ * @param {number} regulatorType - Regulator type.
+ * @param {'active' | 'all' | 'detailed'} mode - Detail mode.
+ * @returns {Promise<cylinderSanitizers.SanitizedCylinders>}
  */
 export const getCylinderInventory = async (
   storeId: string,
   size: number,
-  regulatorType: number
+  regulatorType: number,
+  mode: 'active' | 'all' | 'detailed' = 'active'
 ): Promise<cylinderSanitizers.SanitizedCylinders> => {
   if (!size) throw new Errors.BadRequestError('Size is required');
   if (!regulatorType) throw new Errors.BadRequestError('Regulator type is required');
 
-  const cylinders = await Cylinder.find({
+  // Base filter
+  const filter: any = {
     store: new Types.ObjectId(storeId),
     size,
     regulatorType,
-    isActive: true,
-  })
-    .select('id sku brandName cylinderImage price fullCount emptyCount defectedCount')
-    .lean();
+  };
+
+  // Mode-based filter
+  if (mode === 'active') filter.isActive = true;
+
+  // Query
+  const cylinders = await Cylinder.find(filter).lean();
+
+  // Mode-based field selection
+  let selectedFields: (keyof cylinderSanitizers.SanitizedCylinder)[] | undefined = undefined;
+
+  switch (mode) {
+    case 'active':
+      selectedFields = [
+        'id',
+        'sku',
+        'brandName',
+        'cylinderImage',
+        'price',
+        'fullCount',
+        'emptyCount',
+        'defectedCount',
+      ];
+      break;
+
+    case 'all':
+      selectedFields = [
+        'id',
+        'sku',
+        'brandName',
+        'cylinderImage',
+        'price',
+        'fullCount',
+        'emptyCount',
+        'defectedCount',
+        'isActive',
+      ];
+      break;
+
+    case 'detailed':
+      // return full detailed object → no selection
+      selectedFields = undefined;
+      break;
+  }
 
   return {
-    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, [
-      'id',
-      'sku',
-      'brandName',
-      'cylinderImage',
-      'price',
-      'fullCount',
-      'emptyCount',
-      'defectedCount',
-    ]).cylinders,
+    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, selectedFields).cylinders,
   };
 };
 

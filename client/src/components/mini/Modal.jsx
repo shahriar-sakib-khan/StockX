@@ -15,6 +15,7 @@ export default function Modal({
         sm: "max-w-sm",
         md: "max-w-md",
         lg: "max-w-3xl",
+        vlg: "max-w-5xl",
         full: "max-w-[95vw] h-[90vh]",
     };
 

@@ -5,15 +5,17 @@ import API from "@/services/apiClient";
  * @param {string} storeId - The ID of the store.
  * @param {number} size - The size of the cylinder.
  * @param {string} regulatorType - The type of the regulator.
+ * @param {string} mode - The mode of the inventory.
  * @returns {Promise<any>} Response containing the cylinder inventory.
  */
 export const getCylinderInventory = async ({
     storeId,
     size,
     regulatorType,
+    mode,
 }) => {
     const { data } = await API.get(`/stores/${storeId}/cylinders/inventory`, {
-        params: { size, regulatorType },
+        params: { size, regulatorType, mode },
     });
 
     return data || [];
