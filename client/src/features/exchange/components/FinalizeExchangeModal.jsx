@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-
 import { toast } from "sonner";
+
 import { useSingleShop } from "@/features/shop/hooks/shopHooks";
 import { useExchangeStore } from "@/stores/useExchangeStore";
 
-import FinalizeExchangeHeader from "../utils/FinalizeExchangeHeader";
-import GivenCylinders from "../utils/GivenCylinders";
-import TakenCylinders from "../utils/TakenCylinders";
-import PaymentExtras from "../utils/PaymentExtras";
-import PaymentSummary from "../utils/PaymentSummary";
-import PrintStyles from "../utils/PrintStyles";
+import {
+    FinalizeExchangeHeader,
+    GivenCylinders,
+    TakenCylinders,
+    PaymentExtras,
+    PaymentSummary,
+    PrintStyles,
+} from "../utils";
 
 export default function FinalizeExchangeModal({
     open,
@@ -103,10 +105,7 @@ export default function FinalizeExchangeModal({
             createdAtRef.current = new Date();
             setTotalAmount(
                 Number(
-                    payload?.totalAmount ??
-                        payload?.totalPrice ??
-                        totals?.totalAmount ??
-                        sumGiveValue,
+                    payload?.totalAmount ?? payload?.totalPrice ?? sumGiveValue,
                 ),
             );
             setPaidAmount(

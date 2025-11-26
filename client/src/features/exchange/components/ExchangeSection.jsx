@@ -4,13 +4,13 @@ import clsx from "clsx";
 import { useExchangeStore } from "@/stores/useExchangeStore";
 import { ConfirmDialog } from "@/components";
 
-import { AddButton } from "../utils";
 import {
     GiveCylinderModal,
     BrandSelectionModal,
     QuantityModal,
-    ExchangeList,
-} from "./index";
+} from "@/features/common/cylinderSelection";
+import { AddButton } from "../utils";
+import { ExchangeList } from "./index";
 
 export default function ExchangeSection({ type }) {
     const [isModalOpen, setIsModalOpen] = useState(false);

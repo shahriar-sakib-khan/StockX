@@ -6,8 +6,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useCylinderInventory } from "@/features/inventory/hooks";
 import { SIZES, TYPES } from "@/constants/cylinderSizeAndTypes";
 
-import { CylinderFilters } from "../utils/index";
-import { QuantityModal } from "./index";
+import { QuantityModal, CylinderFilters } from "./index";
 
 export default function GiveCylinderModal({ isOpen, onClose, onSelect }) {
     const storeId = useAuthStore((s) => s.currentStore?.id);

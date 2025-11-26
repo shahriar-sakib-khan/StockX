@@ -3,7 +3,10 @@ import React, { useState } from "react";
 import { ConfirmDialog } from "@/components";
 import { useExchangeStore } from "@/stores/useExchangeStore";
 
-import { QuantityModal, TakeCylindersModal } from "@/features/exchange/components";
+import {
+    QuantityModal,
+    TakeCylinderModal,
+} from "@/features/common/cylinderSelection";
 
 export default function ExchangeList({ type }) {
     const list = useExchangeStore((s) => s[type]);
@@ -146,7 +149,7 @@ export default function ExchangeList({ type }) {
                         onDone={handleEditDone}
                     />
                 ) : (
-                    <TakeCylindersModal
+                    <TakeCylinderModal
                         isOpen
                         onClose={() => setEditingItem(null)}
                         brand={{

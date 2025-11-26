@@ -235,13 +235,7 @@ export const useExchangeStore = create(
             const s = get();
 
             const normalizeReg = (reg) =>
-                String(reg).includes("mm") ? String(reg) : `${reg}mm`;
-
-            // compute totalAmount from give list
-            const totalAmount = s.give.reduce(
-                (acc, it) => acc + (Number(it.computedTotal) || 0),
-                0,
-            );
+                String(reg).includes("mm") ? String(reg) - "mm" : String(reg);
 
             return {
                 shopId,
@@ -253,7 +247,7 @@ export const useExchangeStore = create(
                         regulatorType: normalizeReg(it.regulatorType || ""),
                         quantity: Number(it.quantity) || 0,
                         price: Number(it.price) || 0,
-                        amount: Number(it.computedTotal) || 0,
+                        amount: Number(it.total) || 0,
                     })),
                     take: s.take.map((it) => ({
                         id: it.id,
@@ -263,11 +257,14 @@ export const useExchangeStore = create(
                         quantity: Number(it.quantity) || 0,
                     })),
                 },
-                totalPrice: s.give.reduce(
+                totalAmount: s.give.reduce(
                     (acc, it) => acc + (Number(it.total) || 0),
                     0,
                 ),
-                totalAmount,
+                totalPrice: s.give.reduce(
+                    (acc, it) => acc + (Number(it.computedTotal) || 0),
+                    0,
+                ),
                 ...extra,
             };
         },

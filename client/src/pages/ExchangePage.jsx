@@ -14,9 +14,6 @@ export default function ExchangePage() {
     const exchangeStore = useExchangeStore();
     const { give, take, reset, getTotals, buildPayload } = exchangeStore;
 
-    // ---------------------------------------------------------
-    //  NEW: local state for modal
-    // ---------------------------------------------------------
     const [finalizeOpen, setFinalizeOpen] = useState(false);
     const [pendingPayload, setPendingPayload] = useState(null);
 
@@ -34,9 +31,7 @@ export default function ExchangePage() {
         },
     });
 
-    // ---------------------------------------------------------
-    //  UPDATED: Submit → build payload → open Finalize Modal
-    // ---------------------------------------------------------
+    // Submit → build payload → open Finalize Modal
     const handleSubmit = () => {
         if (!storeId) {
             toast.error("No store selected.");

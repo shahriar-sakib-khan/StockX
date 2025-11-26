@@ -1,4 +1,4 @@
-export default function GivenCylinders({ items = [] }) {
+export default function GivenCylinders({ items = [] }) {    
     return (
         <>
             <div className="mt-6 mb-2 text-sm font-bold tracking-wider text-gray-700 uppercase">
@@ -20,7 +20,7 @@ export default function GivenCylinders({ items = [] }) {
                         {Number(item.price).toLocaleString()}
                     </div>
                     <div className="col-span-2 text-right font-semibold">
-                        {Number(item.price * item.quantity).toLocaleString()}
+                        {Number(item.amount).toLocaleString()}
                     </div>
                 </div>
             ))}

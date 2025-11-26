@@ -5,14 +5,14 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { SIZES, TYPES } from "@/constants/cylinderSizeAndTypes";
 import { useCylinderInventory } from "@/features/inventory/hooks";
 
-import { CylinderFilters } from "../utils/index";
+import { CylinderFilters } from "./index";
 
 /**
- * TakeCylindersModal
+ * TakeCylinderModal
  * - For selecting a size + regulator + quantity.
  * - Prefills quantity if provided (e.g., editing item from exchange list).
  */
-export default function TakeCylindersModal({
+export default function TakeCylinderModal({
     isOpen,
     onClose,
     brand,

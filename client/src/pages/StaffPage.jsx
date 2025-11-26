@@ -1,34 +1,15 @@
 import { useState } from "react";
-import { StaffCard } from "../features";
-import { useAuthStore } from "../stores/useAuthStore";
-import { inviteStaff } from "../features/authentication/services/authServices";
 import { MdArrowDropDown } from "react-icons/md";
+
+import { useAuthStore } from "../stores/useAuthStore";
+
+import { inviteStaff } from "@/features/authentication/services/authServices";
+import { StaffCard } from "@/features";
 
 export default function StaffPage() {
     const currentStore = useAuthStore((state) => state.currentStore);
 
-    const [staffList, setStaffList] = useState([
-        // {
-        //     id: Date.now(),
-        //     name: "Salif bro",
-        //     role: "Friend",
-        //     salary: "18,000/-",
-        //     paid: "15,000/-",
-        //     remaining: "3,000/-",
-        //     salaryStatus: "Paid",
-        //     lastPaidDate: "12 August, 2025",
-        // },
-        // {
-        //     id: Date.now() + 1,
-        //     name: "Sakib bro",
-        //     role: "Friend",
-        //     salary: "18,000/-",
-        //     paid: "15,000/-",
-        //     remaining: "3,000/-",
-        //     salaryStatus: "Paid",
-        //     lastPaidDate: "12 August, 2025",
-        // },
-    ]);
+    const [staffList, setStaffList] = useState([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -73,8 +54,8 @@ export default function StaffPage() {
             console.error(err);
             setErrorMsg(
                 err?.response?.data?.errors?.[0]?.message ||
-                err?.response?.data?.message ||
-                "Failed to send invite"
+                    err?.response?.data?.message ||
+                    "Failed to send invite",
             );
         } finally {
             setIsLoading(false);
@@ -86,7 +67,7 @@ export default function StaffPage() {
             {/* header */}
             <div className="flex items-center justify-between px-4">
                 <h2 className="text-2xl font-semibold text-gray-500">
-                    Staff Salary
+                    Staff List
                 </h2>
                 <button
                     onClick={onAddClick}
@@ -111,8 +92,8 @@ export default function StaffPage() {
             {/* invite modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
-                        <h3 className="text-xl font-semibold mb-4">
+                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+                        <h3 className="mb-4 text-xl font-semibold">
                             Invite Staff
                         </h3>
                         <input
@@ -120,7 +101,7 @@ export default function StaffPage() {
                             placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full mb-3 rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="mb-3 w-full rounded border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                         />
 
                         {/* Role dropdown */}
@@ -128,7 +109,7 @@ export default function StaffPage() {
                             <select
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="w-full rounded border border-gray-300 p-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="w-full appearance-none rounded border border-gray-300 p-2 pr-8 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             >
                                 <option value="">Select Role</option>
                                 {roleOptions.map((r) => (
@@ -137,7 +118,7 @@ export default function StaffPage() {
                                     </option>
                                 ))}
                             </select>
-                            <MdArrowDropDown className="absolute right-2 top-2.5 pointer-events-none text-gray-500 text-xl" />
+                            <MdArrowDropDown className="pointer-events-none absolute top-2.5 right-2 text-xl text-gray-500" />
                         </div>
 
                         {/* Lifespan dropdown */}
@@ -145,7 +126,7 @@ export default function StaffPage() {
                             <select
                                 value={lifespan}
                                 onChange={(e) => setLifespan(e.target.value)}
-                                className="w-full rounded border border-gray-300 p-2 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="w-full appearance-none rounded border border-gray-300 p-2 pr-8 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             >
                                 <option value="">Select Lifespan</option>
                                 {lifespanOptions.map((l) => (
@@ -154,23 +135,23 @@ export default function StaffPage() {
                                     </option>
                                 ))}
                             </select>
-                            <MdArrowDropDown className="absolute right-2 top-2.5 pointer-events-none text-gray-500 text-xl" />
+                            <MdArrowDropDown className="pointer-events-none absolute top-2.5 right-2 text-xl text-gray-500" />
                         </div>
 
                         {errorMsg && (
-                            <p className="text-red-500 mb-2">{errorMsg}</p>
+                            <p className="mb-2 text-red-500">{errorMsg}</p>
                         )}
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setIsModalOpen(false)}
-                                className="px-4 py-2 rounded border border-gray-300"
+                                className="rounded border border-gray-300 px-4 py-2"
                                 disabled={isLoading}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={onSendInvite}
-                                className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+                                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                                 disabled={isLoading}
                             >
                                 {isLoading ? "Sending..." : "Send"}

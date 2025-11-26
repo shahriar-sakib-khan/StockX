@@ -7,6 +7,7 @@ import { CgProfile as ProfileIcon } from "react-icons/cg";
 import { MdOutlineSettings as SettingsIcon } from "react-icons/md";
 import { HiOutlineUserGroup as MembersIcon } from "react-icons/hi2";
 import { GoPeople as StaffIcon } from "react-icons/go";
+import { TbUsersGroup as CommunityIcon } from "react-icons/tb";
 
 export const pagesConfig = {
     "/profile": { title: "Profile", icon: ProfileIcon },
@@ -18,4 +19,5 @@ export const pagesConfig = {
     "/settings": { title: "Settings", icon: SettingsIcon },
     "/members": { title: "Members", icon: MembersIcon },
     "/staff": { title: "Staff", icon: StaffIcon },
+    "/community": { title: "Community", icon: CommunityIcon },
 };

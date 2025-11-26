@@ -1,33 +1,36 @@
 import { createBrowserRouter } from "react-router-dom";
+
+import { AppContainer, Layout } from "../components";
+
 import {
     LandingPage,
     LoginPage,
     SignupPage,
     ErrorPage,
-    Dashboard,
+    // system
+    ServicesPage,
+    PricingPage,
+    SupportPage,
+    // general
     SettingsPage,
+    ProfilePage,
+    InvitationsPage,
+    ShowAllStores,
+    // sidebar
+    Dashboard,
     InventoryPage,
     VehiclesPage,
-    ProfilePage,
-    HistoryPage,
-    MembersPage,
-    SupportPage,
-    PricingPage,
-    ServicesPage,
-    ShowAllStores,
-    AddStore,
-    InvitationsPage,
-    BrandSelectionPage,
     ShopsPage,
+    StaffPage,
+    HistoryPage,
+    CommunityPage,
+    // sub pages
     ExchangePage,
+    AddStore,
+    BrandSelectionPage,
 } from "../pages";
-import Layout from "../components/layouts/Layout";
-import { AppContainer } from "../components";
-import StaffPage from "../pages/StaffPage";
 
-// import { default as ExchangePage } from "@/features/exchange/pages/ExchangePage";
-// import { default as ExchangePage } from "@/features/exchange/exchange/ExchangePage";
-// import { default as ExchangePage } from "@/features/src/pages/ExchangePage";
+import { MyPostsPage, CreateSwapPostPage } from "@/features/community/pages";
 
 const router = createBrowserRouter([
     {
@@ -94,18 +97,34 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "profile",
+                path: "community",
                 element: (
                     <AppContainer>
-                        <ProfilePage />
+                        <CommunityPage />
                     </AppContainer>
                 ),
             },
             {
-                path: "members",
+                path: "community/create",
                 element: (
                     <AppContainer>
-                        <MembersPage />
+                        <CreateSwapPostPage />
+                    </AppContainer>
+                ),
+            },
+            {
+                path: "community/my-posts",
+                element: (
+                    <AppContainer>
+                        <MyPostsPage />
+                    </AppContainer>
+                ),
+            },
+            {
+                path: "profile",
+                element: (
+                    <AppContainer>
+                        <ProfilePage />
                     </AppContainer>
                 ),
             },

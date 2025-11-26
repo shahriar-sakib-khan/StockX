@@ -1,8 +1,9 @@
-import { LuSquareChevronLeft as MenuIcon } from "react-icons/lu";
-import { pagesConfig } from "../../pages/utils/pagesConfig";
 import { NavLink } from "react-router-dom";
-import StoreMenu from "../ui/StoreMenu";
-import { useUIStore } from "../../stores/useUIStore";
+import { LuSquareChevronLeft as MenuIcon } from "react-icons/lu";
+
+import { StoreMenu } from "@/components";
+import { useUIStore } from "@/stores/useUIStore";
+import { pagesConfig } from "@/pages/utils/pagesConfig";
 
 export default function Sidebar() {
     const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
@@ -14,6 +15,7 @@ export default function Sidebar() {
     const VehicleIcon = pagesConfig["/vehicles"]?.icon;
     const HistoryIcon = pagesConfig["/history"]?.icon;
     const StaffIcon = pagesConfig["/staff"]?.icon;
+    const CommunityIcon = pagesConfig["/community"]?.icon;
 
     const sideBarHeading = (headingText) => (
         <h2
@@ -103,6 +105,11 @@ export default function Sidebar() {
                             <StaffIcon className="shrink-0 text-xl text-gray-700" />,
                             "Staff",
                             "/staff",
+                        )}
+                        {navItem(
+                            <CommunityIcon className="shrink-0 text-xl text-gray-700" />,
+                            "Community",
+                            "/community",
                         )}
                     </div>
                 </nav>

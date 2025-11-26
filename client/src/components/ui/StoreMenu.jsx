@@ -1,12 +1,12 @@
-// src/components/sidebar/StoreMenu.jsx
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { MdExpandMore as ExpandIcon } from "react-icons/md";
 import { IoAdd as AddIcon } from "react-icons/io5";
 import { useUIStore } from "../../stores/useUIStore";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { pagesConfig } from "../../pages/utils/pagesConfig";
 import MenuContainer from "./MenuContainer";
-import { useEffect } from "react";
 
 export default function StoreMenu() {
     const navigate = useNavigate();

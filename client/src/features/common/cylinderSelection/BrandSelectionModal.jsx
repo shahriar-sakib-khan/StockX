@@ -2,9 +2,9 @@ import { useState } from "react";
 
 import { Modal } from "@/components";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useBrands } from "@/features/brands/hooks/useBrand";
 
-import { TakeCylindersModal } from "./index";
+import { useBrands } from "@/features/brands/hooks/useBrand";
+import { TakeCylinderModal } from "./index";
 
 export default function BrandSelectionModal({
     isOpen,
@@ -23,7 +23,7 @@ export default function BrandSelectionModal({
     };
 
     const handleDone = (payload) => {
-        // payload from TakeCylindersModal: { brand, cylinder, quantity }
+        // payload from TakeCylinderModal: { brand, cylinder, quantity }
         // forward to parent -> ExchangeSection will add to store
         onBrandSelect(payload);
         setTakeModalOpen(false);
@@ -85,7 +85,7 @@ export default function BrandSelectionModal({
                 )}
             </Modal>
 
-            <TakeCylindersModal
+            <TakeCylinderModal
                 isOpen={takeModalOpen}
                 onClose={() => setTakeModalOpen(false)}
                 brand={selectedBrand}
