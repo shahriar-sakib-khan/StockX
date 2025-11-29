@@ -1,15 +1,17 @@
 import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 
+// Components
 import { Tabs, Modal } from "@/components";
-import { CylinderTable, StoveTable, RegulatorTable } from "@/features";
-
 import BrandSelection from "./BrandSelectionPage";
+import { CylinderTable, StoveTable, RegulatorTable } from "@/features";
 
 export default function InventoryPage() {
     const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
 
     const handleBrandSelectionDone = () => {
         setIsBrandModalOpen(false);
+        // Optionally trigger a refetch here if needed
     };
 
     const tabs = [
@@ -19,44 +21,43 @@ export default function InventoryPage() {
     ];
 
     return (
-        <div className="wrapper flex h-[var(--height-with-nav-titlebar)] flex-col gap-2 bg-gray-100 p-2">
-            {/* Top bar with action */}
-            <div className="flex items-center justify-between">
-                <h1 className="text-lg font-semibold text-gray-700">
-                    Inventory
-                </h1>
+        <div className="flex h-full flex-col gap-4 bg-gray-50 p-4 md:p-6">
+            {/* Top Action Bar */}
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Inventory Management</h1>
+                    <p className="text-sm text-gray-500">Manage stock, prices, and defected items.</p>
+                </div>
 
                 <button
                     onClick={() => setIsBrandModalOpen(true)}
-                    className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow transition-all hover:bg-emerald-700 active:bg-emerald-800"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 active:scale-95 sm:w-auto"
                 >
-                    Select Brand
+                    <FaPlus /> Manage Brands
                 </button>
             </div>
 
-            <Tabs tabs={tabs} defaultActive={tabs[0].key}>
-                {({ activeTab }) => (
-                    <>
-                        {activeTab === "cylinders" && (
-                            <CylinderTable
-                                type="cylinders"
-                            />
-                        )}
-                        {activeTab === "stoves" && <StoveTable type="stoves" />}
-                        {activeTab === "regulators" && (
-                            <RegulatorTable type="regulators" />
-                        )}
-                    </>
-                )}
-            </Tabs>
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <Tabs tabs={tabs} defaultActive={tabs[0].key}>
+                    {({ activeTab }) => (
+                        <div className="h-full overflow-y-auto p-4">
+                            {activeTab === "cylinders" && <CylinderTable type="cylinders" />}
+                            {activeTab === "stoves" && <StoveTable type="stoves" />}
+                            {activeTab === "regulators" && <RegulatorTable type="regulators" />}
+                        </div>
+                    )}
+                </Tabs>
+            </div>
 
+            {/* Brand Selection Modal */}
             <Modal
                 isOpen={isBrandModalOpen}
                 onClose={() => setIsBrandModalOpen(false)}
-                title="Select Brands"
+                title="Manage Store Brands"
                 size="lg"
             >
-                <BrandSelection onDone={handleBrandSelectionDone} />
+                <BrandSelection onDone={handleBrandSelectionDone} mode="modal" />
             </Modal>
         </div>
     );

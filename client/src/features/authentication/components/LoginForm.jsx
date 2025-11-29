@@ -1,28 +1,18 @@
-import { Button, Divider, FormInputField } from "@/components";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { login } from "../services/authServices";
-import useInput from "@/hooks/useInput";
-import { useAuthStore } from "@/stores/useAuthStore";
 import { FcGoogle as GoogleIcon } from "react-icons/fc";
+
+import useInput from "@/hooks/useInput";
+import { login } from "../services/authServices";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { Button, Divider, FormInputField } from "@/components";
 
 export default function LoginForm() {
     const navigate = useNavigate();
-    const location = useLocation();
-
     const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
-    const [loginIdentifier, resetLoginIdentifier, loginIdentifierObj] =
-        useInput("loginIdentifier", ""); // email or username
-    const [password, resetPassword, passwordObj] = useInput(
-        "loginPassword",
-        "",
-    );
-
-    const resetValues = () => {
-        resetLoginIdentifier();
-        resetPassword();
-    };
+    const [loginIdentifier, resetLoginIdentifier, loginIdentifierObj] = useInput("loginIdentifier", "");
+    const [password, resetPassword, passwordObj] = useInput("loginPassword", "");
 
     const {
         mutate: signIn,
@@ -34,28 +24,8 @@ export default function LoginForm() {
         onSuccess: async () => {
             await initializeAuth();
             navigate("/stores", { replace: true });
-
-            // const { workspaces } = await initializeAuth();
-            // if (!workspaces || workspaces.length === 0) {
-            // } else if (workspaces.length === 1) {
-            //     // set this workspace
-            //     setWorkspace(workspaces[0]);
-
-            //     const res = await getWorkspaceDivisions(workspaces[0].id);
-            //     const divisions = res?.divisions || [];
-            //     if (divisions.length === 0) {
-            //         navigate("/createDivision", { replace: true });
-            //     } else if (divisions.length === 1) {
-            //         setDivision(divisions[0]);
-            //         navigate(location.state?.redirectUrl || "/dashboard", { replace: true });
-            //     } else {
-            //         navigate("/selectDivision", { replace: true });
-            //     }
-            // } else {
-            //     navigate("/selectWorkspace", { replace: true });
-            // }
-
-            resetValues();
+            resetLoginIdentifier();
+            resetPassword();
         },
     });
 
@@ -64,50 +34,81 @@ export default function LoginForm() {
     };
 
     return (
-        <section className="flex flex-col gap-4 rounded-lg border-0 border-gray-300 bg-white p-8 shadow-lg">
-            <div className="flex w-full cursor-pointer items-center justify-center gap-2 rounded py-2 text-center outline-1 outline-gray-200">
-                <GoogleIcon className="text-xl" />{" "}
+        // Card Container:
+        // - w-full max-w-md: Ensures it's responsive but doesn't get too wide on desktop
+        // - p-6 sm:p-8: Smaller padding on mobile, larger on desktop
+        <section className="flex w-full max-w-md flex-col gap-6 rounded-xl border border-gray-200 bg-white p-6 shadow-xl sm:p-8">
+
+            {/* Google Button */}
+            <button
+                type="button"
+                className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus:ring-2 focus:ring-gray-200"
+            >
+                <GoogleIcon className="text-xl" />
                 <span>Continue with Google</span>
-            </div>
+            </button>
+
             <Divider text="Or" />
-            <FormInputField
-                id="email"
-                type="email"
-                label="Email or Username"
-                placeholder="Enter email or username"
-                {...loginIdentifierObj}
-                className="min-w-[30ch]"
-            />
-            <FormInputField
-                id="password"
-                type="password"
-                label="Password"
-                placeholder="Enter password"
-                {...passwordObj}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            />
+
+            {/* Inputs Container */}
+            <div className="flex flex-col gap-4">
+                <FormInputField
+                    id="email"
+                    type="text"
+                    label="Email or Username"
+                    placeholder="Enter email or username"
+                    {...loginIdentifierObj}
+                    className="w-full" // Fluid width
+                />
+
+                <div>
+                    <FormInputField
+                        id="password"
+                        type="password"
+                        label="Password"
+                        placeholder="Enter password"
+                        {...passwordObj}
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                        className="w-full"
+                    />
+                    {/* Forgot Password Link */}
+                    <div className="mt-1 flex justify-end">
+                        <NavLink
+                            to="/forgot-password"
+                            className="text-xs font-medium text-blue-600 hover:text-blue-500"
+                        >
+                            Forgot password?
+                        </NavLink>
+                    </div>
+                </div>
+            </div>
+
+            {/* Error Message */}
             {isError && (
-                <span className="text-md text-center text-red-400">
-                    {error?.message ||
-                        error?.errors[0]?.message ||
-                        "Invalid email or password"}
-                </span>
+                <div className="rounded bg-red-50 p-3 text-center text-sm text-red-500">
+                    {error?.message || error?.errors?.[0]?.message || "Invalid credentials"}
+                </div>
             )}
+
+            {/* Submit Button */}
             <Button
                 label="Log in"
-                className="mt-2"
-                // disabled={!loginIdentifier || password.length < 3}
                 isLoading={isPending}
+                // Basic validation: disable if empty
+                disabled={!loginIdentifier || !password}
                 onClick={(e) => {
                     e.preventDefault();
                     handleSubmit();
                 }}
+                className="w-full"
             />
-            <div className="mt-1 flex gap-2 self-center text-sm">
-                <span>Don't have an account? </span>
+
+            {/* Sign Up Footer */}
+            <div className="flex justify-center gap-1.5 text-sm text-gray-600">
+                <span>Don't have an account?</span>
                 <NavLink
                     to="/signup"
-                    className="font-semibold text-blue-500 hover:underline"
+                    className="font-semibold text-blue-600 hover:text-blue-500 hover:underline"
                 >
                     Sign up
                 </NavLink>

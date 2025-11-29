@@ -1,77 +1,99 @@
 import DefaultImage from "@/assets/images/user_icon.jpeg";
 import { RiDeleteBin5Line as DeleteIcon } from "react-icons/ri";
+import { FaUserCircle } from "react-icons/fa";
 
 export default function StaffCard({ staffMember, onDelete }) {
+    // Helper to determine status color
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case "paid": return "bg-emerald-100 text-emerald-700";
+            case "partial": return "bg-amber-100 text-amber-700";
+            case "unpaid": return "bg-red-100 text-red-700";
+            default: return "bg-gray-100 text-gray-700";
+        }
+    };
+
     return (
-        <div className="flex flex-col rounded-md bg-white text-nowrap text-gray-600 shadow-lg ring-1 ring-gray-200">
-            {/* Top section */}
-            <section className="flex items-center gap-4 bg-gray-100/90 px-4 py-4">
-                <div className="size-20">
-                    <img
-                        src={staffMember?.image || DefaultImage}
-                        alt="Logo"
-                        className="rounded-full"
-                    />
-                </div>
-                <div className="flex min-w-[10ch] flex-col">
-                    <span className="text-base font-normal">
-                        {staffMember?.name || "Unnamed"}
-                    </span>
-                    <span className="text-sm font-normal text-gray-400">
-                        {staffMember?.role || "Friend"}
-                    </span>
-                </div>
-                <div className="h-full">
-                    <button
-                        onClick={onDelete}
-                        className="group ml-auto flex size-9 items-center justify-center rounded-full bg-white/70 shadow transition-all duration-100 hover:bg-red-50"
-                    >
-                        <DeleteIcon className="size-5 text-red-400/80 transition-all duration-100 group-hover:text-red-500/80" />
-                    </button>
-                </div>
-            </section>
+        <div className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
 
-            {/* Salary info section */}
-            <section className="flex flex-col gap-2 px-6 py-2">
-                <span className="flex items-center justify-between">
-                    Salary{" "}
-                    <span className="font-semibold">
-                        {staffMember?.salary || "15,000/-"}
-                    </span>
-                </span>
-                <span className="flex items-center justify-between">
-                    Paid{" "}
-                    <span className="font-semibold text-emerald-500">
-                        {staffMember?.paid || "0/-"}
-                    </span>
-                </span>
-                <span className="flex items-center justify-between">
-                    Remaining{" "}
-                    <span className="font-semibold text-red-500">
-                        {staffMember?.remaining || "15,000/-"}
-                    </span>
-                </span>
-                <span className="flex items-center justify-between">
-                    Status
-                    <span className="mr-3 rounded bg-emerald-500 px-2 py-0.5 text-xs text-white">
-                        {staffMember?.salaryStatus || "Unpaid"}
-                    </span>
-                </span>
-                <span className="flex items-center justify-between gap-2">
-                    Last Paid:
-                    <span className="font-semibold">
-                        {staffMember?.lastPaidDate || "Never Paid"}
-                    </span>
-                </span>
-            </section>
+            {/* --- Header Section (Profile) --- */}
+            <div className="flex items-center gap-4 border-b border-gray-50 bg-gray-50/50 p-4">
+                {/* Avatar */}
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-white">
+                    {staffMember?.image ? (
+                        <img
+                            src={staffMember.image}
+                            alt={staffMember.name}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400">
+                            <FaUserCircle className="h-10 w-10" />
+                        </div>
+                    )}
+                </div>
 
-            {/* Buttons Section */}
-            <section className="mt-4 mb-4 flex items-center justify-center gap-3 px-4">
-                <button className="primary-button px-3 py-1">Pay</button>
-                <button className="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300/70">
+                {/* Name & Role */}
+                <div className="flex flex-col">
+                    <h3 className="text-base font-bold text-gray-800 line-clamp-1">
+                        {staffMember?.name || "Pending Invite"}
+                    </h3>
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        {staffMember?.role || "Staff"}
+                    </span>
+                </div>
+
+                {/* Delete Button */}
+                <button
+                    onClick={onDelete}
+                    className="absolute right-3 top-3 rounded-full p-2 text-gray-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                    title="Remove Staff"
+                >
+                    <DeleteIcon size={18} />
+                </button>
+            </div>
+
+            {/* --- Salary Info Section --- */}
+            <div className="flex flex-col gap-2 p-4 text-sm">
+
+                {/* Salary Row */}
+                <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Salary</span>
+                    <span className="font-semibold text-gray-900">৳ {staffMember?.salary || "0"}</span>
+                </div>
+
+                {/* Paid Row */}
+                <div className="flex items-center justify-between">
+                    <span className="text-gray-500">Paid</span>
+                    <span className="font-semibold text-emerald-600">৳ {staffMember?.paid || "0"}</span>
+                </div>
+
+                {/* Remaining Row */}
+                <div className="flex items-center justify-between border-t border-gray-50 pt-2">
+                    <span className="text-gray-500">Due</span>
+                    <span className="font-bold text-red-500">৳ {staffMember?.remaining || "0"}</span>
+                </div>
+
+                {/* Status Badges */}
+                <div className="mt-2 flex items-center justify-between">
+                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${getStatusColor(staffMember?.salaryStatus)}`}>
+                        {staffMember?.salaryStatus || "Unknown"}
+                    </span>
+                    <span className="text-[10px] text-gray-400">
+                        Last Paid: {staffMember?.lastPaidDate || "N/A"}
+                    </span>
+                </div>
+            </div>
+
+            {/* --- Action Buttons --- */}
+            <div className="mt-auto grid grid-cols-2 gap-px bg-gray-100 p-px">
+                <button className="bg-white py-3 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50">
+                    Pay Salary
+                </button>
+                <button className="bg-white py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">
                     History
                 </button>
-            </section>
+            </div>
         </div>
     );
 }

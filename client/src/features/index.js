@@ -11,6 +11,8 @@ export { default as UpdatePasswordForm } from "./profile/components/UpdatePasswo
 export { default as StatsSection } from "./dashboard/components/StatsSection";
 export { default as QuickActionsSection } from "./dashboard/components/QuickActionsSection";
 export { default as InventoryOverviewSection } from "./dashboard/components/InventoryOverviewSection";
+export { default as ShopOverviewSection} from "./dashboard/components/ShopOverviewSection";
+export { default as VehicleOverviewSection} from "./dashboard/components/VehicleOverviewSection";
 
 // inventory
 export { default as InventoryTable } from "./inventory/components/InventoryTable";

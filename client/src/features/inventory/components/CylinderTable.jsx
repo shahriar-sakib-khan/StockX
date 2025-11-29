@@ -1,122 +1,71 @@
 import { useState } from "react";
-
 import { useAuthStore } from "@/stores/useAuthStore";
-
-import InventoryTable from "./InventoryTable";
 import { useCylinderInventory } from "../hooks";
 import { TableRow, SearchBar, CylinderFilters, SortBy } from "../utils";
+import InventoryTable from "./InventoryTable";
+import InventoryMobileCard from "./InventoryMobileCard"; // <--- Import the new card
 
 export default function CylinderTable({ overview = false, itemCount, type }) {
-    // ----------------- States -----------------
+    // ... [Keep all your existing State and Sorting logic exactly the same] ...
     const [search, setSearch] = useState("");
     const [selectedSize, setSelectedSize] = useState("12");
     const [selectedRegulatorType, setSelectedRegulatorType] = useState("22");
     const [sortBy, setSortBy] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc");
 
-    // ----------------- Constants -----------------
-    const headers = [
-        "#",
-        "Brand",
-        "Status",
-        "Price",
-        "Full",
-        "Empty",
-        "Defected",
-        "Action",
-    ];
-
-    const sizes = [
-        "5.5",
-        "12",
-        "12.5",
-        "15",
-        "20",
-        "25",
-        "30",
-        "33",
-        "35",
-        "45",
-    ];
-    const types = ["20", "22"];
     const storeId = useAuthStore((s) => s.currentStore?.id);
 
-    // ----------------- Queries -----------------
     const {
         data: cylinders = [],
         isLoading,
         error,
     } = useCylinderInventory(storeId, selectedSize, selectedRegulatorType);
 
-    // ----------------- Filter + Sort -----------------
-    let displayedCylinders =
-        typeof itemCount === "number"
-            ? cylinders.slice(0, itemCount)
-            : [...cylinders];
-
-    // ----------------- Search -----------------
-    if (search.trim() !== "" && displayedCylinders.length > 0) {
-        displayedCylinders = displayedCylinders.filter((item) =>
-            String(item.brandName || "")
+    // ... [Keep processing logic] ...
+    let processedData = [...cylinders];
+    if (search.trim()) {
+        processedData = processedData.filter((item) =>
+            String(item.brandName || item.name || "")
                 .toLowerCase()
-                .includes(search.toLowerCase()),
+                .includes(search.toLowerCase())
         );
     }
-
-    // Sort by name, full count, empty count, or defected cylinder count
-    displayedCylinders.sort((a, b) => {
-        let valueA, valueB;
+    processedData.sort((a, b) => {
+        // ... [Keep existing sort logic] ...
+        let valA, valB;
         switch (sortBy) {
-            case "full":
-                valueA = a.fullCount || 0;
-                valueB = b.fullCount || 0;
-                break;
-            case "empty":
-                valueA = a.emptyCount || 0;
-                valueB = b.emptyCount || 0;
-                break;
-            case "defected":
-                valueA = a.defectedCount || 0;
-                valueB = b.defectedCount || 0;
-                break;
-            case "name":
-            default:
-                valueA = String(a.brandName || "").toLowerCase();
-                valueB = String(b.brandName || "").toLowerCase();
-                break;
+            case "full": valA = a.fullCount || 0; valB = b.fullCount || 0; break;
+            case "empty": valA = a.emptyCount || 0; valB = b.emptyCount || 0; break;
+            case "defected": valA = a.defectedCount || 0; valB = b.defectedCount || 0; break;
+            default: // name
+                valA = String(a.brandName || "").toLowerCase();
+                valB = String(b.brandName || "").toLowerCase();
         }
-
-        if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
-        if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+        if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+        if (valA > valB) return sortOrder === "asc" ? 1 : -1;
         return 0;
     });
 
-    // ----------------- Conditional UI -----------------
-    if (error)
-        return (
-            <p className="mt-4 text-center text-red-500">
-                Failed to load {type}s.
-            </p>
-        );
+    if (itemCount) processedData = processedData.slice(0, itemCount);
 
-    // ----------------- Render -----------------
+    const headers = ["#", "Brand", "Status", "Price", "Full", "Empty", "Defected", "Action"];
+    const sizes = ["5.5", "12", "12.5", "15", "20", "25", "30", "33", "35", "45"];
+    const types = ["20", "22"];
+
+    if (error) return <div className="p-8 text-center text-red-500">Failed to load inventory.</div>;
+
     return (
-        <div className="w-full bg-transparent p-4">
-            {/* ----------------- Top Controls ----------------- */}
-            {/* Search */}
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    {!overview && (
+        <div className="flex flex-col gap-4">
+            {/* Controls (Keep as is, they are already responsive) */}
+            {!overview && (
+                <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="flex flex-1 flex-col gap-4 xl:flex-row xl:items-center">
                         <SearchBar
                             value={search}
                             onChange={setSearch}
-                            placeholder={`Search ${type}...`}
-                            className="w-[200px]"
+                            placeholder="Search brands..."
+                            className="w-full xl:w-72"
                         />
-                    )}
-
-                    {/* Size & Type Filters */}
-                    {type === "cylinders" && (
                         <CylinderFilters
                             sizes={sizes}
                             types={types}
@@ -125,51 +74,60 @@ export default function CylinderTable({ overview = false, itemCount, type }) {
                             onSizeChange={setSelectedSize}
                             onTypeChange={setSelectedRegulatorType}
                         />
-                    )}
-                </div>
-
-                <SortBy
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    sortOrder={sortOrder}
-                    setSortOrder={setSortOrder}
-                />
-            </div>
-
-            {/* ----------------- Table ----------------- */}
-            <InventoryTable headers={headers}>
-                {displayedCylinders.map((item, index) => (
-                    <TableRow
-                        key={item.id || index}
-                        index={index}
-                        product={item}
-                        type={type}
-                        selectedSize={selectedSize}
-                        selectedRegulatorType={selectedRegulatorType}
-                        onEdit={() => {}}
-                        onDelete={() => {}}
-                    />
-                ))}
-            </InventoryTable>
-
-            {/* ----------------- Loading Indicator ----------------- */}
-            {isLoading && (
-                <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 italic">
-                    <svg
-                        className="h-5 w-5 animate-spin text-emerald-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.36 6.36l-1.42-1.42M6.36 6.36 4.94 4.94m12.02 0-1.42 1.42M6.36 17.64l-1.42 1.42"
+                    </div>
+                    <div className="flex justify-end">
+                        <SortBy
+                            sortBy={sortBy}
+                            setSortBy={setSortBy}
+                            sortOrder={sortOrder}
+                            setSortOrder={setSortOrder}
                         />
-                    </svg>
-                    Loading {type} data...
+                    </div>
+                </div>
+            )}
+
+            {/* --- LOADING STATE --- */}
+            {isLoading && (
+                <div className="py-10 text-center text-gray-500">Loading inventory...</div>
+            )}
+
+            {/* --- EMPTY STATE --- */}
+            {!isLoading && processedData.length === 0 && (
+                <div className="py-10 text-center text-gray-500">No items found.</div>
+            )}
+
+            {/* --- VIEW 1: MOBILE CARD LIST (Visible on small screens) --- */}
+            {!isLoading && processedData.length > 0 && (
+                <div className="flex flex-col gap-3 md:hidden">
+                    {processedData.map((item, index) => (
+                        <InventoryMobileCard
+                            key={item.id || index}
+                            product={item}
+                            type={type}
+                            selectedSize={selectedSize}
+                            selectedRegulatorType={selectedRegulatorType}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* --- VIEW 2: DESKTOP TABLE (Hidden on small screens) --- */}
+            {!isLoading && processedData.length > 0 && (
+                <div className="hidden overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm md:block">
+                    <div className="overflow-x-auto">
+                        <InventoryTable headers={headers}>
+                            {processedData.map((item, index) => (
+                                <TableRow
+                                    key={item.id || index}
+                                    index={index}
+                                    product={item}
+                                    type={type}
+                                    selectedSize={selectedSize}
+                                    selectedRegulatorType={selectedRegulatorType}
+                                />
+                            ))}
+                        </InventoryTable>
+                    </div>
                 </div>
             )}
         </div>

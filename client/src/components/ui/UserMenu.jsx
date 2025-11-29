@@ -1,12 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { FiLogOut as LogoutIcon } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { FiLogOut as LogoutIcon } from "react-icons/fi";
+
 import pfp from "../../assets/images/user_icon.jpeg";
+import queryClient from "../../services/queryClient";
+import { useUIStore } from "../../stores/useUIStore";
 import { logout } from "../../features/authentication/services/authServices";
 import useAuth from "../../hooks/useAuth";
 import { pagesConfig } from "../../pages/utils/pagesConfig";
-import queryClient from "../../services/queryClient";
-import { useUIStore } from "../../stores/useUIStore";
 import MenuContainer from "../mini/MenuContainer";
 
 export default function UserMenu() {

@@ -1,10 +1,6 @@
 import { useState } from "react";
 import clsx from "clsx";
-
-import { FaCartPlus as BuyIcon } from "react-icons/fa";
-import { FaCashRegister as SellIcon } from "react-icons/fa";
-import { FaPencilAlt as EditIcon } from "react-icons/fa";
-import { FaWrench as DefectedIcon } from "react-icons/fa";
+import { FaCartPlus, FaCashRegister, FaPen, FaWrench } from "react-icons/fa";
 
 import {
     TransactionModal,
@@ -28,43 +24,37 @@ const TableRow = ({
     const defectedCount = product?.defectedCount ?? 0;
     const stockCount = product?.stockCount ?? 0;
 
+    // Logic specifically preserved as requested
     let status = "Out of Stock";
     if (fullCount > 20) status = "In Stock";
     else if (fullCount > 0) status = "Low Stock";
 
     const statusColors = {
-        "In Stock": "bg-emerald-500 text-white",
-        "Low Stock": "bg-orange-400/80 text-white",
-        "Out of Stock": "bg-red-500/80 text-white",
+        "In Stock": "bg-emerald-100 text-emerald-700",
+        "Low Stock": "bg-orange-100 text-orange-700",
+        "Out of Stock": "bg-red-100 text-red-700",
     };
 
     return (
         <>
-            <tr className="border-b border-gray-200 bg-white text-gray-600 hover:bg-gray-50">
-                {/* ---------- Index ---------- */}
-                <td data-cell="#" className="p-4">
-                    {index + 1}
-                </td>
+            <tr className="transition-colors hover:bg-gray-50">
+                <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
 
-                {/* ---------- Brand ---------- */}
-                <td
-                    data-cell="Brand"
-                    className="flex items-center gap-2 p-4 whitespace-nowrap"
-                >
-                    <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50">
-                        <img
-                            src={
-                                product.cylinderImage ||
-                                `/src/assets/images/${type.replace(/s$/, "")}Model.png`
-                            }
-                            alt={product.brandName || product.name}
-                            className="h-6 w-6 object-contain"
-                            loading="lazy"
-                        />
+                {/* Brand */}
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white p-1">
+                            <img
+                                src={product.cylinderImage || `/src/assets/images/${type.replace(/s$/, "")}Model.png`}
+                                alt={product.brandName}
+                                className="h-full w-full object-contain"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                        </div>
+                        <span className="font-medium text-gray-900 truncate max-w-[150px]">
+                            {product.brandName || product.name || "Unknown"}
+                        </span>
                     </div>
-                    <span className="max-w-[120px] truncate">
-                        {product.brandName || product.name}
-                    </span>
                 </td>
 
                 {/* ---------- Status ---------- */}
@@ -79,78 +69,71 @@ const TableRow = ({
                     </span>
                 </td>
 
-                {/* ---------- Price ---------- */}
-                <td data-cell="Price" className="flex items-center gap-2 p-4">
-                    <span>{product.price}</span>
-                    <button
-                        onClick={() => setIsPriceModalOpen(true)}
-                        className="rounded-sm p-1 hover:bg-blue-100"
-                    >
-                        <EditIcon className="size-4 text-blue-500" />
-                    </button>
+                {/* Price */}
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900">৳{product.price}</span>
+                        <button
+                            onClick={() => setIsPriceModalOpen(true)}
+                            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-indigo-600"
+                        >
+                            <FaPen size={12} />
+                        </button>
+                    </div>
                 </td>
 
-                {/* ---------- Counts ---------- */}
+                {/* Counts - Conditional columns based on type */}
                 {type === "cylinders" && (
                     <>
-                        <td data-cell="Full" className="p-4">
-                            {fullCount}
-                        </td>
-                        <td data-cell="Empty" className="p-4">
-                            {emptyCount}
-                        </td>
+                        <td className="px-6 py-4 text-sm font-bold text-gray-700">{fullCount}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{emptyCount}</td>
                     </>
                 )}
                 {(type === "stoves" || type === "regulators") && (
-                    <td data-cell="In Stock" className="p-4">
-                        {stockCount}
-                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-gray-700">{stockCount}</td>
                 )}
 
-                {/* ---------- Defected ---------- */}
-                <td
-                    data-cell="Defected"
-                    className="flex items-center gap-2 p-4 whitespace-nowrap"
-                >
-                    <span>{defectedCount}</span>
-                    <button
-                        onClick={() => setIsDefectedModalOpen(true)}
-                        className="rounded-sm p-1 hover:bg-yellow-100"
-                    >
-                        <DefectedIcon className="size-4 text-yellow-500" />
-                    </button>
+                {/* Defected */}
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-red-500">{defectedCount}</span>
+                        <button
+                            onClick={() => setIsDefectedModalOpen(true)}
+                            className="rounded-full p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                        >
+                            <FaWrench size={12} />
+                        </button>
+                    </div>
                 </td>
 
-                {/** Extra td here to maintain the table structure */}
-                <td data-cell="Action" className="flex gap-4"></td>
-
-                {/* ---------- Actions ---------- */}
-                <td
-                    data-cell="Action"
-                    className="rounded-sm p-1 hover:bg-yellow-100"
-                >
-                    <button
-                        onClick={() => setModalType("buy")}
-                        className="rounded-sm p-1 hover:bg-green-100"
-                    >
-                        <BuyIcon className="size-5 text-green-500" />
-                    </button>
-                    <button
-                        onClick={() => setModalType("sell")}
-                        className="rounded-sm p-1 hover:bg-blue-100"
-                    >
-                        <SellIcon className="size-5 text-blue-500" />
-                    </button>
+                {/* Actions */}
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setModalType("buy")}
+                            className="rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-100"
+                            title="Buy Stock"
+                        >
+                            <FaCartPlus />
+                        </button>
+                        <button
+                            onClick={() => setModalType("sell")}
+                            className="rounded-lg bg-indigo-50 p-2 text-indigo-600 transition-colors hover:bg-indigo-100"
+                            title="Sell Stock"
+                        >
+                            <FaCashRegister />
+                        </button>
+                    </div>
                 </td>
             </tr>
 
-            {/* ---------- Modals ---------- */}
+            {/* --- Modals Render --- */}
             {modalType && (
                 <TransactionModal
-                    type={type}
-                    isBuyModal={modalType === "buy"}
                     isOpen={!!modalType}
                     onClose={() => setModalType(null)}
+                    isBuyModal={modalType === "buy"}
+                    type={type}
                     product={product}
                     selectedSize={selectedSize}
                     selectedRegulatorType={selectedRegulatorType}

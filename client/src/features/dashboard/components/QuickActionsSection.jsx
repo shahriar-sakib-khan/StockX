@@ -1,62 +1,37 @@
 import QuickActionCard from "./QuickActionCard";
 import images from "@/assets/nav_icons/Images";
-import { Section } from "../utils/Section";
-import { Heading } from "../utils/Heading";
+import { DashboardCard } from "./DashboardWidgets";
+import { FaBolt } from "react-icons/fa";
 
 export default function QuickActionsSection() {
     return (
-        <Section>
-            <Heading>Quick Actions</Heading>
-            <div className="mr-4 grid w-full grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))] gap-4 overflow-hidden">
-                {/* <QuickActionCard
-          path="./selection"
-          imgSrc={images.img_selection}
-          title="Selection"
-        /> */}
+        <DashboardCard title="Quick Actions" icon={FaBolt} className="h-full">
+            {/* Mobile: 2 Columns
+                Tablet: 4 Columns
+                Desktop: 4 Columns
+            */}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <QuickActionCard
-                    path="./buy"
+                    path="/buy"
                     imgSrc={images.img_buy}
-                    title="Buy"
+                    title="Buy Entry"
                 />
                 <QuickActionCard
-                    path="./shop-selection"
+                    path="/shops/selection"
                     imgSrc={images.img_sell}
-                    title="Sell"
+                    title="Sell Entry"
                 />
-                <QuickActionCard path="#" imgSrc={images.img_due} title="Due" />
-                {/* <QuickActionCard
-            path="./inventory"
-            imgSrc={images.img_inventory}
-            title="Inventory"
-          /> */}
-                {/* <QuickActionCard path="./shop" imgSrc={images.img_shop} title="Shop" /> */}
                 <QuickActionCard
-                    path="./vehicle-cost"
+                    path="/dues"
+                    imgSrc={images.img_due}
+                    title="Manage Dues"
+                />
+                <QuickActionCard
+                    path="/vehicles/cost"
                     imgSrc={images.img_vehicles}
                     title="Vehicle Cost"
                 />
-                {/* <QuickActionCard
-            path="./exchange-history"
-            imgSrc={images.img_history}
-            title="History"
-          /> */}
-                {/* <QuickActionCard
-            path="./daily-sales"
-            imgSrc={images.img_dailySales}
-            title="Daily Sales"
-          /> */}
-                {/* <QuickActionCard
-            path="./profile"
-            imgSrc={images.img_profile}
-            title="Profile"
-          /> */}
-                {/* <QuickActionCard
-            path="./community"
-            imgSrc={images.img_community}
-            title="Community"
-          /> */}
-                {/* <QuickActionCard path="/" imgSrc={images.img_logout} title="Log out" /> */}
             </div>
-        </Section>
+        </DashboardCard>
     );
 }

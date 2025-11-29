@@ -1,14 +1,16 @@
 import { NavLink } from "react-router-dom";
 import { LuSquareChevronLeft as MenuIcon } from "react-icons/lu";
 
-import { StoreMenu } from "@/components";
 import { useUIStore } from "@/stores/useUIStore";
 import { pagesConfig } from "@/pages/utils/pagesConfig";
+// Using the alias as requested
+import { StoreMenu } from "@/components";
 
 export default function Sidebar() {
     const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
     const toggleMenu = useUIStore((state) => state.toggleMenu);
-    // const isAdmin = false;
+
+    // Icon Mappings
     const DashboardIcon = pagesConfig["/dashboard"]?.icon;
     const InventoryIcon = pagesConfig["/inventory"]?.icon;
     const ShopIcon = pagesConfig["/shops"]?.icon;
@@ -19,7 +21,9 @@ export default function Sidebar() {
 
     const sideBarHeading = (headingText) => (
         <h2
-            className={`pointer-events-none mb-3 overflow-hidden text-xs font-semibold tracking-wider text-gray-500 transition-all ${isSidebarOpen ? "w-full" : "w-0"}`}
+            className={`pointer-events-none mb-3 overflow-hidden text-xs font-semibold tracking-wider text-gray-500 transition-all duration-300 ${
+                isSidebarOpen ? "w-full opacity-100" : "w-0 opacity-0 lg:w-0"
+            }`}
         >
             {headingText.toUpperCase()}
         </h2>
@@ -29,108 +33,66 @@ export default function Sidebar() {
         <NavLink
             to={link}
             className={({ isActive }) =>
-                `group relative flex items-center border-l-3 p-1 pl-2 text-gray-700 ${
+                `group relative flex items-center gap-3 rounded-lg border-l-4 px-3 py-2.5 text-sm font-medium transition-all ${
                     isActive
-                        ? "border-green-500 bg-gray-100"
-                        : "border-transparent hover:bg-gray-100"
+                        ? "border-green-500 bg-green-50 text-green-700"
+                        : "border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 }`
             }
         >
-            {icon}
-            <h3
-                className={`overflow-hidden transition-all ${isSidebarOpen ? "grow-1 pl-2" : "w-0"}`}
+            <span className="shrink-0 text-xl">{icon}</span>
+            <span
+                className={`whitespace-nowrap transition-all duration-300 ${
+                    isSidebarOpen ? "w-auto opacity-100" : "w-0 overflow-hidden opacity-0 lg:w-0"
+                }`}
             >
                 {text}
-            </h3>
+            </span>
+
             {!isSidebarOpen && (
-                <h3
-                    className={`invisible absolute left-full z-[100] translate-x-0 rounded bg-white p-1.5 opacity-20 shadow-md transition-all group-hover:visible group-hover:translate-x-6 group-hover:opacity-100`}
-                >
+                <div className="absolute left-full ml-2 hidden whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 shadow-lg group-hover:block group-hover:opacity-100 lg:block z-50">
                     {text}
-                </h3>
+                </div>
             )}
         </NavLink>
     );
 
     return (
         <aside
-            className={`flex h-[var(--height-with-nav)] flex-col border-r-1 border-gray-200 text-gray-700 transition-all ${isSidebarOpen ? "w-[var(--sidebar-width-lg)]" : "w-[var(--sidebar-width-sm)]"}`}
+            className={`hidden h-full flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out lg:flex ${
+                isSidebarOpen
+                    ? "w-[var(--sidebar-width-lg)]"
+                    : "w-[var(--sidebar-width-sm)]"
+            }`}
         >
-            <div
-                className={`mb-4 flex h-[var(--titlebar-height)] items-center justify-between border-b-1 border-gray-300 bg-gray-50 p-3 text-gray-800`}
-            >
-                <StoreMenu />
+            <div className="flex h-[var(--titlebar-height)] items-center justify-between border-b border-gray-200 bg-gray-50 px-3">
+                <div className={`transition-all duration-300 ${isSidebarOpen ? "w-full opacity-100" : "w-0 overflow-hidden opacity-0 lg:w-0"}`}>
+                        <StoreMenu />
+                </div>
+
                 <button
-                    className="rounded p-1 transition-all hover:bg-gray-200"
+                    className="rounded p-1.5 text-gray-500 hover:bg-gray-200"
                     onClick={() => toggleMenu("isSidebarOpen")}
-                    aria-label={
-                        isSidebarOpen ? "Close sidebar" : "Open sidebar"
-                    }
                 >
                     <MenuIcon
-                        className={`text-2xl text-gray-500 ${isSidebarOpen ? "rotate-0" : "rotate-180"} transition-transform`}
+                        className={`text-xl transition-transform duration-300 ${
+                            isSidebarOpen ? "rotate-0" : "rotate-180"
+                        }`}
                     />
                 </button>
             </div>
-            <div className={`flex flex-col gap-4 px-3`}>
-                <nav aria-label="General">
-                    {sideBarHeading("GENERAL")}
-                    <div className="flex flex-col gap-2">
-                        {navItem(
-                            <DashboardIcon className="shrink-0 text-xl text-gray-700" />,
-                            "Dashboard",
-                            "/dashboard",
-                        )}
-                        {navItem(
-                            <InventoryIcon className="shrink-0 text-xl text-gray-700" />,
-                            "Inventory",
-                            "/inventory",
-                        )}
-                        {navItem(
-                            <ShopIcon className="shrink-0 text-xl text-gray-700" />,
-                            "Shops",
-                            "/shops",
-                        )}
-                        {navItem(
-                            <VehicleIcon className="shrink-0 text-xl text-gray-700" />,
-                            "Vehicles",
-                            "/vehicles",
-                        )}
-                        {navItem(
-                            <HistoryIcon className="shrink-0 text-xl text-gray-700" />,
-                            "History",
-                            "/history",
-                        )}
-                        {navItem(
-                            <StaffIcon className="shrink-0 text-xl text-gray-700" />,
-                            "Staff",
-                            "/staff",
-                        )}
-                        {navItem(
-                            <CommunityIcon className="shrink-0 text-xl text-gray-700" />,
-                            "Community",
-                            "/community",
-                        )}
-                    </div>
+
+            <div className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-gray-200">
+                <nav className="flex flex-col gap-1">
+                    {sideBarHeading("General")}
+                    {navItem(<DashboardIcon />, "Dashboard", "/dashboard")}
+                    {navItem(<InventoryIcon />, "Inventory", "/inventory")}
+                    {navItem(<ShopIcon />, "Shops", "/shops")}
+                    {navItem(<VehicleIcon />, "Vehicles", "/vehicles")}
+                    {navItem(<HistoryIcon />, "History", "/history")}
+                    {navItem(<StaffIcon />, "Staff", "/staff")}
+                    {navItem(<CommunityIcon />, "Community", "/community")}
                 </nav>
-                {/* <nav
-          aria-label="My Account"
-        >
-          {heading("MY ACCOUNT")}
-          <div className="flex flex-col gap-1">
-            {navItem("Profile", "/profile")}
-            {navItem("Settings", "/settings")}
-          </div>
-        </nav>
-        {isAdmin && (
-          <nav aria-label="Admin Panel">
-            {heading("ADMIN PANEL")}
-            <div className="flex flex-col gap-1">
-              {navItem("Users", "/users")}
-              {navItem("Statistics", "/statistics")}
-            </div>
-          </nav>
-        )} */}
             </div>
         </aside>
     );

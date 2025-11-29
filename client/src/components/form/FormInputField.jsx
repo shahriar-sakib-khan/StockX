@@ -4,10 +4,10 @@ const FormInputField = React.forwardRef(function FormInputField(
     {
         id = "",
         label,
-        type = "text", // text - email - password
+        type = "text",
         placeholder,
         value,
-        autoComplete = "off", // on - off
+        autoComplete = "off",
         onChange,
         onKeyDown,
         className = "",
@@ -15,11 +15,11 @@ const FormInputField = React.forwardRef(function FormInputField(
     ref,
 ) {
     return (
-        <div className="flex w-full flex-col gap-1">
+        <div className="flex w-full flex-col gap-1.5">
             {label && (
                 <label
                     htmlFor={id}
-                    className="pl-0.5 text-xs font-semibold text-gray-700"
+                    className="block text-sm font-medium text-gray-700"
                 >
                     {label}
                 </label>
@@ -34,8 +34,11 @@ const FormInputField = React.forwardRef(function FormInputField(
                 onChange={onChange}
                 onKeyDown={onKeyDown}
                 className={[
+                    "block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400",
+                    "focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500", // Modern Ring Focus
+                    "disabled:bg-gray-50 disabled:text-gray-500",
+                    "transition-all duration-200 sm:text-sm sm:leading-6",
                     className,
-                    "rounded border-0 px-3 py-1.5 text-gray-700 outline-1 outline-gray-300 transition-all duration-150 placeholder:text-gray-400 hover:outline-gray-400 focus:bg-white focus:outline-1 focus:outline-blue-300",
                 ].join(" ")}
             />
         </div>

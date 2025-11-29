@@ -1,114 +1,89 @@
 import { useEffect } from "react";
-import {
-    InventoryOverviewSection,
-    QuickActionsSection,
-    StatsSection,
-} from "../features";
-import { Heading } from "../features/dashboard/utils/Heading";
-import { Section } from "../features/dashboard/utils/Section";
-import { useUIStore } from "../stores/useUIStore";
+
+// Icons
 import { PiWallet as WalletIcon } from "react-icons/pi";
-import { useAuthStore } from "../stores/useAuthStore";
+import { FaChartLine, FaHistory } from "react-icons/fa";
+
+import { useAuthStore } from "@/stores/useAuthStore";
 import { logOnce } from "./utils/logOnce";
 
+// Internal Components
+import { DashboardCard } from "@/features/dashboard/components/DashboardWidgets";
+import { DemoSalesChart, DemoActivityList } from "@/features/dashboard/components/DemoWidgets";
+
+import {
+    QuickActionsSection,
+    StatsSection,
+    InventoryOverviewSection,
+    ShopOverviewSection,
+    VehicleOverviewSection
+} from "@/features";
 
 export default function Dashboard() {
-    const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
     const user = useAuthStore((state) => state.user);
-
-    const allStores = useAuthStore((state) => state.allStores);
-    const setAllStores = useAuthStore((state) => state.setAllStores);
-    const setCurrentStore = useAuthStore((state) => state.setCurrentStore);
     const store = useAuthStore((state) => state.currentStore);
 
-    // Logging safely in useEffect to avoid double logs in React 18 Strict Mode
     useEffect(() => {
         logOnce("👤 User from DB:", user);
-        logOnce("👤 Current Store:", store);
-        logOnce("👤 Current Stores:", allStores);
     }, [user]);
 
     return (
-        <div className="grid h-[var(--height-with-nav-titlebar)] grid-cols-[auto_1fr] bg-amber-50">
-            <main
-                className={`flex flex-col gap-4 overflow-auto bg-gray-50 transition-all ${
-                    isSidebarOpen
-                        ? "w-[var(--width-with-sidebar-lg-rightbar)]"
-                        : "w-[var(--width-with-sidebar-sm-rightbar)]"
-                }`}
-            >
-                <StatsSection />
-                <QuickActionsSection />
-                {/* <InventoryOverviewSection /> */}
+        <div className="flex flex-col gap-6 pb-24 lg:pb-6">
 
-                <Section>
-                    <Heading>Graph</Heading>
-                    <div className="h-40 bg-blue-100"></div>
-                </Section>
-                <Section>
-                    <Heading>Recents</Heading>
-                    <div className="flex flex-col gap-4">
-                        <div className="h-5 bg-red-100"></div>
-                        <div className="h-5 bg-red-100"></div>
-                        <div className="h-5 bg-red-100"></div>
-                        <div className="h-5 bg-red-100"></div>
-                    </div>
-                </Section>
-                <Section>
-                    <Heading>Custormer Shops</Heading>
-                    <div className="grid grid-cols-[1rem_1fr_1rem] gap-2">
-                        <button className="flex self-center px-0.5 font-bold">{`<`}</button>
-                        <div className="grid h-30 grid-cols-4 gap-2">
-                            <div className="h-30 bg-purple-200"></div>
-                            <div className="h-30 bg-purple-200"></div>
-                            <div className="h-30 bg-purple-200"></div>
-                            <div className="h-30 bg-purple-200"></div>
-                        </div>
-                        <button className="flex self-center px-0.5 font-bold">{`>`}</button>
-                    </div>
-                    <button className="mt-2 w-full bg-green-100 text-center text-green-700">
-                        View all
-                    </button>
-                </Section>
-                <Section>
-                    <Heading>Vehicles</Heading>
-                    <div className="grid grid-cols-[1rem_1fr_1rem] gap-2">
-                        <button className="flex self-center px-0.5 font-bold">{`<`}</button>
-                        <div className="grid h-30 grid-cols-4 gap-2">
-                            <div className="h-30 bg-red-200"></div>
-                            <div className="h-30 bg-red-200"></div>
-                            <div className="h-30 bg-red-200"></div>
-                            <div className="h-30 bg-red-200"></div>
-                        </div>
-                        <button className="flex self-center px-0.5 font-bold">{`>`}</button>
-                    </div>
-                    <button className="mt-2 w-full bg-green-100 text-center text-green-700">
-                        View all
-                    </button>
-                </Section>
-            </main>
-            <aside className="flex w-[var(--rightbar-width)] flex-col border-l border-gray-300 bg-gray-50">
-                <Section>
-                    <div className="flex gap-4 rounded-md border border-gray-200 bg-white py-3">
-                        <div className="flex flex-col gap-2">
-                            <div className="ml-3 flex items-center gap-2">
-                                <WalletIcon className="size-8 rounded-sm bg-blue-100 p-1 text-2xl text-blue-600" />
-                                <h2 className="text-lg text-gray-400">Balance</h2>
+            {/* --- ROW 1: WALLET + STATS --- */}
+            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-4 lg:gap-6">
+                <div className="w-full lg:col-span-1">
+                    <div className="flex h-full flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 p-5 text-white shadow-lg shadow-indigo-200">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <p className="text-xs font-medium text-indigo-100 uppercase tracking-wider">Balance</p>
+                                <h2 className="mt-1 text-3xl font-bold">
+                                    ৳ {"15,000".toLocaleString()}
+                                </h2>
                             </div>
-                            <div className="mt-1 w-full pl-2 text-left">
-                                <span className={`text-3xl font-semibold text-gray-600`}>
-                                    {"15,000".toLocaleString()}
-                                </span>{" "}
-                                <span className={`text-sm`}>Tk</span>
+                            <div className="rounded-lg bg-white/20 p-2 backdrop-blur-sm">
+                                <WalletIcon className="text-xl text-white" />
                             </div>
                         </div>
-                        <div className="mr-2 grow rounded-sm bg-gray-100"></div>
+                        <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                            <span className="text-xs font-medium text-indigo-100">+2.5% this week</span>
+                            <button className="text-xs font-bold hover:underline">View History &rarr;</button>
+                        </div>
                     </div>
-                </Section>
-                <Section>
-                    <div className="h-30 bg-gray-100"></div>
-                </Section>
-            </aside>
+                </div>
+                <div className="w-full lg:col-span-3">
+                     <StatsSection />
+                </div>
+            </div>
+
+            {/* --- ROW 2: QUICK ACTIONS --- */}
+            <div className="w-full">
+                <QuickActionsSection />
+            </div>
+
+            {/* --- ROW 3: INVENTORY (Main) --- */}
+            <div className="w-full">
+                <InventoryOverviewSection />
+            </div>
+
+            {/* --- ROW 4: SHOPS & VEHICLES --- */}
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                <ShopOverviewSection />
+                <VehicleOverviewSection />
+            </div>
+
+            {/* --- ROW 5: ANALYTICS (Demo) --- */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <DashboardCard title="Sales Trend" icon={FaChartLine}>
+                    <div className="h-64 w-full">
+                        <DemoSalesChart />
+                    </div>
+                </DashboardCard>
+
+                <DashboardCard title="Recent Activity" icon={FaHistory}>
+                    <DemoActivityList />
+                </DashboardCard>
+            </div>
         </div>
     );
 }

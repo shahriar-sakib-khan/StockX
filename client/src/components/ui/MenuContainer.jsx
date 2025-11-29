@@ -8,47 +8,63 @@ export default function MenuContainer({
     isOpen,
     onClose,
     backdrop = true,
-    backdropColor = "",
-    menuPosition = "left-1 mt-1",
+    backdropColor = "bg-transparent", // Allows passing 'bg-black/20' if you want a dim effect
+    menuPosition = "left-0 mt-2",     // Default alignment
     className = "",
 }) {
     const menuRef = useRef(null);
 
-    // close on outside click
+    // Close on outside click (Active only if backdrop is FALSE, otherwise backdrop handles it)
     useClickOutside(
-        menuRef, // pass ref
+        menuRef,
         () => {
             if (isOpen) onClose?.();
-        }, // pass handler
-        !backdrop && !!isOpen, // pass permission
+        },
+        !backdrop && isOpen // Only listen if backdrop is off and menu is open
     );
 
     return (
-        <div ref={menuRef} className={`relative`}>
-            {/* Menu Trigger */}
-            {trigger}
+        <div ref={menuRef} className="relative inline-block text-left">
+            {/* 1. Menu Trigger */}
+            <div className="flex items-center">
+                {trigger}
+            </div>
 
-            {/* Backdrop */}
+            {/* 2. Backdrop (Fixed Overlay) */}
+            {/* Z-Index 60 ensures it sits above Sidebar (z-50) and Navbar (z-30) */}
             {backdrop && isOpen && (
                 <div
-                    onClick={onClose}
-                    className={`fixed inset-0 z-[90] ${backdropColor}`}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                    }}
+                    className={clsx(
+                        "fixed inset-0 z-[60] cursor-default",
+                        backdropColor
+                    )}
                     aria-hidden="true"
                 />
             )}
 
-            {/* Menu Content */}
+            {/* 3. Menu Content */}
+            {/* Z-Index 70 ensures content sits on top of the backdrop */}
             <div
                 className={clsx(
-                    "absolute z-[100] min-w-40 rounded-md bg-white text-nowrap shadow-lg ring-1 ring-gray-300 transition-all duration-150 ease-out",
-                    !className?.match(/left-|right-/) && menuPosition,
-                    isOpen
-                        ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
-                        : "pointer-events-none -translate-y-2 scale-95 opacity-0",
+                    "absolute z-[70] min-w-[10rem] origin-top rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none transition-all duration-200 ease-out",
+                    menuPosition,
                     className,
+                    isOpen
+                        ? "transform scale-100 opacity-100 visible"
+                        : "transform scale-95 opacity-0 invisible pointer-events-none"
                 )}
+                role="menu"
+                aria-orientation="vertical"
+                tabIndex="-1"
             >
-                {children}
+                {/* Scrollable container for very long menus */}
+                <div className="max-h-[80vh] overflow-y-auto rounded-md py-1">
+                    {children}
+                </div>
             </div>
         </div>
     );

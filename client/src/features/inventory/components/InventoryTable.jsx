@@ -1,12 +1,21 @@
-import { TableHeader } from "../utils";
-
 export default function InventoryTable({ headers, children }) {
     return (
-        <table className="w-full border-collapse overflow-hidden rounded-md border bg-white tracking-wider shadow-sm">
-            <thead className="bg-gray-200/75 text-left text-sm font-semibold text-gray-600">
-                <TableHeader headers={headers} />
+        <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+                <tr>
+                    {headers.map((h, i) => (
+                        <th
+                            key={i}
+                            className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500"
+                        >
+                            {h}
+                        </th>
+                    ))}
+                </tr>
             </thead>
-            <tbody>{children}</tbody>
+            <tbody className="divide-y divide-gray-200 bg-white">
+                {children}
+            </tbody>
         </table>
     );
 }

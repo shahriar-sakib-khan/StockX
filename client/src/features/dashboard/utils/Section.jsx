@@ -1,6 +1,6 @@
-export const Section = ({ children }) => {
+export const Section = ({ children, className = "" }) => {
     return (
-        <section role="region" className="flex flex-col p-2">
+        <section className={`flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${className}`}>
             {children}
         </section>
     );

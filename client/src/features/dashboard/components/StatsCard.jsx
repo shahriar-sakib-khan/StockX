@@ -1,27 +1,18 @@
-export default function StatCard({
-    Icon,
-    title,
-    value,
-    // bgColor = "bg-white",
-    // titleColor,
-    // valueColor,
-    // signColor,
-    // shadow,
-}) {
+export default function StatsCard({ Icon, title, value, colorClass, borderClass }) {
     return (
-        <div
-            className={`pointer-events-none flex flex-col rounded-2xl bg-white px-[min(10%,2rem)] py-2`}
-        >
-            <span className={`flex items-center gap-2 text-lg text-gray-400`}>
-                {Icon}
-                {title}
-            </span>
-            <span className="mt-1 text-nowrap">
-                <span className={`text-3xl font-semibold text-gray-600`}>
-                    {value.toLocaleString()}
-                </span>{" "}
-                <span className={`text-sm`}>Tk</span>
-            </span>
+        // Added h-full to stretch vertically
+        <div className={`flex h-full flex-col justify-center rounded-xl border bg-white p-5 shadow-sm transition-transform hover:-translate-y-1 ${borderClass}`}>
+            <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colorClass}`}>
+                    {Icon}
+                </div>
+                <span className="text-sm font-medium text-gray-500">{title}</span>
+            </div>
+            <div className="mt-3">
+                <span className="text-2xl font-bold text-gray-800">
+                    ৳ {value.toLocaleString()}
+                </span>
+            </div>
         </div>
     );
 }

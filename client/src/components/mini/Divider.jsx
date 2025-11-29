@@ -1,10 +1,13 @@
 export default function Divider({ text = "Or", className = "" }) {
-    const gap = text === "" ? "gap-0" : "gap-2";
+    if (!text) return <div className={`border-t border-gray-200 ${className}`} />;
+
     return (
-        <div className={`flex w-full items-center ${gap} ${className}`}>
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="text-xs text-gray-400">{text}</span>
-            <div className="flex-grow border-t border-gray-300"></div>
+        <div className={`relative flex items-center py-2 ${className}`}>
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="mx-4 flex-shrink-0 text-xs font-medium uppercase text-gray-500">
+                {text}
+            </span>
+            <div className="flex-grow border-t border-gray-200"></div>
         </div>
     );
 }
