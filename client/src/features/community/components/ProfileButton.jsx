@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { CgProfile } from "react-icons/cg";
+import { FaUserCircle } from "react-icons/fa";
 
 export default function ProfileButton() {
     const navigate = useNavigate();
@@ -7,10 +7,11 @@ export default function ProfileButton() {
     return (
         <button
             onClick={() => navigate("/community/my-posts")}
-            className="primary-button flex items-center gap-3 px-3 py-1"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+            title="My Swap History"
         >
-            <CgProfile className="text-xl" />
-            <span className="text-sm font-medium">My Posts</span>
+            <FaUserCircle className="text-lg text-gray-400" />
+            <span className="hidden sm:inline">My Activity</span>
         </button>
     );
 }

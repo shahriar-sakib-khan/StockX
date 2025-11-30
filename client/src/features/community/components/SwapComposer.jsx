@@ -1,113 +1,144 @@
 import { useState } from "react";
+import { FaPlus, FaPaperPlane } from "react-icons/fa";
 import {
     GiveCylinderModal,
     BrandSelectionModal,
 } from "@/features/common/cylinderSelection";
+import CylinderItemCard from "./CylinderItemCard"; // Reuse the nice card!
 
 export default function SwapComposer({ onSubmit }) {
     const [giveList, setGiveList] = useState([]);
     const [takeList, setTakeList] = useState([]);
+    const [description, setDescription] = useState("");
 
     const [giveModal, setGiveModal] = useState(false);
     const [takeModal, setTakeModal] = useState(false);
 
     const handleSubmit = () => {
-        // Build a minimal payload for backend
+        if (giveList.length === 0 && takeList.length === 0) return;
+
         const payload = {
-            postType:
-                giveList.length > 0 && takeList.length > 0
+            postType: giveList.length > 0 && takeList.length > 0
                     ? "both"
-                    : giveList.length > 0
-                      ? "give"
-                      : "take",
+                    : giveList.length > 0 ? "give" : "take",
             offer: giveList,
             take: takeList,
-            description: "",
+            description,
         };
 
         onSubmit(payload);
         setGiveList([]);
         setTakeList([]);
+        setDescription("");
     };
 
     return (
-        <div className="flex flex-col rounded-md bg-white text-gray-700 shadow-lg ring-1 ring-gray-200">
+        <div className="flex flex-col rounded-xl bg-white shadow-lg ring-1 ring-gray-200 overflow-hidden">
             {/* Header */}
-            <section className="flex items-center justify-between bg-gray-100/90 px-4 py-4">
-                <h2 className="text-lg font-semibold text-gray-700">
-                    Create Swap Request
-                </h2>
-            </section>
+            <div className="border-b border-gray-100 bg-gray-50 px-6 py-4">
+                <h2 className="text-lg font-bold text-gray-800">Create Swap Request</h2>
+                <p className="text-xs text-gray-500">Post what you have and what you need.</p>
+            </div>
 
-            {/* Offer */}
-            <section className="flex flex-col gap-2 px-6 py-2">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Offer</h3>
-                    <button
-                        onClick={() => setGiveModal(true)}
-                        className="primary-button px-3 py-1"
-                    >
-                        Add <span className="ml-1 text-lg font-bold">+</span>
-                    </button>
+            <div className="p-6 space-y-6">
+                {/* Description Input */}
+                <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">Note (Optional)</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Any specific details? e.g., 'Need urgent delivery by 5 PM'"
+                        className="w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        rows="2"
+                    />
                 </div>
 
-                {giveList.length === 0 ? (
-                    <span className="text-sm text-gray-400">
-                        Nothing added yet.
-                    </span>
-                ) : (
-                    giveList.map((item, i) => (
-                        <div
-                            key={i}
-                            className="rounded border px-3 py-2 text-sm text-gray-700"
-                        >
-                            {item.brandName ?? item.brand} — {item.size}kg —{" "}
-                            {item.regulatorType} — Qty: {item.quantity}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {/* OFFER SECTION */}
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-bold uppercase tracking-wide text-emerald-600">Offering</h3>
+                            <button
+                                onClick={() => setGiveModal(true)}
+                                className="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-800 hover:underline"
+                            >
+                                <FaPlus /> Add Item
+                            </button>
                         </div>
-                    ))
-                )}
-            </section>
 
-            {/* Demand */}
-            <section className="flex flex-col gap-2 px-6 py-2">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Demand</h3>
-                    <button
-                        onClick={() => setTakeModal(true)}
-                        className="primary-button px-3 py-1"
-                    >
-                        Add <span className="ml-1 text-lg font-bold">+</span>
-                    </button>
+                        <div className="min-h-[100px] rounded-lg border-2 border-dashed border-emerald-100 bg-emerald-50/30 p-3">
+                            {giveList.length === 0 ? (
+                                <div className="flex h-full flex-col items-center justify-center text-center text-xs text-gray-400">
+                                    <p>No items added.</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {giveList.map((item, i) => (
+                                        <div key={i} className="relative group">
+                                            <CylinderItemCard item={item} variant="offer" />
+                                            {/* Remove Button */}
+                                            <button
+                                                onClick={() => setGiveList(prev => prev.filter((_, idx) => idx !== i))}
+                                                className="absolute -right-2 -top-2 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-sm group-hover:flex"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* DEMAND SECTION */}
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-bold uppercase tracking-wide text-orange-600">Requesting</h3>
+                            <button
+                                onClick={() => setTakeModal(true)}
+                                className="flex items-center gap-1 text-xs font-bold text-orange-600 hover:text-orange-800 hover:underline"
+                            >
+                                <FaPlus /> Add Item
+                            </button>
+                        </div>
+
+                        <div className="min-h-[100px] rounded-lg border-2 border-dashed border-orange-100 bg-orange-50/30 p-3">
+                            {takeList.length === 0 ? (
+                                <div className="flex h-full flex-col items-center justify-center text-center text-xs text-gray-400">
+                                    <p>No items added.</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {takeList.map((item, i) => (
+                                        <div key={i} className="relative group">
+                                            <CylinderItemCard item={item} variant="take" />
+                                            <button
+                                                onClick={() => setTakeList(prev => prev.filter((_, idx) => idx !== i))}
+                                                className="absolute -right-2 -top-2 hidden h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-sm group-hover:flex"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                {takeList.length === 0 ? (
-                    <span className="text-sm text-gray-400">
-                        Nothing added yet.
-                    </span>
-                ) : (
-                    takeList.map((item, i) => (
-                        <div
-                            key={i}
-                            className="rounded border px-3 py-2 text-sm text-gray-700"
-                        >
-                            {item.brand?.name ?? item.brandName ?? item.brand} —{" "}
-                            {item.size}kg — {item.regulatorType} — Qty:{" "}
-                            {item.quantity}
-                        </div>
-                    ))
-                )}
-            </section>
-
-            {/* Submit */}
-            <section className="mt-4 mb-4 flex items-center justify-center gap-3 px-4">
+            {/* Footer Action */}
+            <div className="border-t border-gray-100 bg-gray-50 px-6 py-4 flex justify-end">
                 <button
                     onClick={handleSubmit}
-                    className="primary-button px-3 py-1"
+                    disabled={giveList.length === 0 && takeList.length === 0}
+                    className="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Post Swap Request
+                    <FaPaperPlane /> Post Request
                 </button>
-            </section>
+            </div>
 
+            {/* Modals */}
             <GiveCylinderModal
                 isOpen={giveModal}
                 onClose={() => setGiveModal(false)}
