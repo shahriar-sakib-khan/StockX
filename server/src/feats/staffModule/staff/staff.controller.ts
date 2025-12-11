@@ -1,7 +1,7 @@
 /**
  * @module StaffController
  *
- * @description Controller for managing staff members within divisions.
+ * @description Controller for managing staff (memberships) within a store.
  */
 
 import { Request, Response } from 'express';
@@ -13,46 +13,56 @@ import { staffService } from './index.js';
  * ----------------- Staff CRUD Controllers -----------------
  */
 
-export const createStaff = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId } = req.params;
-
-  const staff = await staffService.createStaff(req.body, workspaceId, divisionId);
-
-  res.status(StatusCodes.CREATED).json({ message: 'Staff member created successfully', staff });
-};
-
 export const getAllStaff = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId } = req.params;
+  const { storeId } = req.params;
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
 
-  const { staff, total } = await staffService.getAllStaffs(workspaceId, divisionId, page, limit);
+  const { staffDocs, total } = await staffService.getAllStaffs(storeId, page, limit);
 
-  res.status(StatusCodes.OK).json({ total, page, limit, staff });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: `Staff members fetched successfully`,
+    meta: { page, limit, total },
+    data: staffDocs,
+  });
 };
 
 export const getSingleStaff = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, staffId } = req.params;
+  const { storeId, staffId } = req.params;
 
-  const staff = await staffService.getSingleStaff(workspaceId, divisionId, staffId);
+  const staff = await staffService.getSingleStaff(storeId, staffId);
 
-  res.status(StatusCodes.OK).json({ staff });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Staff member fetched successfully',
+    data: staff,
+  });
 };
 
 export const updateStaff = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, staffId } = req.params;
+  const { storeId, staffId } = req.params;
+  const { storeRoles, status } = req.body;
 
-  const updatedStaff = await staffService.updateStaff(req.body, workspaceId, divisionId, staffId);
+  const updatedStaff = await staffService.updateStaff(storeId, staffId, storeRoles, status);
 
-  res.status(StatusCodes.OK).json({ message: 'Staff member updated successfully', updatedStaff });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Staff member updated successfully',
+    data: updatedStaff,
+  });
 };
 
 export const deleteStaff = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, staffId } = req.params;
+  const { storeId, staffId } = req.params;
 
-  const deletedStaff = await staffService.deleteStaff(workspaceId, divisionId, staffId);
+  const deletedStaff = await staffService.deleteStaff(storeId, staffId);
 
-  res.status(StatusCodes.OK).json({ message: 'Staff member deleted successfully', deletedStaff });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Staff member removed successfully',
+    data: deletedStaff,
+  });
 };
 
 /**
@@ -60,9 +70,8 @@ export const deleteStaff = async (req: Request, res: Response) => {
  */
 
 export default {
-  createStaff, // Create a new staff member
-  getAllStaff, // Get all staff members in a division
-  getSingleStaff, // Get details of a single staff member
-  updateStaff, // Update staff member details
-  deleteStaff, // Delete a staff member
+  getAllStaff,
+  getSingleStaff,
+  updateStaff,
+  deleteStaff,
 };

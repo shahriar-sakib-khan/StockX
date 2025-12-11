@@ -5,6 +5,7 @@ import localBrandRouter from '@/feats/brandModule/local.brand.routes.js';
 
 import { vehicleRouter, vehicleTxRouter } from '@/feats/vehicleModule/index.js';
 import { shopRouter, shopTxRouter } from '@/feats/shopModule/index.js';
+import {staffRouter} from '@/feats/staffModule/index.js';
 
 import { transactionRouter } from '@/feats/transactionModule/index.js';
 
@@ -52,5 +53,8 @@ router.use('/', transactionRouter);
 
 /** ----------------- Exchange routes ----------------- */
 router.use('/', exchangeRouter);
+
+/** ----------------- Staff routes ----------------- */
+router.use('/', staffRouter);
 
 export default router;

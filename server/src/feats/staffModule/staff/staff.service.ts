@@ -1,190 +1,155 @@
 /**
- * @module staffValidator.service
+ * @module staff.service
  *
- * @description Services for staff-related operations within workspace divisions.
- * Handles CRUD, salary plans, attendance tracking, and payments.
+ * @description Services for staff (membership) related operations.
+ * Handles adding, updating, and removing staff from stores.
  */
 
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
-
-import { Staff, staffValidator, staffSanitizers } from './index.js';
+import { Membership } from '@/models/index.js';
 
 /**
- * ----------------- Staff CRUD -----------------
+ * ----------------- Staff CRUD Services -----------------
  */
 
 /**
- * @function createStaff
- * @description Create a new staff member within a division and workspace.
+ * @function getAllStaffs
+ * @description Get paginated staff list for a store.
  *
- * @param {staffValidator.StaffInput} staffData - Staff creation data.
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @returns {Promise<staffSanitizers.SanitizedStaff>} Created staff document.
+ * @param {string} storeId - Store ID.
+ * @param {number} page - Page number.
+ * @param {number} limit - Records per page.
+ * @returns {Promise<{ staffDocs: any[], total: number }>}
  */
-export const createStaff = async (
-  staffData: staffValidator.CreateStaffInput,
-  workspaceId: string,
-  divisionId: string
-): Promise<staffSanitizers.SanitizedStaff> => {
-  const { name, phone, role, image, salary } = staffData;
+export const getAllStaffs = async (
+  storeId: string,
+  page: number,
+  limit: number
+): Promise<{ staffDocs: any[]; total: number }> => {
+  const skip = (page - 1) * limit;
 
-  // Ensure unique phone number within the same workspace & division
-  const existing = await Staff.exists({ phone, workspace: workspaceId, division: divisionId });
-  if (existing)
-    throw new Errors.BadRequestError('Staff member with this phone number already exists');
+  const [staffDocs, total] = await Promise.all([
+    Membership.find({ store: new Types.ObjectId(storeId) })
+      .populate('user', 'name email phone image') // Populating user details
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Membership.countDocuments({ store: new Types.ObjectId(storeId) }),
+  ]);
 
-  const newStaff = await Staff.create({
-    name,
-    phone,
-    role,
-    image,
-    salary,
-    joiningDate: new Date(),
-    workspace: new Types.ObjectId(workspaceId),
-    division: new Types.ObjectId(divisionId),
-  });
-
-  return staffSanitizers.staffSanitizer(newStaff);
+  return { staffDocs, total };
 };
 
 /**
  * @function getSingleStaff
- * @description Fetch a single staff member by ID.
+ * @description Fetch a single staff member (membership) by ID.
  *
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @param {string} staffId - Staff ID.
- * @returns {Promise<staffSanitizers.SanitizedStaff>} Staff document.
+ * @param {string} storeId - Store ID.
+ * @param {string} staffId - Membership ID.
+ * @returns {Promise<any>} Staff document.
  */
-export const getSingleStaff = async (
-  workspaceId: string,
-  divisionId: string,
-  staffId: string
-): Promise<staffSanitizers.SanitizedStaff> => {
-  // const staffDoc = await Staff.findById(staffId).lean();
-  const staffDoc = await Staff.findOne({
-    _id: staffId,
-    workspace: workspaceId,
-    division: divisionId,
-  }).lean();
+export const getSingleStaff = async (storeId: string, staffId: string): Promise<any> => {
+  const staffDoc = await Membership.findOne({
+    _id: new Types.ObjectId(staffId),
+    store: new Types.ObjectId(storeId),
+  })
+    .populate('user', 'name email phone image')
+    .lean();
 
   if (!staffDoc) throw new Errors.NotFoundError('Staff member not found');
 
-  return staffSanitizers.staffSanitizer(staffDoc);
+  return staffDoc;
 };
 
 /**
  * @function updateStaff
- * @description Update staff member information.
+ * @description Update staff roles or status.
+ * Uses transactions to ensure data integrity.
  *
- * @param {staffValidator.UpdateStaffInput} staffData - Fields to update.
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @param {string} staffId - Staff ID.
- * @returns {Promise<staffSanitizers.SanitizedStaff>} Updated staff document.
+ * @param {string} storeId - Store ID.
+ * @param {string} staffId - Membership ID.
+ * @param {string[]} storeRoles - New roles.
+ * @param {string} status - New status.
+ * @returns {Promise<any>} Updated staff document.
  */
 export const updateStaff = async (
-  staffData: staffValidator.UpdateStaffInput,
-  workspaceId: string,
-  divisionId: string,
-  staffId: string
-): Promise<staffSanitizers.SanitizedStaff> => {
-  const { name, phone, role, image, salary } = staffData;
+  storeId: string,
+  staffId: string,
+  storeRoles?: string[],
+  status?: string
+): Promise<any> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // Check for duplicate phone
-  const existingPhone = await Staff.exists({
-    phone,
-    workspace: workspaceId,
-    division: divisionId,
-    _id: { $ne: staffId },
-  });
-  if (existingPhone)
-    throw new Errors.BadRequestError('Staff member with this phone number already exists');
+  try {
+    const updatePayload: any = {};
+    if (storeRoles) updatePayload.storeRoles = storeRoles;
+    if (status) updatePayload.status = status;
 
-  const updatedStaff = await Staff.findOneAndUpdate(
-    { _id: staffId, workspace: workspaceId, division: divisionId },
-    { name, phone, role, image, salary },
-    { new: true, runValidators: true }
-  ).lean();
+    const updatedStaff = await Membership.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(staffId),
+        store: new Types.ObjectId(storeId),
+      },
+      { $set: updatePayload },
+      { new: true, session } // Pass session here
+    ).lean();
 
-  if (!updatedStaff) throw new Errors.NotFoundError('Staff member not found');
+    if (!updatedStaff) {
+      throw new Errors.NotFoundError('Staff member not found');
+    }
 
-  return staffSanitizers.staffSanitizer(updatedStaff);
+    await session.commitTransaction();
+    return updatedStaff;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 /**
  * @function deleteStaff
- * @description Remove a staff member from a division.
+ * @description Remove a staff member from a store (Delete Membership).
+ * Uses transactions.
  *
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @param {string} staffId - Staff ID.
- * @returns {Promise<staffSanitizers.SanitizedStaff>} Deleted staff document.
+ * @param {string} storeId - Store ID.
+ * @param {string} staffId - Membership ID.
+ * @returns {Promise<any>} Deleted staff document.
  */
-export const deleteStaff = async (
-  workspaceId: string,
-  divisionId: string,
-  staffId: string
-): Promise<staffSanitizers.SanitizedStaff> => {
-  const deletedStaff = await Staff.findOneAndDelete({
-    _id: staffId,
-    workspace: workspaceId,
-    division: divisionId,
-  }).lean();
+export const deleteStaff = async (storeId: string, staffId: string): Promise<any> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!deletedStaff) throw new Errors.NotFoundError('Staff member not found');
+  try {
+    const deletedStaff = await Membership.findOneAndDelete({
+      _id: new Types.ObjectId(staffId),
+      store: new Types.ObjectId(storeId),
+    }).session(session);
 
-  return staffSanitizers.staffSanitizer(deletedStaff);
-};
+    if (!deletedStaff) {
+      throw new Errors.NotFoundError('Staff member not found');
+    }
 
-/**
- * @function getAllStaff
- * @description Get paginated staff list for a workspace and division.
- *
- * @param {string} workspaceId - Workspace ID.
- * @param {string} divisionId - Division ID.
- * @param {number} page - Page number.
- * @param {number} limit - Records per page.
- * @returns {Promise<staffSanitizers.SanitizedStaffs & { total: number }>} Paginated staff list.
- */
-export const getAllStaffs = async (
-  workspaceId: string,
-  divisionId: string,
-  page: number,
-  limit: number
-): Promise<staffSanitizers.SanitizedStaffs & { total: number }> => {
-  const total = await Staff.countDocuments({ workspace: workspaceId, division: divisionId });
-  if (total === 0) return { staff: [], total };
-
-  const skip: number = (page - 1) * limit;
-  const staffList = await Staff.find({ workspace: workspaceId, division: divisionId })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-
-  return {
-    staff: staffSanitizers.allStaffSanitizer(staffList, [
-      'id',
-      'name',
-      'phone',
-      'role',
-      'image',
-      'salary',
-    ]).staff,
-    total,
-  };
+    await session.commitTransaction();
+    return deletedStaff;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 /**
  * ----------------- Default Export (staffService) -----------------
  */
 export default {
-  createStaff, // Create a new staff member
-  getSingleStaff, // Get details of a single staff member
-  updateStaff, // Update staff member details
-  deleteStaff, // Delete a staff member
-  getAllStaffs, // Get all staff members in a division
+  getAllStaffs,
+  getSingleStaff,
+  updateStaff,
+  deleteStaff,
 };

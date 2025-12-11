@@ -17,46 +17,31 @@ const router = Router({ mergeParams: true });
  */
 
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/staff
- * @desc    Add a new staff member to a division
- * @access  Admin (division)
- */
-router.post(
-  '/staff',
-  validateRequest(staffValidator.createStaffSchema),
-  staffController.createStaff
-);
-
-/**
- * @route   GET /:workspaceId/divisions/:divisionId/staff
+ * @route   GET /:workspaceId/divisions/:divisionId/staffs
  * @desc    Get all staff members in a division
  * @access  Authenticated
  */
-router.get('/staff', staffController.getAllStaff);
+router.get('/staffs', staffController.getAllStaff);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/staff/:staffId
+ * @route   GET /:workspaceId/divisions/:divisionId/staffs/:staffId
  * @desc    Get details of a single staff member
  * @access  Authenticated
  */
-router.get('/staff/:staffId', staffController.getSingleStaff);
+router.get('/staffs/:staffId', staffController.getSingleStaff);
 
 /**
- * @route   PUT /:workspaceId/divisions/:divisionId/staff/:staffId
+ * @route   PUT /:workspaceId/divisions/:divisionId/staffs/:staffId
  * @desc    Update staff member details
  * @access  Admin (division)
  */
-router.put(
-  '/staff/:staffId',
-  validateRequest(staffValidator.updateStaffSchema),
-  staffController.updateStaff
-);
+router.patch('/staffs/:staffId', staffController.updateStaff);
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId/staff/:staffId
+ * @route   DELETE /:workspaceId/divisions/:divisionId/staffs/:staffId
  * @desc    Remove a staff member
  * @access  Admin (division)
  */
-router.delete('/staff/:staffId', staffController.deleteStaff);
+router.delete('/staffs/:staffId', staffController.deleteStaff);
 
 export default router;

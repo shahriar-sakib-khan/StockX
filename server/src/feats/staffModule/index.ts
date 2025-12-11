@@ -21,3 +21,8 @@ export {
   salaryService,
   salarySanitizers,
 } from './salary/index.js';
+
+/**
+ * ----------------- Routers -----------------
+ */
+export {default as staffRouter} from './staff.routes.js';
