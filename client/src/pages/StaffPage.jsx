@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { FaUserPlus, FaEnvelope, FaTrash } from "react-icons/fa";
+import { useState } from "react";
+import { FaUserPlus, FaEnvelope, FaUserTie } from "react-icons/fa";
 
 import { Modal } from "@/components";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -16,6 +16,7 @@ export default function StaffPage() {
             name: "Rahim Uddin",
             role: "Manager",
             image: null,
+            phone: "01700000000",
             salary: "20,000",
             paid: "15,000",
             remaining: "5,000",
@@ -27,6 +28,7 @@ export default function StaffPage() {
             name: "Karim Mia",
             role: "Driver",
             image: null,
+            phone: "01800000000",
             salary: "12,000",
             paid: "12,000",
             remaining: "0",
@@ -38,6 +40,7 @@ export default function StaffPage() {
             name: "Salam Khan",
             role: "Helper",
             image: null,
+            phone: "01900000000",
             salary: "8,000",
             paid: "0",
             remaining: "8,000",
@@ -68,21 +71,22 @@ export default function StaffPage() {
     };
 
     const onDelete = (id) => {
+        // eslint-disable-next-line no-restricted-globals
         if (confirm("Are you sure you want to remove this staff member?")) {
             setStaffList((prev) => prev.filter((staff) => staff.id !== id));
         }
     };
+
+    // Placeholder functions to match card props (add logic later)
+    const onUpdateMock = (staff) => console.log("Update", staff);
+    const onPaySalaryMock = (staff) => console.log("Pay Salary", staff);
+    const onHistoryMock = (staff) => console.log("History", staff);
 
     const onSendInvite = async (e) => {
         e.preventDefault();
         if (!email || !role || !lifespan) {
             setErrorMsg("Please fill in all fields");
             return;
-        }
-        if (!currentStore?.id) {
-            // For demo purposes, we can skip this check or show mock success
-            // setErrorMsg("No store selected");
-            // return;
         }
 
         setIsLoading(true);
@@ -121,7 +125,8 @@ export default function StaffPage() {
                 </div>
                 <button
                     onClick={onAddClick}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95 sm:w-auto"
+                    // Updated to Emerald to match Shop/Vehicle pages
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 active:scale-95 sm:w-auto"
                 >
                     <FaUserPlus /> Invite Staff
                 </button>
@@ -129,9 +134,10 @@ export default function StaffPage() {
 
             {/* Staff Grid */}
             {staffList.length === 0 ? (
-                <div className="flex h-64 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white p-8 text-center text-gray-400">
-                    <FaUserPlus className="mb-4 text-4xl text-gray-300" />
-                    <p>No staff members yet. Invite someone to get started!</p>
+                // Updated Empty State to match Shop/Vehicle pages
+                <div className="flex h-64 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white text-gray-400">
+                    <FaUserTie className="mb-4 text-4xl text-gray-300" />
+                    <p>No staff members yet.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -140,12 +146,15 @@ export default function StaffPage() {
                             key={staff.id}
                             staffMember={staff}
                             onDelete={() => onDelete(staff.id)}
+                            onUpdate={() => onUpdateMock(staff)}
+                            onPaySalary={() => onPaySalaryMock(staff)}
+                            onShowHistory={() => onHistoryMock(staff)}
                         />
                     ))}
                 </div>
             )}
 
-            {/* Invite Modal */}
+            {/* Invite Modal (Logic Kept Same, Styles Tweaked to match Theme) */}
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -162,7 +171,7 @@ export default function StaffPage() {
                                 placeholder="name@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                                 required
                             />
                         </div>
@@ -174,7 +183,7 @@ export default function StaffPage() {
                             <select
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                             >
                                 {roleOptions.map((r) => (
                                     <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
@@ -186,7 +195,7 @@ export default function StaffPage() {
                             <select
                                 value={lifespan}
                                 onChange={(e) => setLifespan(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                             >
                                 {lifespanOptions.map((l) => (
                                     <option key={l} value={l}>{l}</option>
@@ -208,7 +217,7 @@ export default function StaffPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-70"
+                            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-70"
                         >
                             {isLoading ? "Sending..." : "Send Invite"}
                         </button>
