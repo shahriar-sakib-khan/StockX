@@ -1,294 +1,135 @@
-/**
- * @module salary.service
- *
- * @description Services for division member salary management,
- * including CRUD operations and recording payments with transactions.
- */
+import { Types, ClientSession } from 'mongoose';
 
-import { Types } from 'mongoose';
+import { assertHierarchy } from '../staff/staff.middleware.js';
 
+import { salaryValidator, salarySanitizers } from './index.js';
+
+import { AuthUser } from '@/common/assertions.js';
 import { Errors } from '@/error/index.js';
-
-import { Salary, salaryValidator, salarySanitizers } from '../salary/index.js';
-
-/**
- * @function createSalary
- * @description Create a new division member salary
- *
- * @param {salaryValidator.CreateSalaryInput} salaryData - Salary creation data
- * @param {string} workspaceId - Workspace ID
- * @param {string} divisionId - Division ID
- * @param {string} memberId - Member ID
- * @param {string} cycleId - Cycle ID
- * @returns {Promise<salarySanitizers.SanitizedSalary>} The created salary
- * @throws {Errors.BadRequestError} If a salary already exists for the member in this cycle
- */
-export const createSalary = async (
-  salaryData: salaryValidator.CreateSalaryInput,
-  workspaceId: string,
-  divisionId: string,
-  memberId: string,
-  cycleId: string
-): Promise<salarySanitizers.SanitizedSalary> => {
-  const { monthlySalary } = salaryData;
-
-  // Ensure no duplicate salary exists for member in this cycle
-  const existing = await Salary.exists({
-    workspace: workspaceId,
-    division: divisionId,
-    member: memberId,
-    cycle: cycleId,
-  });
-  if (existing)
-    throw new Errors.BadRequestError('Salary already exists for this member in this cycle');
-
-  const newSalary = await Salary.create({
-    workspace: new Types.ObjectId(workspaceId),
-    division: new Types.ObjectId(divisionId),
-    member: new Types.ObjectId(memberId),
-    cycle: new Types.ObjectId(cycleId),
-    monthlySalary,
-    paidAmount: 0,
-    dueAmount: monthlySalary,
-    isPaid: false,
-  });
-
-  return salarySanitizers.salarySanitizer(newSalary);
-};
+import { Staff, IStaff } from '@/feats/staffModule/staff/index.js';
+import { logger } from '@/utils/index.js';
 
 /**
- * @function getAllSalaries
- * @description Get all division member salaries
- *
- * @param {string} workspaceId - Workspace ID
- * @param {string} divisionId - Division ID
- * @param {number} page - Page number
- * @param {number} limit - Records per page
- * @returns {Promise<salarySanitizers.SanitizedSalaries & { total: number }>} List of salaries and total count
- * @throws {Errors.NotFoundError} If no salaries are found
+ * @function getPayrollList
+ * @description List staff with their salary details. (Read-Only)
  */
-export const getAllSalaries = async (
-  workspaceId: string,
-  divisionId: string,
+export const getPayrollList = async (
+  storeId: string,
   page: number,
   limit: number
-): Promise<salarySanitizers.SanitizedSalaries & { total: number }> => {
-  const total = await Salary.countDocuments({ workspace: workspaceId, division: divisionId });
-  if (total === 0) return { salaries: [], total };
-
+): Promise<{ salaries: Partial<salarySanitizers.SanitizedSalary>[]; total: number }> => {
   const skip = (page - 1) * limit;
-  const salaries = await Salary.find({ workspace: workspaceId, division: divisionId })
-    .skip(skip)
-    .limit(limit)
-    .populate('cycle', 'name')
-    .lean();
+  const storeObjectId = new Types.ObjectId(storeId);
+
+  // Filter: Active staff only
+  const query = {
+    store: storeObjectId,
+    isActive: true,
+  };
+
+  const [docs, total] = await Promise.all([
+    Staff.find(query).skip(skip).limit(limit).select('name role payroll updatedAt store').lean(),
+    Staff.countDocuments(query),
+  ]);
 
   return {
-    salaries: salarySanitizers.allSalarySanitizer(salaries, ['cycle']).salaries,
+    salaries: salarySanitizers.allSalarySanitizer(docs as unknown as IStaff[]).salaries,
     total,
   };
 };
 
 /**
- * @function getAllSalariesPerMember
- * @description Get all division member salaries per member
- *
- * @param {string} workspaceId - Workspace ID
- * @param {string} divisionId - Division ID
- * @param {string} memberId - Member ID
- * @param {number} page - Page number
- * @param {number} limit - Records per page
- * @returns {Promise<salarySanitizers.SanitizedSalaries & { total: number }>} List of salaries and total count
- * @throws {Errors.NotFoundError} If no salaries are found
+ * @function getStaffSalary
+ * @description Get specific staff salary details.
  */
-export const getAllSalariesPerMember = async (
-  workspaceId: string,
-  divisionId: string,
-  memberId: string,
-  page: number,
-  limit: number
-): Promise<salarySanitizers.SanitizedSalaries & { total: number }> => {
-  const total = await Salary.countDocuments({
-    workspace: workspaceId,
-    division: divisionId,
-    member: memberId,
-  });
-  if (total === 0) return { salaries: [], total };
-
-  const skip = (page - 1) * limit;
-  const salaries = await Salary.find({
-    workspace: workspaceId,
-    division: divisionId,
-    member: memberId,
-  })
-    .skip(skip)
-    .limit(limit)
-    .populate('cycle', 'name')
-    .lean();
-
-  return {
-    salaries: salarySanitizers.allSalarySanitizer(salaries, [
-      'cycle',
-      'monthlySalary',
-      'paidAmount',
-      'dueAmount',
-      'isPaid',
-    ]).salaries,
-    total,
-  };
-};
-
-/**
- * @function getSingleSalary
- * @description Get details of a single division member salary
- *
- * @param {string} workspaceId - Workspace ID
- * @param {string} divisionId - Division ID
- * @param {string} salaryId - Salary ID
- * @returns {Promise<salarySanitizers.SanitizedSalary>} The salary details
- * @throws {Errors.NotFoundError} If the salary is not found
- */
-export const getSingleSalary = async (
-  workspaceId: string,
-  divisionId: string,
-  salaryId: string
+export const getStaffSalary = async (
+  storeId: string,
+  staffId: string
 ): Promise<salarySanitizers.SanitizedSalary> => {
-  const salary = await Salary.findOne({
-    _id: salaryId,
-    workspace: workspaceId,
-    division: divisionId,
+  const staff = await Staff.findOne({
+    _id: new Types.ObjectId(staffId),
+    store: new Types.ObjectId(storeId),
   }).lean();
-  if (!salary) throw new Errors.NotFoundError('Salary not found');
 
-  return salarySanitizers.salarySanitizer(salary);
+  if (!staff) throw new Errors.NotFoundError('Staff member not found');
+
+  return salarySanitizers.salarySanitizer(staff as unknown as IStaff);
 };
 
 /**
- * @function updateSalary
- * @description Update a division member salary
- *
- * @param {salaryValidator.UpdateSalaryInput} updateData - The data to update the salary with
- * @param {string} workspaceId - Workspace ID
- * @param {string} divisionId - Division ID
- * @param {string} salaryId - Salary ID
- * @returns {Promise<salarySanitizers.SanitizedSalary>} The updated salary details
- * @throws {Errors.NotFoundError} If the salary is not found
+ * @function setSalary
+ * @description Configure base salary. Enforces hierarchy checks.
  */
-export const updateSalary = async (
-  updateData: salaryValidator.UpdateSalaryInput,
-  workspaceId: string,
-  divisionId: string,
-  salaryId: string
+export const setSalary = async (
+  storeId: string,
+  staffId: string,
+  actor: AuthUser,
+  data: salaryValidator.SetSalaryInput,
+  session?: ClientSession
 ): Promise<salarySanitizers.SanitizedSalary> => {
-  const { monthlySalary } = updateData;
-  const salary = await Salary.findOneAndUpdate(
+  const isGlobalOwner = actor.type !== 'staff';
+
+  // 1. Fetch target for hierarchy check
+  const targetStaff = await Staff.findById(staffId).select('role username').lean();
+  if (!targetStaff) throw new Errors.NotFoundError('Staff member not found');
+
+  // 2. Hierarchy Check (e.g., Admin cannot set salary for another Admin)
+  assertHierarchy(actor.role, targetStaff.role, isGlobalOwner);
+
+  // 3. Update
+  const staff = await Staff.findOneAndUpdate(
     {
-      _id: salaryId,
-      workspace: workspaceId,
-      division: divisionId,
+      _id: new Types.ObjectId(staffId),
+      store: new Types.ObjectId(storeId),
     },
-    { monthlySalary },
-    { new: true }
+    { $set: { 'payroll.baseSalary': data.amount } },
+    { new: true, session, runValidators: true }
   ).lean();
 
-  if (!salary) throw new Errors.NotFoundError('Salary not found');
+  logger.info(
+    `Salary updated for ${targetStaff.username} (${staffId}) by ${actor.userId} in store ${storeId}`
+  );
 
-  return salarySanitizers.salarySanitizer(salary);
+  return salarySanitizers.salarySanitizer(staff as unknown as IStaff);
 };
 
 /**
- * @function deleteSalary
- * @description Delete a division member salary
- *
- * @param {string} workspaceId - Workspace ID
- * @param {string} divisionId - Division ID
- * @param {string} salaryId - Salary ID
- * @returns {Promise<salarySanitizers.SanitizedSalary>} The deleted salary details
- * @throws {Errors.NotFoundError} If the salary is not found
+ * @function removeSalary
+ * @description Reset salary config to 0. Enforces hierarchy checks.
  */
-export const deleteSalary = async (
-  workspaceId: string,
-  divisionId: string,
-  salaryId: string
+export const removeSalary = async (
+  storeId: string,
+  staffId: string,
+  actor: AuthUser,
+  session?: ClientSession
 ): Promise<salarySanitizers.SanitizedSalary> => {
-  const deleted = await Salary.findOneAndDelete({
-    _id: salaryId,
-    workspace: workspaceId,
-    division: divisionId,
-  }).lean();
-  if (!deleted) throw new Errors.NotFoundError('Salary not found');
+  const isGlobalOwner = actor.type !== 'staff';
 
-  return salarySanitizers.salarySanitizer(deleted);
+  const targetStaff = await Staff.findById(staffId).select('role username').lean();
+  if (!targetStaff) throw new Errors.NotFoundError('Staff member not found');
+
+  // Hierarchy Check
+  assertHierarchy(actor.role, targetStaff.role, isGlobalOwner);
+
+  const staff = await Staff.findOneAndUpdate(
+    {
+      _id: new Types.ObjectId(staffId),
+      store: new Types.ObjectId(storeId),
+    },
+    { $set: { 'payroll.baseSalary': 0 } },
+    { new: true, session }
+  ).lean();
+
+  logger.info(
+    `Salary removed for ${targetStaff.username} (${staffId}) by ${actor.userId} in store ${storeId}`
+  );
+
+  return salarySanitizers.salarySanitizer(staff as unknown as IStaff);
 };
 
-/**
- * ----------------- Record Salary Payment -----------------
- */
-
-// /**
-//  * @function paySalary
-//  * @description Record a payment for a division member salary
-//  *
-//  * @param {salaryValidator.PaySalaryInput} paymentData - The payment data
-//  * @param {string} workspaceId - Workspace ID
-//  * @param {string} divisionId - Division ID
-//  * @param {string} salaryId - Salary ID
-//  * @param {string} userId - User ID
-//  * @returns {Promise<salarySanitizers.SanitizedSalary>} The updated salary details
-//  */
-// export const paySalary = async (
-//   paymentData: { amount: number; paymentMethod?: string; ref?: string },
-//   workspaceId: string,
-//   divisionId: string,
-//   salaryId: string,
-//   userId?: string
-// ): Promise<{
-//   salary: salarySanitizers.SanitizedSalary;
-//   transaction: transactionSanitizers.SanitizedTransaction;
-// }> => {
-//   const salary = await Salary.findOne({
-//     _id: salaryId,
-//     workspace: workspaceId,
-//     division: divisionId,
-//   });
-//   if (!salary) throw new Errors.NotFoundError('Salary not found');
-
-//   const { amount, paymentMethod, ref } = paymentData;
-
-//   // Prevent overpayment
-//   if (amount > salary.dueAmount) throw new Errors.BadRequestError('Payment exceeds due amount');
-
-//   // Record the transaction
-//   const tx = await transactionService.recordTransaction(userId!, workspaceId, divisionId, {
-//     amount,
-//     category: 'salary_payment',
-//     paymentMethod,
-//     counterpartyType: 'staff',
-//     staffId: salary.member,
-//     ref,
-//   });
-
-//   // Update salary
-//   salary.paidAmount += amount;
-//   salary.dueAmount -= amount;
-//   salary.isPaid = salary.dueAmount <= 0;
-//   await salary.save();
-
-//   return {
-//     salary: salarySanitizers.salarySanitizer(salary),
-//     transaction: tx, // can sanitize in controller if needed
-//   };
-// };
-
-/**
- * ----------------- Default Export (salaryService) -----------------
- */
 export default {
-  createSalary, // Create a new division member salary
-  getSingleSalary, // Get details of a single division member salary
-  getAllSalaries, // Get all division member salaries
-  getAllSalariesPerMember, // Get all division member salaries per member
-  updateSalary, // Update a division member salary
-  deleteSalary, // Delete a division member salary
-  // paySalary, // Record a payment for a division member salary
+  getPayrollList,
+  getStaffSalary,
+  setSalary,
+  removeSalary,
 };

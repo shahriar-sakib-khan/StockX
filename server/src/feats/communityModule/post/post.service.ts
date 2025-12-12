@@ -1,8 +1,9 @@
 import { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
-import { Post, postSanitizers } from './index.js';
 import { Store } from '@/feats/storeModule/index.js';
+
+import { Post, postSanitizers } from './index.js';
 
 /**
  * ----------------- Fetch All Swap Posts -----------------

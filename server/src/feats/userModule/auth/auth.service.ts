@@ -1,25 +1,28 @@
-import { Errors } from '@/error/index.js';
-import { Passwords, JWTs } from '@/utils/index.js';
+import { ClientSession } from 'mongoose';
 
-import { User, userSanitizers } from '../index.js';
+import { User, IUser, userSanitizers } from '../index.js';
+
 import { authValidator } from './index.js';
+
+import { Errors } from '@/error/index.js';
 import { Invite } from '@/models/index.js';
+import { Passwords, JWTs, logger } from '@/utils/index.js';
 
 /**
- * Registers a new user.
- *
- * @param {authValidator.RegisterInput} userData - Incoming user data.
- * @returns {Promise<userSanitizers.SanitizedUser>} Sanitized user object.
- * @throws {Errors.BadRequestError} If email or username already exists.
+ * @function registerUser
  */
 export const registerUser = async (
-  userData: authValidator.RegisterInput
+  userData: authValidator.RegisterInput,
+  session?: ClientSession
 ): Promise<userSanitizers.SanitizedUser> => {
-  const { username, email, password, address } = userData;
+  const { username, email, password, address, firstName, lastName } = userData;
 
   const existingUsers = await User.find({
     $or: [{ email }, { username }],
-  }).select('email username');
+  })
+    .session(session || null)
+    .select('email username')
+    .lean();
 
   if (existingUsers.length) {
     if (existingUsers.some(u => u.email === email))
@@ -30,31 +33,34 @@ export const registerUser = async (
 
   const hashedPassword = await Passwords.hashPassword(password);
 
-  const user = await User.create({
-    username,
-    email,
-    address,
-    password: hashedPassword,
-  });
-
-  const updateResult = await Invite.updateMany(
-    { email, user: null, status: 'pending' }, // only unclaimed + pending invites
-    { $set: { user: user._id, status: 'sent' } } // link + update status
+  const [newUser] = await User.create(
+    [
+      {
+        username,
+        email,
+        address,
+        firstName,
+        lastName,
+        password: hashedPassword,
+      },
+    ],
+    { session }
   );
 
-  if (updateResult.modifiedCount > 0) {
-    console.log(`[Invite Update] You have ${updateResult.modifiedCount} pending invite(s)!`);
-  }
+  // Link Invites
+  await Invite.updateMany(
+    { email, user: null, status: 'pending' },
+    { $set: { user: newUser._id, status: 'sent' } },
+    { session }
+  );
 
-  return userSanitizers.userSanitizer(user);
+  logger.info(`Global User registered: ${username} (${email})`);
+
+  return userSanitizers.userSanitizer(newUser);
 };
 
 /**
- * Authenticates a user.
- *
- * @param {authValidator.LoginInput} credentials - Login credentials.
- * @returns {Promise<userSanitizers.SanitizedUser>} Authenticated user.
- * @throws {Errors.UnauthenticatedError} If credentials are invalid.
+ * @function loginUser
  */
 export const loginUser = async ({
   loginIdentifier,
@@ -64,38 +70,51 @@ export const loginUser = async ({
 
   const user = await User.findOne(
     isEmail ? { email: loginIdentifier } : { username: loginIdentifier }
-  ).select('+password');
+  )
+    .select('+password')
+    .lean();
 
   if (!user) throw new Errors.UnauthenticatedError('Invalid credentials');
 
-  const isValid = await Passwords.compareHashedPassword(password, user.password);
+  const isValid = await Passwords.compareHashedPassword(
+    password,
+    (user as unknown as IUser).password!
+  );
   if (!isValid) throw new Errors.UnauthenticatedError('Invalid credentials');
 
-  return userSanitizers.userSanitizer(user);
+  logger.info(`Global User login: ${user.username} (${user._id})`);
+
+  return userSanitizers.userSanitizer(user as unknown as IUser);
 };
 
 /**
- * Generates a new access token from a refresh token.
- *
- * @param {string} refreshToken - User refresh token.
- * @returns {string} New access token.
- * @throws {Errors.UnauthenticatedError} If token is missing or invalid.
+ * @function refreshAccessToken
  */
 export const refreshAccessToken = async (refreshToken: string): Promise<string> => {
   if (!refreshToken) throw new Errors.UnauthenticatedError('Refresh token missing');
 
   const { userId } = JWTs.verifyRefreshToken(refreshToken);
-  const user = await User.findById(userId);
+
+  const user = await User.findById(userId).lean();
   if (!user) throw new Errors.NotFoundError('User not found');
+
+  logger.info(`Global User refresh: ${user.username} (${user._id})`);
 
   return JWTs.createAccessToken({
     userId,
-    role: user.role,
+    role: (user as unknown as IUser).role,
   });
 };
 
+export const logoutUser = (): void => {
+  logger.info(`Global User logged out`);
+
+  return;
+};
+
 export default {
-  registerUser, // Register a new user
-  loginUser, // Log in a user
-  refreshAccessToken, // Refresh access token
+  registerUser,
+  loginUser,
+  refreshAccessToken,
+  logoutUser,
 };

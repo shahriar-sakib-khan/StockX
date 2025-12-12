@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
+
 import { Regulator, regulatorSanitizers } from './index.js';
 
 /**

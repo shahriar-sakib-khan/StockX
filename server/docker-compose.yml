@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # 1. Your Backend Application
+  api:
+    build: .
+    container_name: stockx_server
+    restart: always
+    ports:
+      - '5000:5000' # Maps local port 5000 to container port 5000
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      # Use the service name 'mongo' as the hostname
+      - MONGO_URI=mongodb://mongo:27017/stockx_db
+      # Add other keys here (JWT_SECRET, CLOUDINARY, etc.)
+      # Or use env_file: .env to load them all from your local file
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    volumes:
+      # Syncs your logs folder so you can see them on your host machine
+      - ./logs:/app/logs
+
+  # 2. MongoDB Database
+  mongo:
+    image: mongo:6.0
+    container_name: stockx_mongo
+    restart: always
+    ports:
+      - '27017:27017' # Exposed to host so you can connect via Compass/Studio3T
+    volumes:
+      - mongo-data:/data/db # Persists data even if container is deleted
+
+volumes:
+  mongo-data:

@@ -1,155 +1,182 @@
-/**
- * @module staff.service
- *
- * @description Services for staff (membership) related operations.
- * Handles adding, updating, and removing staff from stores.
- */
+import { Types, ClientSession } from 'mongoose';
 
-import mongoose, { Types } from 'mongoose';
+import { Staff, IStaff, staffSanitizers, staffValidator, staffMiddleware } from './index.js';
 
+import { AuthUser } from '@/common/assertions.js';
 import { Errors } from '@/error/index.js';
-import { Membership } from '@/models/index.js';
+import { Store } from '@/feats/storeModule/index.js';
+import { Passwords, JWTs, logger } from '@/utils/index.js';
 
 /**
- * ----------------- Staff CRUD Services -----------------
+ * @function createStaff
+ * @description Create a new staff member
  */
+export const createStaff = async (
+  storeId: string,
+  actor: AuthUser,
+  data: staffValidator.CreateStaffInput,
+  session?: ClientSession
+): Promise<staffSanitizers.SanitizedStaff> => {
+  // Hierarchy Check
+  // Global Users (type undefined or 'user') are treated as Owners (supreme)
+  const isGlobalOwner = actor.type !== 'staff';
+  staffMiddleware.assertHierarchy(actor.role, data.role, isGlobalOwner);
+
+  const { username, password, baseSalary, ...profile } = data;
+
+  const exists = await Staff.exists({ store: storeId, username }).session(session || null);
+  if (exists) throw new Errors.BadRequestError('Username already exists in this store');
+
+  const hashedPassword = await Passwords.hashPassword(password);
+
+  const [staff] = await Staff.create(
+    [
+      {
+        store: new Types.ObjectId(storeId),
+        username,
+        password: hashedPassword,
+        ...profile,
+        payroll: {
+          baseSalary: baseSalary || 0,
+          currentDue: 0,
+          totalPaid: 0,
+        },
+      },
+    ],
+    { session }
+  );
+
+  logger.info(`Staff created: ${username} in store ${storeId}`);
+
+  return staffSanitizers.staffSanitizer(staff);
+};
+
+/**
+ * @function loginStaff
+ * @description Staff login
+ */
+export const loginStaff = async (
+  data: staffValidator.StaffLoginInput
+): Promise<{ token: string; staff: staffSanitizers.SanitizedStaff }> => {
+  const { storeCode, username, password } = data;
+
+  const store = await Store.findById(storeCode).select('_id').lean();
+  if (!store) throw new Errors.NotFoundError('Store not found');
+
+  const staff = await Staff.findOne({ store: store._id, username }).select('+password').lean();
+  if (!staff) throw new Errors.UnauthenticatedError('Invalid credentials');
+  if (!staff.isActive) throw new Errors.UnauthenticatedError('Account is inactive');
+
+  const isValid = await Passwords.compareHashedPassword(
+    password,
+    (staff as unknown as IStaff).password!
+  );
+  if (!isValid) throw new Errors.UnauthenticatedError('Invalid credentials');
+
+  const token = JWTs.createStaffAccessToken({
+    userId: String(staff._id),
+    role: staff.role,
+    storeId: String(store._id),
+  });
+
+  logger.info(`Staff login: ${username} in store ${store._id}`);
+
+  return { token, staff: staffSanitizers.staffSanitizer(staff as unknown as IStaff) };
+};
 
 /**
  * @function getAllStaffs
- * @description Get paginated staff list for a store.
- *
- * @param {string} storeId - Store ID.
- * @param {number} page - Page number.
- * @param {number} limit - Records per page.
- * @returns {Promise<{ staffDocs: any[], total: number }>}
+ * @description List all staff for a store. (Read-only, no logs)
  */
 export const getAllStaffs = async (
   storeId: string,
   page: number,
   limit: number
-): Promise<{ staffDocs: any[]; total: number }> => {
+): Promise<{ staffs: Partial<staffSanitizers.SanitizedStaff>[]; total: number }> => {
   const skip = (page - 1) * limit;
+  const query = { store: new Types.ObjectId(storeId) };
 
-  const [staffDocs, total] = await Promise.all([
-    Membership.find({ store: new Types.ObjectId(storeId) })
-      .populate('user', 'name email phone image') // Populating user details
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Membership.countDocuments({ store: new Types.ObjectId(storeId) }),
+  const [docs, total] = await Promise.all([
+    Staff.find(query).skip(skip).limit(limit).lean(),
+    Staff.countDocuments(query),
   ]);
 
-  return { staffDocs, total };
-};
-
-/**
- * @function getSingleStaff
- * @description Fetch a single staff member (membership) by ID.
- *
- * @param {string} storeId - Store ID.
- * @param {string} staffId - Membership ID.
- * @returns {Promise<any>} Staff document.
- */
-export const getSingleStaff = async (storeId: string, staffId: string): Promise<any> => {
-  const staffDoc = await Membership.findOne({
-    _id: new Types.ObjectId(staffId),
-    store: new Types.ObjectId(storeId),
-  })
-    .populate('user', 'name email phone image')
-    .lean();
-
-  if (!staffDoc) throw new Errors.NotFoundError('Staff member not found');
-
-  return staffDoc;
+  return {
+    staffs: staffSanitizers.allStaffSanitizer(docs as unknown as IStaff[]).staffs,
+    total,
+  };
 };
 
 /**
  * @function updateStaff
- * @description Update staff roles or status.
- * Uses transactions to ensure data integrity.
- *
- * @param {string} storeId - Store ID.
- * @param {string} staffId - Membership ID.
- * @param {string[]} storeRoles - New roles.
- * @param {string} status - New status.
- * @returns {Promise<any>} Updated staff document.
+ * @description Update a staff member.
  */
 export const updateStaff = async (
   storeId: string,
   staffId: string,
-  storeRoles?: string[],
-  status?: string
-): Promise<any> => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  actor: AuthUser,
+  data: staffValidator.UpdateStaffInput,
+  session?: ClientSession
+): Promise<staffSanitizers.SanitizedStaff> => {
+  const isGlobalOwner = actor.type !== 'staff';
 
-  try {
-    const updatePayload: any = {};
-    if (storeRoles) updatePayload.storeRoles = storeRoles;
-    if (status) updatePayload.status = status;
+  // Fetch target role for hierarchy check
+  const targetStaff = await Staff.findById(staffId).select('role username').lean();
+  if (!targetStaff) throw new Errors.NotFoundError('Staff member not found');
 
-    const updatedStaff = await Membership.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(staffId),
-        store: new Types.ObjectId(storeId),
-      },
-      { $set: updatePayload },
-      { new: true, session } // Pass session here
-    ).lean();
+  // Check 1: Can I manage this staff member?
+  staffMiddleware.assertHierarchy(actor.role, targetStaff.role, isGlobalOwner);
 
-    if (!updatedStaff) {
-      throw new Errors.NotFoundError('Staff member not found');
-    }
-
-    await session.commitTransaction();
-    return updatedStaff;
-  } catch (error) {
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    session.endSession();
+  // Check 2: If promoting, can I assign this role?
+  if (data.role) {
+    staffMiddleware.assertHierarchy(actor.role, data.role, isGlobalOwner);
   }
+
+  const { password, baseSalary, ...updates } = data;
+  const updatePayload: any = { ...updates };
+
+  if (password) updatePayload.password = await Passwords.hashPassword(password);
+  if (baseSalary !== undefined) updatePayload['payroll.baseSalary'] = baseSalary;
+
+  const staff = await Staff.findOneAndUpdate(
+    { _id: staffId, store: storeId },
+    { $set: updatePayload },
+    { new: true, session, runValidators: true }
+  ).lean();
+
+  logger.info(`Staff updated: ${targetStaff.username} (${staffId}) in store ${storeId}`);
+
+  return staffSanitizers.staffSanitizer(staff as unknown as IStaff);
 };
 
 /**
  * @function deleteStaff
- * @description Remove a staff member from a store (Delete Membership).
- * Uses transactions.
- *
- * @param {string} storeId - Store ID.
- * @param {string} staffId - Membership ID.
- * @returns {Promise<any>} Deleted staff document.
+ * @description Delete a staff member
  */
-export const deleteStaff = async (storeId: string, staffId: string): Promise<any> => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+export const deleteStaff = async (
+  storeId: string,
+  staffId: string,
+  actor: AuthUser,
+  session?: ClientSession
+): Promise<staffSanitizers.SanitizedStaff> => {
+  const isGlobalOwner = actor.type !== 'staff';
 
-  try {
-    const deletedStaff = await Membership.findOneAndDelete({
-      _id: new Types.ObjectId(staffId),
-      store: new Types.ObjectId(storeId),
-    }).session(session);
+  const targetStaff = await Staff.findById(staffId).select('role username').lean();
+  if (!targetStaff) throw new Errors.NotFoundError('Staff member not found');
 
-    if (!deletedStaff) {
-      throw new Errors.NotFoundError('Staff member not found');
-    }
+  staffMiddleware.assertHierarchy(actor.role, targetStaff.role, isGlobalOwner);
 
-    await session.commitTransaction();
-    return deletedStaff;
-  } catch (error) {
-    await session.abortTransaction();
-    throw error;
-  } finally {
-    session.endSession();
-  }
+  const staff = await Staff.findOneAndDelete({ _id: staffId, store: storeId }, { session }).lean();
+
+  logger.info(`Staff deleted: ${targetStaff.username} (${staffId}) from store ${storeId}`);
+
+  return staffSanitizers.staffSanitizer(staff as unknown as IStaff);
 };
 
-/**
- * ----------------- Default Export (staffService) -----------------
- */
 export default {
+  createStaff,
+  loginStaff,
   getAllStaffs,
-  getSingleStaff,
   updateStaff,
   deleteStaff,
 };

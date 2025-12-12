@@ -5,8 +5,8 @@
  */
 
 import { Types } from 'mongoose';
-import { Errors } from '@/error/index.js';
 
+import { Errors } from '@/error/index.js';
 import {
   Transaction,
   transactionService,
@@ -14,6 +14,7 @@ import {
 } from '@/feats/transactionModule/index.js';
 
 import { Cylinder, cylinderSanitizers } from '../index.js';
+
 import { cylinderTxConstants } from './index.js';
 
 /** ----------------- General Cylinder Transactions ----------------- */
@@ -220,8 +221,8 @@ export const exchangeEmptyForEmpty = async (
   storeId: string,
   transactorId: string
 ): Promise<any> => {
-  let outgoingCylinders = [],
-    totalOut = 0,
+  const outgoingCylinders = [];
+  let totalOut = 0,
     totalIn = 0;
   for (const c of cylinderOut) {
     const cylinder = await Cylinder.findOne({ store: storeId, brand: c.brandId });
@@ -236,7 +237,7 @@ export const exchangeEmptyForEmpty = async (
     outgoingCylinders.push({ brandName: cylinder.brandName, count: c.quantity });
   }
 
-  let incomingCylinders = [];
+  const incomingCylinders = [];
   for (const c of cylinderIn) {
     const cylinder = await Cylinder.findOne({ store: storeId, brand: c.brandId });
 

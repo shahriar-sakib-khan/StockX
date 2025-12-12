@@ -1,62 +1,60 @@
-/**
- * @module user.service
- *
- * @description Services for user-related operations.
- */
+import { ClientSession } from 'mongoose';
+
+import { IUser, User, userSanitizers, userValidator } from './index.js';
 
 import { Errors } from '@/error/index.js';
-
-import { User, userSanitizers, userValidator } from './index.js';
-
-/**
- * ----------------- User CRUD Services -----------------
- */
+import { logger } from '@/utils/index.js';
 
 /**
  * @function getCurrentUser
- * @description Retrieves the currently authenticated user by their ID.
- *
- * @param {string} userId - The user's unique ID.
- * @returns {Promise<userSanitizers.SanitizedUser>} Sanitized user document.
- * @throws {Errors.NotFoundError} If user not found.
+ * @description Retrieves a user by ID. Read-only.
  */
 export const getCurrentUser = async (userId: string): Promise<userSanitizers.SanitizedUser> => {
   const user = await User.findById(userId).lean();
 
   if (!user) throw new Errors.NotFoundError('User not found');
 
-  return userSanitizers.userSanitizer(user);
+  return userSanitizers.userSanitizer(user as unknown as IUser);
 };
 
 /**
  * @function updateUser
- * @description Updates allowed fields for the current user.
- *
- * @param {string} userId - The user's unique ID.
- * @param {userValidator.UpdateUserInput} updateData - Fields to update.
- * @returns {Promise<userSanitizers.SanitizedUser>} Updated sanitized user.
- * @throws {Errors.NotFoundError} If user not found.
+ * @description Update user profile details.
  */
 export const updateUser = async (
   userId: string,
-  updateData: userValidator.UpdateUserInput
+  data: userValidator.UpdateUserInput,
+  session?: ClientSession
 ): Promise<userSanitizers.SanitizedUser> => {
-  const { firstName, lastName, username, email, address, image } = updateData;
+  if (data.email) {
+    const existingUser = await User.exists({
+      email: data.email,
+      _id: { $ne: userId },
+    }).session(session || null);
+
+    if (existingUser) {
+      throw new Errors.BadRequestError('Email is already in use');
+    }
+  }
 
   const user = await User.findByIdAndUpdate(
     userId,
-    { firstName, lastName, username, email, address, image },
-    { new: true }
-  )
-    .select('firstName lastName username email address image')
-    .lean();
+    { $set: data },
+    {
+      new: true,
+      session,
+      runValidators: true,
+    }
+  ).lean();
 
   if (!user) throw new Errors.NotFoundError('User not found');
 
-  return userSanitizers.userSanitizer(user);
+  logger.info(`User profile updated: ${userId}`); // [LOG]
+
+  return userSanitizers.userSanitizer(user as unknown as IUser);
 };
 
 export default {
-  getCurrentUser, // Fetches current user by ID, returns sanitized user object
-  updateUser, // Updates allowed fields of current user, returns sanitized user
+  getCurrentUser,
+  updateUser,
 };

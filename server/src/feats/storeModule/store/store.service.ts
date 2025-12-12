@@ -1,240 +1,262 @@
-/**
- * @module store.service
- *
- * @description Services for store related operations:
- */
+import { Types, ClientSession } from 'mongoose';
 
-import { Types } from 'mongoose';
+import { Membership } from '../index.js';
 
+import { Store, IStore, storeValidator, storeSanitizers } from './index.js';
+
+import { generateStoreCode } from '@/common/index.js';
 import { Errors } from '@/error/index.js';
-
-import { Membership, membershipSanitizers } from '../index.js';
-import { Store, storeValidator, storeSanitizers } from './index.js';
+import { logger } from '@/utils/index.js';
 
 /**
  * @function createStore
- * @description Creates a new store for the given user.
- * Returns only sanitized store fields.
- *
- * @param {storeValidator.CreateStoreInput} storeData - Store creation data.
- * @param {string} userId - The creator's user ID.
- * @returns {Promise<storeSanitizers.SanitizedStore>} The sanitized store object.
- * @throws {Errors.BadRequestError} If a store with the same name already exists for the user.
+ * @description Creates a new store, assigns the creator as 'owner', and returns the store with role.
  */
 export const createStore = async (
-  storeData: storeValidator.CreateStoreInput,
-  userId: string
-): Promise<storeSanitizers.SanitizedStore> => {
-  const { name, description, location, phone } = storeData;
-
-  // Prevent duplicate store names for the same user
-  const existingStore = await Store.exists({ name, createdBy: userId });
-  if (existingStore) {
-    throw new Errors.BadRequestError('Store name already exists');
-  }
-
-  // Create the store
-  const store = await Store.create({
-    name,
-    description,
-    location,
-    phone,
-    createdBy: new Types.ObjectId(userId),
-  });
-
-  // Create a membership for the creator
-  await Membership.create({
-    store: store._id,
-    user: new Types.ObjectId(userId),
-    storeRoles: ['owner', 'admin'],
-    status: 'active',
-  });
-
-  return storeSanitizers.storeSanitizer(store);
-};
-
-/**
- * @function getAllStores
- * @description Retrieves all stores a user owns or is a member of, ordered with owned stores first.
- *
- * @param {string} userId - The user's ID.
- * @param {number} page - Current page number for pagination.
- * @param {number} limit - Max number of stores per page.
- * @returns {Promise<storeSanitizers.SanitizedStores & { total: number }>}
- */
-export const getAllStores = async (
+  data: storeValidator.CreateStoreInput,
   userId: string,
-  page: number,
-  limit: number
-): Promise<storeSanitizers.SanitizedStores & { total: number }> => {
-  const skip = (page - 1) * limit;
+  session?: ClientSession
+): Promise<storeSanitizers.SanitizedStore & { myRole: string }> => {
+  const { name, ...otherProps } = data;
 
-  // Get owned stores
-  const ownedStores = await Store.find({ createdBy: new Types.ObjectId(userId) })
-    .select('id name image location phone createdBy')
-    .lean();
+  const exists = await Store.exists({ name, createdBy: userId }).session(session || null);
+  if (exists) throw new Errors.BadRequestError('You already have a store with this name');
 
-  // Get joined stores
-  const memberships = await Membership.find({
-    user: new Types.ObjectId(userId),
-    status: 'active',
-  })
-    .select('store')
-    .lean();
+  const storeCode = generateStoreCode();
 
-  // Extract store IDs
-  const joinedStoreIds = memberships.map(m => m.store);
+  const defaultRoles = [
+    { name: 'owner', permissions: ['*'] },
+    { name: 'admin', permissions: ['manage_store', 'assign_roles'] },
+    { name: 'manager', permissions: ['manage_store', 'assign_roles'] },
+    { name: 'staff', permissions: [] },
+    { name: 'driver', permissions: [] },
+  ];
 
-  // Get joined stores
-  const joinedStores = await Store.find({ _id: { $in: joinedStoreIds } })
-    .select('id name image location phone createdBy')
-    .lean();
+  const [store] = await Store.create(
+    [
+      {
+        ...otherProps,
+        name,
+        storeCode,
+        storeRoles: defaultRoles,
+        createdBy: new Types.ObjectId(userId),
+      },
+    ],
+    { session }
+  );
 
-  // Create a map of stores
-  const storeMap = new Map<string, any>();
+  await Membership.create(
+    [
+      {
+        store: store._id,
+        user: new Types.ObjectId(userId),
+        storeRole: 'owner',
+        status: 'active',
+      },
+    ],
+    { session }
+  );
 
-  // Add owned stores first (priority)
-  for (const store of ownedStores) {
-    storeMap.set(String(store._id), store);
-  }
-
-  // Add joined stores (only if not already in owned)
-  for (const store of joinedStores) {
-    if (!storeMap.has(String(store._id))) {
-      storeMap.set(String(store._id), store);
-    }
-  }
-
-  // Convert to array and apply pagination
-  const allStores = Array.from(storeMap.values());
-  const total = allStores.length;
-  const paginatedStores = allStores.slice(skip, skip + limit);
+  logger.info(`Store created: ${name} (${storeCode}) by user ${userId}`);
 
   return {
-    stores: storeSanitizers.allStoreSanitizer(paginatedStores, [
-      'id',
-      'name',
-      'image',
-      'location',
-      'phone',
-    ]).stores,
-    total,
+    ...storeSanitizers.storeSanitizer(store),
+    myRole: 'owner',
   };
 };
 
 /**
  * @function getSingleStore
- * @description Retrieves a single store by its unique _id.
- *
- * @param {string} storeId - The store's unique ID.
- * @returns {Promise<storeSanitizers.SanitizedStore>} Sanitized store document.
- * @throws {Errors.NotFoundError} If store not found.
+ * @description Fetches a store and determines the user's role (Owner check vs Membership lookup).
  */
-export const getSingleStore = async (storeId: string): Promise<storeSanitizers.SanitizedStore> => {
+export const getSingleStore = async (
+  storeId: string,
+  userId: string
+): Promise<storeSanitizers.SanitizedStore & { myRole: string }> => {
   const store = await Store.findById(storeId).lean();
-
   if (!store) throw new Errors.NotFoundError('Store not found');
 
-  return storeSanitizers.storeSanitizer(store);
+  let myRole = 'visitor';
+
+  // 1. Check Ownership (Fastest)
+  if (String(store.createdBy) === userId) {
+    myRole = 'owner';
+  } else {
+    // 2. Check Membership
+    const membership = await Membership.findOne({
+      store: storeId,
+      user: userId,
+      status: 'active',
+    })
+      .select('storeRole')
+      .lean();
+
+    if (membership) myRole = membership.storeRole;
+  }
+
+  return {
+    ...storeSanitizers.storeSanitizer(store as unknown as IStore),
+    myRole,
+  };
+};
+
+/**
+ * @function getAllStores
+ * @description Fetches all stores (owned + joined) for a user with 'all' or 'detailed' mode.
+ */
+export const getAllStores = async (
+  userId: string,
+  page: number,
+  limit: number,
+  mode: 'all' | 'detailed' = 'all'
+): Promise<{
+  stores: (Partial<storeSanitizers.SanitizedStore> & { myRole: string })[];
+  total: number;
+}> => {
+  const skip = (page - 1) * limit;
+  const userObjectId = new Types.ObjectId(userId);
+
+  // 1. Fetch Owned Stores
+  const ownedStoresDocs = await Store.find({ createdBy: userObjectId }).lean();
+  const ownedStores = ownedStoresDocs.map(doc => ({
+    doc: doc as unknown as IStore,
+    role: 'owner',
+  }));
+
+  // 2. Fetch Memberships (Joined)
+  const memberships = await Membership.find({
+    user: userObjectId,
+    status: 'active',
+  })
+    .select('store storeRole')
+    .lean();
+
+  const joinedStoreIds = memberships.map(m => m.store);
+
+  // Map for O(1) Role Lookup
+  const roleMap = memberships.reduce(
+    (acc, curr) => {
+      acc[String(curr.store)] = curr.storeRole;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
+  const joinedStoresDocs = await Store.find({
+    _id: { $in: joinedStoreIds },
+    createdBy: { $ne: userObjectId },
+  }).lean();
+
+  const joinedStores = joinedStoresDocs.map(doc => ({
+    doc: doc as unknown as IStore,
+    role: roleMap[String(doc._id)] || 'member',
+  }));
+
+  // 3. Combine & Paginate
+  const allStores = [...ownedStores, ...joinedStores];
+  const total = allStores.length;
+  const paginatedItems = allStores.slice(skip, skip + limit);
+
+  // 4. Determine Fields based on Mode
+  let selectedFields: (keyof storeSanitizers.SanitizedStore)[] | undefined;
+
+  if (mode === 'all') {
+    selectedFields = ['id', 'name', 'storeCode', 'image', 'description', 'phone', 'location'];
+  }
+
+  // 5. Sanitize
+  const sanitizedStores = storeSanitizers.allStoreSanitizer(
+    paginatedItems.map(item => item.doc),
+    selectedFields
+  ).stores;
+
+  // 6. Merge Roles back
+  const finalStores = sanitizedStores.map((store, index) => ({
+    ...store,
+    myRole: paginatedItems[index].role,
+  }));
+
+  return {
+    stores: finalStores,
+    total,
+  };
 };
 
 /**
  * @function updateStore
- * @description Updates a store's details.
- *
- * @param {storeValidator.UpdateStoreInput} storeData - Store update data.
- * @param {string} storeId - The store's unique ID.
- * @returns {Promise<storeSanitizers.SanitizedStore>} Updated sanitized store document.
- * @throws {Errors.NotFoundError} If store not found.
+ * @description Updates a store and returns it with the user's role.
  */
 export const updateStore = async (
-  storeData: storeValidator.UpdateStoreInput,
-  storeId: string
-): Promise<storeSanitizers.SanitizedStore> => {
-  const { name, description, image, location, phone } = storeData;
+  storeId: string,
+  userId: string,
+  data: storeValidator.UpdateStoreInput,
+  session?: ClientSession
+): Promise<storeSanitizers.SanitizedStore & { myRole: string }> => {
+  const myRole = String(
+    await Membership.findOne({
+      store: storeId,
+      user: userId,
+      status: 'active',
+    })
+      .select('storeRole')
+      .lean()
+      .then(m => (m ? m.storeRole : 'visitor'))
+  );
 
-  // Prevent duplicate store names for the same user
-  const existingStore = await Store.exists({ name, _id: { $ne: storeId } });
-  if (existingStore) {
-    throw new Errors.BadRequestError('Store name already exists');
+  if (myRole !== 'owner') {
+    throw new Errors.ForbiddenError('You do not have permission to update this store');
+  }
+
+  if (data.name) {
+    const exists = await Store.exists({
+      name: data.name,
+      _id: { $ne: storeId },
+    }).session(session || null);
+
+    if (exists) throw new Errors.BadRequestError('Store name is already taken');
   }
 
   const store = await Store.findByIdAndUpdate(
     storeId,
-    { name, description, image, location, phone },
-    { new: true }
-  )
-    .select('name description image location phone')
-    .lean();
+    { $set: data },
+    { new: true, session, runValidators: true }
+  ).lean();
 
   if (!store) throw new Errors.NotFoundError('Store not found');
 
-  return storeSanitizers.storeSanitizer(store);
+  logger.info(`Store updated: ${store.name} (${storeId})`);
+
+  return {
+    ...storeSanitizers.storeSanitizer(store as unknown as IStore),
+    myRole,
+  };
 };
 
 /**
  * @function deleteStore
- * @description Deletes a store by its ID.
- *
- * @param {string} storeId - The store's unique ID.
- * @returns {Promise<storeSanitizers.SanitizedStore>} Deleted sanitized store document.
- * @throws {Errors.NotFoundError} If store not found.
+ * @description Deletes a store and returns it with 'owner' role.
  */
-export const deleteStore = async (storeId: string): Promise<storeSanitizers.SanitizedStore> => {
-  const store = await Store.findByIdAndDelete(storeId)
-    .select('name description image location phone')
-    .lean();
-
+export const deleteStore = async (
+  storeId: string,
+  session?: ClientSession
+): Promise<storeSanitizers.SanitizedStore & { myRole: string }> => {
+  const store = await Store.findByIdAndDelete(storeId, { session }).lean();
   if (!store) throw new Errors.NotFoundError('Store not found');
 
-  // Delete all memberships associated with the store after deleting the store
-  await Membership.deleteMany({ store: storeId });
+  await Membership.deleteMany({ store: storeId }, { session });
 
-  return storeSanitizers.storeSanitizer(store);
+  logger.info(`Store deleted: ${store.name} (${storeId})`);
+
+  return {
+    ...storeSanitizers.storeSanitizer(store as unknown as IStore),
+    myRole: 'owner',
+  };
 };
 
-/**
- * ----------------- User's Store Profile Services -----------------
- */
-
-/**
- * @function getMyStoreProfile
- * @description Retrieve the current user's membership profile for a specific store.
- *
- * @param {string} userId - The ID of the user.
- * @param {string} storeId - The ID of the store.
- * @returns {Promise<membershipSanitizers.SanitizedMembership>}
- * Sanitized store membership document.
- * @throws {Errors.NotFoundError} If the membership or store is not found.
- */
-export const getMyStoreProfile = async (
-  userId: string,
-  storeId: string
-): Promise<membershipSanitizers.SanitizedMembership> => {
-  const storeProfile = await Membership.findOne({
-    user: userId,
-    store: storeId,
-  })
-    .populate('user', 'username email') // Only expose safe fields
-    .populate('store', 'name location') // Minimal store data
-    .lean();
-
-  if (!storeProfile) {
-    throw new Errors.NotFoundError('Store membership profile not found');
-  }
-
-  return membershipSanitizers.membershipSanitizer(storeProfile);
-};
-
-/**
- * ----------------- Default Exports (storeService) -----------------
- */
 export default {
-  createStore, // Create a new store
-  getAllStores, // Retrieve all stores for a user (with pagination)
-  getSingleStore, // Fetch a single store by its ID
-  updateStore, // Update store details
-  deleteStore, // Delete a store by its ID
-
-  getMyStoreProfile, // Retrieve the current user's membership profile for a specific store
+  createStore,
+  getSingleStore,
+  getAllStores,
+  updateStore,
+  deleteStore,
 };

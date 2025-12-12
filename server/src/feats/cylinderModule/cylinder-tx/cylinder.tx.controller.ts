@@ -6,8 +6,10 @@
 
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { cylinderTxService } from './index.js';
+
 import { assertAuth } from '@/common/assertions.js';
+
+import { cylinderTxService } from './index.js';
 
 /**
  * ----------------- Handle Cylinder Transaction (Buy / Sell) -----------------

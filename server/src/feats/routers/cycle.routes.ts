@@ -1,8 +1,7 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
-
 import { cycleController, cycleValidator } from '@/feats/cycle/index.js';
+import { validateRequest } from '@/middlewares/index.js';
 
 const router = Router({ mergeParams: true });
 
@@ -59,9 +58,6 @@ router.patch(
  * @desc    Reopen a closed cycle (admin only)
  * @access  Admin
  */
-router.patch(
-  '/cycle/:cycleId/reopen',
-  cycleController.reopenCycle
-);
+router.patch('/cycle/:cycleId/reopen', cycleController.reopenCycle);
 
 export default router;

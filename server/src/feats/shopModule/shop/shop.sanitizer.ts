@@ -1,5 +1,7 @@
 import { HydratedDocument } from 'mongoose';
+
 import { resolveRef, listSanitizer, storeSanitizer, userSanitizer } from '@/sanitizers/index.js';
+
 import { IShop } from './index.js';
 
 /**

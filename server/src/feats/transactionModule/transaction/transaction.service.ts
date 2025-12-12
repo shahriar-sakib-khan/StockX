@@ -9,7 +9,7 @@ import { Types } from 'mongoose';
 import { Errors } from '@/error/index.js';
 import { TxCategory, Account } from '@/models/index.js';
 
-import { Transaction, transactionSanitizers, transactionConstants } from './index.js';
+import { Transaction, transactionSanitizers } from './index.js';
 
 /** ----------------- Universal Record Transaction Function ----------------- */
 /**

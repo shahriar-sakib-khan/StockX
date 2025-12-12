@@ -1,7 +1,5 @@
 import 'express';
 
-import { IMembership, IDivisionMembership } from '@/models/index.js';
-
 declare module 'express-serve-static-core' {
   interface Request {
     user?: {
@@ -18,7 +16,7 @@ declare module 'express-serve-static-core' {
     membership?: {
       userId: string;
       storeId: string;
-      storeRoles: string[];
+      storeRole: string;
     };
 
     cycle?: {

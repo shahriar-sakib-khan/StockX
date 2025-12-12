@@ -1,3 +1,10 @@
-export const TRANSACTION_STATUS = ["pending", "success", "failed", "cancelled", "reversed", "refunded"]
+export const TRANSACTION_STATUS = [
+  'pending',
+  'success',
+  'failed',
+  'cancelled',
+  'reversed',
+  'refunded',
+];
 
-export const PAYMENT_GATEWAY = ["SSLCOMMERZ"]
+export const PAYMENT_GATEWAY = ['SSLCOMMERZ'];

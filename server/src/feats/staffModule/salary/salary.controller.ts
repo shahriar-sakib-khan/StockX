@@ -1,130 +1,77 @@
-/**
- * @module salaryController
- *
- * @description Controller for managing division member salaries within cycles.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertCycle } from '@/common/assertions.js';
+import { salaryService } from './index.js';
 
-import { salaryService } from '../salary/index.js';
+import { assertAuth, withTransaction } from '@/common/index.js';
 
 /**
- * ----------------- Salary CRUD Controllers -----------------
+ * ----------------- Read Operations -----------------
  */
-
-export const createSalary = async (req: Request, res: Response) => {
-  assertCycle(req);
-  const { cycleId } = req.cycle;
-  const { workspaceId, divisionId, memberId } = req.params;
-
-  const salary = await salaryService.createSalary(
-    req.body,
-    workspaceId,
-    divisionId,
-    memberId,
-    cycleId
-  );
-
-  res.status(StatusCodes.CREATED).json({
-    message: 'Division member salary created successfully',
-    salary,
-  });
-};
-
-export const getAllSalaries = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId } = req.params;
+export const getPayrollList = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { storeId } = req.params;
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
 
-  const { salaries, total } = await salaryService.getAllSalaries(
-    workspaceId,
-    divisionId,
-    page,
-    limit
-  );
-
-  res.status(StatusCodes.OK).json({ total, page, limit, salaries });
-};
-
-export const getAllSalariesPerMember = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, memberId } = req.params;
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-
-  const { salaries, total } = await salaryService.getAllSalariesPerMember(
-    workspaceId,
-    divisionId,
-    memberId,
-    page,
-    limit
-  );
-
-  res.status(StatusCodes.OK).json({ total, page, limit, salaries });
-};
-
-export const getSingleSalary = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, salaryId } = req.params;
-
-  const salary = await salaryService.getSingleSalary(workspaceId, divisionId, salaryId);
-
-  res.status(StatusCodes.OK).json({ salary });
-};
-
-export const updateSalary = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, salaryId } = req.params;
-
-  const updatedSalary = await salaryService.updateSalary(
-    req.body,
-    workspaceId,
-    divisionId,
-    salaryId
-  );
+  const { salaries, total } = await salaryService.getPayrollList(storeId, page, limit);
 
   res.status(StatusCodes.OK).json({
-    message: 'Division member salary updated successfully',
-    updatedSalary,
+    success: true,
+    message: 'Payroll list fetched successfully',
+    meta: { page, limit, total },
+    data: { salaries },
   });
 };
 
-export const deleteSalary = async (req: Request, res: Response) => {
-  const { workspaceId, divisionId, salaryId } = req.params;
+export const getStaffSalary = async (req: Request, res: Response) => {
+  const { storeId, staffId } = req.params;
 
-  const deletedSalary = await salaryService.deleteSalary(workspaceId, divisionId, salaryId);
+  const salary = await salaryService.getStaffSalary(storeId, staffId);
 
   res.status(StatusCodes.OK).json({
-    message: 'Division member salary deleted successfully',
-    deletedSalary,
+    success: true,
+    message: 'Staff salary details fetched successfully',
+    data: { salary },
   });
 };
 
 /**
- * ----------------- Salary Payment Controller -----------------
+ * ----------------- Write Operations -----------------
  */
+export const setSalary = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { storeId, staffId } = req.params;
 
-// export const paySalary = async (req: Request, res: Response) => {
-//   const { workspaceId, divisionId, salaryId } = req.params;
+  const salary = await withTransaction(async session => {
+    return await salaryService.setSalary(storeId, staffId, req.user, req.body, session);
+  });
 
-//   const payment = await salaryService.paySalary(req.body, workspaceId, divisionId, salaryId);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Staff salary set successfully',
+    data: { salary },
+  });
+};
 
-//   res.status(StatusCodes.OK).json({
-//     message: 'Salary payment recorded successfully',
-//     payment,
-//   });
-// };
+export const removeSalary = async (req: Request, res: Response) => {
+  assertAuth(req);
+  const { storeId, staffId } = req.params;
 
-/**
- * ----------------- Default Export -----------------
- */
+  const salary = await withTransaction(async session => {
+    return await salaryService.removeSalary(storeId, staffId, req.user, session);
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Staff salary removed successfully',
+    data: { salary },
+  });
+};
 
 export default {
-  createSalary, // Create a new division member salary
-  getAllSalaries, // Get all division member salaries
-  getAllSalariesPerMember, // Get all division member salaries per member
-  getSingleSalary, // Get details of a single division member salary
-  updateSalary, // Update a division member salary
-  deleteSalary, // Delete a division member salary
-  // paySalary, // Record a payment for a division member salary
+  getPayrollList,
+  getStaffSalary,
+  setSalary,
+  removeSalary,
 };

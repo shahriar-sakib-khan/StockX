@@ -1,8 +1,9 @@
 // src/feats/brandModule/global-brand/global.brand.service.ts
-import { Types } from 'mongoose';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+import { Types } from 'mongoose';
 
 import { Errors } from '@/error/index.js';
+
 import { GlobalBrand, IGlobalBrand } from './index.js';
 
 type MulterFiles = {
@@ -43,7 +44,6 @@ const uploadBufferToCloudinary = (
     }
 
     // stream the buffer
-    // @ts-ignore - stream.end expects Buffer
     stream.end(file.buffer);
   });
 };

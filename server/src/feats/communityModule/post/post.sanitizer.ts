@@ -5,7 +5,9 @@
  */
 
 import { HydratedDocument } from 'mongoose';
+
 import { resolveRef, listSanitizer, storeSanitizer, userSanitizer } from '@/sanitizers/index.js';
+
 import { IPost } from './index.js';
 
 /**

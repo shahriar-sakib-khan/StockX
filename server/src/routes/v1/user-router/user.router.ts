@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import { requireRole, userRouter } from '@/feats/userModule/index.js';
 import { userInviteRouter } from '@/feats/inviteModule/index.js';
+import { requireRole, userRouter } from '@/feats/userModule/index.js';
 
 /**
  * @swagger
@@ -17,9 +17,9 @@ router.use('/', userRouter);
 /**
  * ----------------- User sub-router (User Scoped) -----------------
  */
-router.use('/user', requireRole('user'));
+router.use('/users', requireRole('user'));
 
 // User invite routes
-router.use('/user', userInviteRouter);
+router.use('/users', userInviteRouter);
 
 export default router;

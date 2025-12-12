@@ -1,49 +1,25 @@
-/**
- * @module user.validation
- *
- * @description
- * Validation schemas for user management operations.
- * Includes creating a user and updating user details.
- */
-
 import { z } from 'zod';
 
 /**
- * ----------------- Create User Schema -----------------
- * @property {string} username - Required. Unique username.
- * @property {string} email - Required. User email address.
- * @property {string} password - Required. User password.
- * @property {string} [address] - Optional. User address.
+ * ----------------- Schemas -----------------
  */
+
 export const createUserSchema = z
   .object({
-    username: z.string().min(1, { message: 'Username is required' }),
-    email: z
-      .string()
-      .refine(val => /^\S+@\S+\.\S+$/.test(val), { message: 'Invalid email address' }),
+    username: z.string().min(1, { message: 'Username is required' }).trim(),
+    email: z.string().email({ message: 'Invalid email address' }).trim(),
     password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-
-    address: z.string().optional(),
+    firstName: z.string().trim().optional(),
+    lastName: z.string().trim().optional(),
+    address: z.string().trim().optional(),
+    image: z.string().url().optional().or(z.literal('')),
   })
   .strict();
 
-export type CreateUserInput = z.infer<typeof createUserSchema>;
+export const updateUserSchema = createUserSchema.partial().omit({ password: true }); // Password updates usually handled via separate route
 
 /**
- * ----------------- Update User Schema -----------------
- * @description
- * Allows partial updates of user fields.
- * Additional fields: firstName, lastName, image.
- * @property {string} [firstName] - Optional. Only letters and spaces allowed.
- * @property {string} [lastName] - Optional. Only letters and spaces allowed.
- * @property {string} [image] - Optional. Must be a valid URL.
+ * ----------------- Types -----------------
  */
-export const updateUserSchema = createUserSchema
-  .extend({
-    firstName: z.string().trim().optional(),
-    lastName: z.string().trim().optional(),
-    image: z.string().trim().optional(),
-  })
-  .partial();
-
+export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;

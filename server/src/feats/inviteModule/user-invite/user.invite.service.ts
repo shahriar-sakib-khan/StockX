@@ -1,42 +1,35 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
+
+import { Invite, IInvite, inviteSanitizers } from '../index.js';
 
 import { Errors } from '@/error/index.js';
-import { Membership } from '@/models/index.js';
-
-import { Invite, inviteSanitizers } from '../index.js';
+import { Membership } from '@/feats/storeModule/index.js';
+import { logger } from '@/utils/index.js';
 
 /**
  * @function getUserInvites
- * Fetches all invites associated with a given user.
- *
- * @param {string} userId - The user's unique ID.
- * @param {number} page - Current page number for pagination.
- * @param {number} limit - Max number of invites per page.
- * @returns {Promise<inviteSanitizers.SanitizedInvites>} List of sanitized invites.
+ * @description Retrieves invites for a specific user with pagination.
  */
 export const getUserInvites = async (
   userId: string,
   page: number,
   limit: number
-): Promise<inviteSanitizers.SanitizedInvites & { total: number }> => {
-  const total = await Invite.countDocuments({
-    user: userId,
-    status: { $in: ['pending', 'sent'] },
-  });
-  if (total === 0) return { invites: [], total };
-
+): Promise<{ invites: Partial<inviteSanitizers.SanitizedInvite>[]; total: number }> => {
   const skip = (page - 1) * limit;
-  const invites = await Invite.find({
-    user: userId,
+  const userObjectId = new Types.ObjectId(userId);
+
+  const query = {
+    user: userObjectId,
     status: { $in: ['pending', 'sent'] },
-  })
-    .skip(skip)
-    .limit(limit)
-    .populate('store', 'name')
-    .lean();
+  };
+
+  const [invites, total] = await Promise.all([
+    Invite.find(query).skip(skip).limit(limit).populate('store', 'name').lean(),
+    Invite.countDocuments(query),
+  ]);
 
   return {
-    invites: inviteSanitizers.allInviteSanitizer(invites, [
+    invites: inviteSanitizers.allInviteSanitizer(invites as unknown as IInvite[], [
       'id',
       'token',
       'store',
@@ -50,69 +43,81 @@ export const getUserInvites = async (
 
 /**
  * @function acceptInvite
- * Accepts a user invite based on a token.
- *
- * @param {string} userId - The user's unique ID.
- * @param {string} token - Invite token.
- * @returns {Promise<inviteSanitizers.SanitizedInvite>} Accepted invite document.
- * @throws {Errors.NotFoundError} If invite token is invalid.
- * @throws {Errors.BadRequestError} If invite has expired or already been dealt with.
+ * @description Accepts an invite and creates a membership
  */
 export const acceptInvite = async (
   userId: string,
-  token: string
+  token: string,
+  session?: ClientSession
 ): Promise<inviteSanitizers.SanitizedInvite> => {
-  const invite = await Invite.findOne({ token });
-
+  // 1. Find Invite
+  const invite = await Invite.findOne({ token }).session(session || null);
   if (!invite) throw new Errors.NotFoundError('Invite not found');
-  if (invite.status !== 'pending' && invite.status !== 'sent')
+
+  // 2. Validate
+  if (invite.status !== 'pending' && invite.status !== 'sent') {
     throw new Errors.BadRequestError('Invite already dealt with');
-  if (invite.expiresAt < new Date()) throw new Errors.BadRequestError('Invitation expired');
+  }
+  if (invite.expiresAt < new Date()) {
+    throw new Errors.BadRequestError('Invitation expired');
+  }
 
-  // Create membership
-  await Membership.create({
-    store: invite.store,
-    user: new Types.ObjectId(userId),
-    storeRoles: [invite.role],
-    status: 'active',
-  });
-
-  // Update invite status
+  // 3. Update Invite
+  invite.user = new Types.ObjectId(userId);
   invite.status = 'accepted';
-  await invite.save();
+  await invite.save({ session });
+
+  // 4. Create Membership
+  const membershipExists = await Membership.exists({
+    store: invite.store,
+    user: userId,
+  }).session(session || null);
+
+  if (!membershipExists) {
+    await Membership.create(
+      [
+        {
+          store: invite.store,
+          user: new Types.ObjectId(userId),
+          storeRoles: [invite.role],
+          status: 'active',
+          invitedBy: invite.invitedBy,
+        },
+      ],
+      { session }
+    );
+  }
+
+  logger.info(`Invite accepted: User ${userId} joined Store ${invite.store} as ${invite.role}`); // [LOG]
 
   return inviteSanitizers.inviteSanitizer(invite);
 };
 
 /**
  * @function declineInvite
- * Declines a user invite based on a token.
- *
- * @param {string} token - Invite token.
- * @returns {Promise<inviteSanitizers.SanitizedInvite>} Declined invite document.
- * @throws {Errors.NotFoundError} If invite token is invalid.
- * @throws {Errors.BadRequestError} If invite has expired or already been dealt with.
+ * @description Declines an invite
  */
-export const declineInvite = async (token: string): Promise<inviteSanitizers.SanitizedInvite> => {
-  const invite = await Invite.findOne({ token });
-
+export const declineInvite = async (
+  token: string,
+  session?: ClientSession
+): Promise<inviteSanitizers.SanitizedInvite> => {
+  const invite = await Invite.findOne({ token }).session(session || null);
   if (!invite) throw new Errors.NotFoundError('Invite not found');
-  if (invite.status !== 'pending' && invite.status !== 'sent')
-    throw new Errors.BadRequestError('Invite already dealt with');
-  if (invite.expiresAt < new Date()) throw new Errors.BadRequestError('Invitation expired');
 
-  // Update invite status
+  if (invite.status !== 'pending' && invite.status !== 'sent') {
+    throw new Errors.BadRequestError('Invite already dealt with');
+  }
+
   invite.status = 'declined';
-  await invite.save();
+  await invite.save({ session });
+
+  logger.info(`Invite declined: ${invite.email}`); // [LOG]
 
   return inviteSanitizers.inviteSanitizer(invite);
 };
 
-/**
- * ----------------- Default Exports (userInviteService) -----------------
- */
 export default {
-  getUserInvites, // Fetch all invites for a user
-  acceptInvite, // Accept an invite using token
-  declineInvite, // Decline an invite using token
+  getUserInvites,
+  acceptInvite,
+  declineInvite,
 };

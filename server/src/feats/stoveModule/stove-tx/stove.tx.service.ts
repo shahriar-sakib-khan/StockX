@@ -1,9 +1,9 @@
 import { Errors } from '@/error/index.js';
+import { transactionService } from '@/feats/transactionModule/index.js';
 
 import { Stove, stoveSanitizers } from '../index.js';
-import { stoveTxConstants } from './index.js';
 
-import { transactionService } from '@/feats/transactionModule/index.js';
+import { stoveTxConstants } from './index.js';
 
 /**
  * @function handleStoveTransaction

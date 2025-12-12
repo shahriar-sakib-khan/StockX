@@ -7,33 +7,26 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: Invite
- *   description: User invite management
+ * name: UserInvite
+ * description: User personal invite management
  */
 
 /**
- * ----------------- User Invite Routes -----------------
- */
-
-/**
- * @route   GET /user/invites
- * @desc    Get the currently authenticated user's invites
- * @access  Private
+ * @route   GET /users/invites
+ * @desc    Get all invites sent to me
  */
 router.get('/invites', userInviteController.myInvites);
 
 /**
- * @route   PATCH /user/invites/:token/accept
- * @desc    Accept a user invite
- * @access  Public (via token)
+ * @route   POST /users/invites/:token/accept
+ * @desc    Accept an invite
  */
-router.patch('/invites/:token/accept', userInviteController.acceptInvite);
+router.post('/invites/:token/accept', userInviteController.acceptInvite);
 
 /**
- * @route   PATCH /user/invites/:token/decline
- * @desc    Decline a user invite
- * @access  Public (via token)
+ * @route   POST /users/invites/:token/decline
+ * @desc    Decline an invite
  */
-router.patch('/invites/:token/decline', userInviteController.declineInvite);
+router.post('/invites/:token/decline', userInviteController.declineInvite);
 
 export default router;

@@ -7,8 +7,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { postService } from './index.js';
 import { assertAuth } from '@/common/assertions.js';
+
+import { postService } from './index.js';
 
 /**
  * ------------------------------------------------------

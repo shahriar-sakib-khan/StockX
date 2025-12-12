@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
 
-import { LocalBrand, localBrandSanitizers, localBrandValidator } from './index.js';
 import { Cylinder } from '@/models/index.js';
+
+import { LocalBrand, localBrandSanitizers, localBrandValidator } from './index.js';
 
 /**
  * ----------------- Unified Local Brand Fetch Service -----------------

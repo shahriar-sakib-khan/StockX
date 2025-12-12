@@ -12,11 +12,19 @@ export {
 } from './store/index.js';
 
 /**
- * ----------------- Exports from store-Membership -----------------
+ * ----------------- Exports from Membership -----------------
  */
-export { Membership, type IMembership, membershipSanitizers } from './membership/index.js';
+export {
+  Membership,
+  type IMembership,
+  membershipConstants,
+  membershipController,
+  membershipService,
+  membershipSanitizers,
+} from './membership/index.js';
 
 /**
  * ----------------- Router Exports -----------------
  */
 export { default as storeRouter } from './store.routes.js';
+export { default as membershipRouter } from './membership.routes.js';

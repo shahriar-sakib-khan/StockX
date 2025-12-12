@@ -1,42 +1,64 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IStaff extends Document {
-  workspace: Types.ObjectId;
-  division: Types.ObjectId;
+  store: Types.ObjectId;
 
+  // Identity (Auth)
+  username: string;
+  password?: string; // Select: false by default
+  isActive: boolean;
+
+  // Profile (User)
   name: string;
   phone: string;
-  role: string;
+  role: string; // 'manager', 'cashier', etc.
   image?: string;
-  salary: number;
-  joiningDate: Date;
+  address?: string;
+
+  // Ledger (Salary Data)
+  payroll: {
+    baseSalary: number;
+    currentDue: number;
+    totalPaid: number;
+    lastPaymentDate?: Date;
+  };
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-const staffSchema: Schema<IStaff> = new Schema(
+const staffSchema = new Schema<IStaff>(
   {
-    workspace: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
-    division: { type: Schema.Types.ObjectId, ref: 'Division', required: true, index: true },
-    name: { type: String, required: true },
-    phone: { type: String, required: true },
-    role: { type: String, required: true },
-    image: { type: String },
-    salary: { type: Number, required: true },
-    joiningDate: { type: Date, required: true },
+    store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
+
+    // Identity
+    username: { type: String, required: true, trim: true },
+    password: { type: String, required: true, select: false },
+    isActive: { type: Boolean, default: true },
+
+    // Profile
+    name: { type: String, required: true, trim: true },
+    phone: { type: String, required: true, trim: true },
+    role: { type: String, required: true, default: 'staff' },
+    image: { type: String, trim: true },
+    address: { type: String, trim: true },
+
+    // Ledger
+    payroll: {
+      baseSalary: { type: Number, default: 0, min: 0 },
+      currentDue: { type: Number, default: 0 },
+      totalPaid: { type: Number, default: 0 },
+      lastPaymentDate: { type: Date },
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-// staffSchema.index({ workspace: 1, division: 1, name: 1 });
+// Unique username per store
+staffSchema.index({ store: 1, username: 1 }, { unique: true });
 
-staffSchema.methods.toJSON = function (): Partial<IStaff> {
-  const obj = this.toObject();
-  delete obj.__v;
-
-  return obj;
-};
-
-const Staff: Model<IStaff> = mongoose.model<IStaff>('Staff', staffSchema);
+const Staff = model<IStaff>('Staff', staffSchema);
 export default Staff;

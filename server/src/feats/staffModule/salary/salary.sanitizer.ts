@@ -1,43 +1,31 @@
 import { HydratedDocument } from 'mongoose';
 
-import {
-  resolveRef,
-  listSanitizer,
-  cycleSanitizer,
-} from '@/sanitizers/index.js';
+import { IStaff } from '../index.js';
 
-import { ISalary } from './salary.model.js';
+import { listSanitizer, resolveRef, storeSanitizer } from '@/sanitizers/index.js';
 
-/**
- * ----------------- Single salary -----------------
- */
-export const salarySanitizer = (salary: ISalary | HydratedDocument<ISalary>) => ({
-  id: String(salary._id),
-  // member: resolveRef(salary.member ?? null, divisionMembershipSanitizer),
-  // division: resolveRef(salary.division ?? null, divisionSanitizer),
-  // workspace: resolveRef(salary.workspace ?? null, workspaceSanitizer),
-  cycle: resolveRef(salary.cycle ?? null, cycleSanitizer),
+// Specific sanitizer for Salary View
+export const salarySanitizer = (doc: IStaff | HydratedDocument<IStaff>) => ({
+  id: String(doc._id),
+  store: resolveRef(doc.store, storeSanitizer),
+  name: doc.name,
+  role: doc.role,
 
-  monthlySalary: salary.monthlySalary,
-  paidAmount: salary.paidAmount,
-  dueAmount: salary.dueAmount,
-  isPaid: salary.isPaid ?? false,
-
-  createdAt: salary.createdAt,
-  updatedAt: salary.updatedAt,
+  // Focused Payload
+  payroll: {
+    baseSalary: doc.payroll.baseSalary,
+    currentDue: doc.payroll.currentDue,
+    totalPaid: doc.payroll.totalPaid,
+    lastPaymentDate: doc.payroll.lastPaymentDate || null,
+  },
+  updatedAt: doc.updatedAt,
 });
 
 export type SanitizedSalary = ReturnType<typeof salarySanitizer>;
 
-/**
- * ----------------- List of DivMemberSalaries -----------------
- * Optional field selection supported
- */
 export const allSalarySanitizer = (
-  salaryList: ISalary[] | HydratedDocument<ISalary>[],
+  docs: IStaff[] | HydratedDocument<IStaff>[],
   fields?: (keyof SanitizedSalary)[]
 ) => ({
-  salaries: listSanitizer(salaryList, salarySanitizer, fields),
+  salaries: listSanitizer(docs, salarySanitizer, fields),
 });
-
-export type SanitizedSalaries = ReturnType<typeof allSalarySanitizer>;

@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
 
-import { Cylinder, cylinderSanitizers } from './index.js';
 import { Errors } from '@/error/index.js';
+
+import { Cylinder, cylinderSanitizers } from './index.js';
 
 /** ----------------- Cylinder Inventory Service ----------------- */
 

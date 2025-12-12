@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { storeRouter, storeScope } from '@/feats/storeModule/index.js';
 
 import { default as StoreSubRouter } from './store.sub.router.js';
+
 /**
  * @swagger
  * tags:

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import { regulatorController } from './index.js';
 
 /**

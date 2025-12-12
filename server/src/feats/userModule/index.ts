@@ -1,26 +1,25 @@
 /**
- * ----------------- Exports from User -----------------
+ * ----------------- Exports from User Feature -----------------
  */
 export {
   User,
   type IUser,
-  UserRoles,
-  type UserRoleType,
-  userValidator,
+  userConstants,
   userController,
   userService,
+  userValidator,
   userSanitizers,
 } from './user/index.js';
 
 /**
- * ----------------- Exports from Auth -----------------
+ * ----------------- Exports from Auth Feature -----------------
  */
 export {
   authController,
-  requireAuth,
-  requireRole,
   authService,
   authValidator,
+  requireAuth,
+  requireRole,
 } from './auth/index.js';
 
 /**

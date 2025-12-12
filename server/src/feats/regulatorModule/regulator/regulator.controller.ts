@@ -7,8 +7,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { regulatorService } from './index.js';
 import { assertAuth } from '@/common/assertions.js';
+
+import { regulatorService } from './index.js';
 
 /**
  * ----------------- Regulator Inventory Controllers -----------------

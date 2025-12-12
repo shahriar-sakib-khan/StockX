@@ -1,6 +1,6 @@
 import { HydratedDocument } from 'mongoose';
 
-import { resolveRef, listSanitizer } from '@/sanitizers/index.js';
+import { listSanitizer } from '@/sanitizers/index.js';
 
 import { ICycle } from '../cycle/index.js';
 

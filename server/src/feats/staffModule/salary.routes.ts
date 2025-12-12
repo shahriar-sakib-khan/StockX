@@ -1,83 +1,60 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
+import { salaryController, salaryValidator } from './salary/index.js';
+import { staffMiddleware } from './staff/index.js';
 
-import { requireActiveCycle } from '@/feats/cycle/index.js';
-import { salaryController, salaryValidator } from '@/feats/staffModule/index.js';
+import { validateRequest } from '@/middlewares/index.js';
 
 const router = Router({ mergeParams: true });
 
 /**
  * @swagger
  * tags:
- *   name: Division Member Salary
- *   description: Manage salaries of division members within cycles
+ * name: Salary
+ * description: Staff salary management
  */
 
-/**
- * ----------------- Salary CRUD -----------------
- */
+// --- Mounted under /stores/:storeId ---
 
 /**
- * @route   POST /:workspaceId/divisions/:divisionId/salary/:memberId
- * @desc    Create or initialize salary for a division member for a cycle
- * @access  Admin (division)
+ * @route   GET /stores/:storeId/salaries
+ * @desc    Get payroll list
  */
-router.post(
-  '/salary/:memberId',
-  requireActiveCycle,
-  validateRequest(salaryValidator.createSalarySchema),
-  salaryController.createSalary
+router.get(
+  '/salaries',
+  staffMiddleware.staffScope(['owner', 'admin', 'manager']),
+  salaryController.getPayrollList
 );
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/salary
- * @desc    List all salaries in a division (paginated)
- * @access  Authenticated
+ * @route   GET /stores/:storeId/salaries/:staffId
+ * @desc    Get specific staff salary
  */
-router.get('/salary', salaryController.getAllSalaries);
+router.get(
+  '/salaries/:staffId',
+  staffMiddleware.staffScope(['owner', 'admin', 'manager']),
+  salaryController.getStaffSalary
+);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/salary/:memberId
- * @desc    Get all salaries for a division member
- * @access  Authenticated
- */
-router.get('/salary/:memberId', salaryController.getAllSalariesPerMember);
-
-/**
- * @route   GET /:workspaceId/divisions/:divisionId/salary/:salaryId
- * @desc    Get details of a single member salary
- * @access  Authenticated
- */
-router.get('/salary/:salaryId', salaryController.getSingleSalary);
-
-/**
- * @route   PUT /:workspaceId/divisions/:divisionId/salary/:salaryId
- * @desc    Update salary details (e.g., monthlySalary or paidAmount)
- * @access  Admin (division)
+ * @route   PUT /stores/:storeId/salaries/:staffId
+ * @desc    Set or update staff salary
  */
 router.put(
-  '/salary/:salaryId',
-  validateRequest(salaryValidator.updateSalarySchema),
-  salaryController.updateSalary
+  '/salaries/:staffId',
+  staffMiddleware.staffScope(['owner', 'admin']),
+  validateRequest(salaryValidator.setSalarySchema),
+  salaryController.setSalary
 );
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId/salary/:salaryId
- * @desc    Delete a salary record (rare case)
- * @access  Admin (division)
+ * @route   DELETE /stores/:storeId/salaries/:staffId
+ * @desc    Reset staff salary to 0
  */
-router.delete('/salary/:salaryId', salaryController.deleteSalary);
-
-// /**
-//  * @route   POST /:workspaceId/divisions/:divisionId/salary/:salaryId/pay
-//  * @desc    Record a payment for a member salary
-//  * @access  Admin (division)
-//  */
-// router.post(
-//   '/salary/:salaryId/pay',
-// //   validateRequest(salaryValidator.paySalarySchema),
-//   salaryController.paySalary
-// );
+router.delete(
+  '/salaries/:staffId',
+  staffMiddleware.staffScope(['owner']),
+  salaryController.removeSalary
+);
 
 export default router;

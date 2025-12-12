@@ -6,10 +6,9 @@
  */
 
 import { Types } from 'mongoose';
+
 import { Errors } from '@/error/index.js';
-
 import { Cylinder, cylinderSanitizers } from '@/feats/cylinderModule/index.js';
-
 import {
   Transaction,
   transactionService,
@@ -17,6 +16,7 @@ import {
 } from '@/feats/transactionModule/index.js';
 
 import { Shop } from '../index.js';
+
 import { shopTxValidator, shopTxConstants } from './index.js';
 
 /**

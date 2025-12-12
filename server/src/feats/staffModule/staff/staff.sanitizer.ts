@@ -1,40 +1,36 @@
 import { HydratedDocument } from 'mongoose';
 
-import { resolveRef, listSanitizer } from '@/sanitizers/index.js';
-
 import { IStaff } from './index.js';
 
-/**
- * ----------------- Staff -----------------
- */
-export const staffSanitizer = (staff: IStaff | HydratedDocument<IStaff>) => ({
-  id: String(staff._id),
-  name: staff.name,
-  phone: staff.phone,
-  role: staff.role,
-  image: staff.image ?? null,
+import { listSanitizer } from '@/sanitizers/index.js';
 
-  salary: staff.salary,
-  joiningDate: staff.joiningDate,
+export const staffSanitizer = (doc: IStaff | HydratedDocument<IStaff>) => ({
+  id: String(doc._id),
+  username: doc.username,
+  role: doc.role,
+  isActive: doc.isActive,
 
-  // workspace: resolveRef(staff.workspace ?? null, workspaceSanitizer),
-  // division: resolveRef(staff.division ?? null, divisionSanitizer),
+  name: doc.name,
+  phone: doc.phone,
+  image: doc.image || null,
+  address: doc.address || null,
 
-  createdAt: staff.createdAt,
-  updatedAt: staff.updatedAt,
+  payroll: {
+    baseSalary: doc.payroll.baseSalary,
+    currentDue: doc.payroll.currentDue,
+    totalPaid: doc.payroll.totalPaid,
+    lastPaymentDate: doc.payroll.lastPaymentDate || null,
+  },
+
+  createdAt: doc.createdAt,
+  updatedAt: doc.updatedAt,
 });
 
 export type SanitizedStaff = ReturnType<typeof staffSanitizer>;
 
-/**
- * ----------------- Staff List -----------------
- * Optional field selection supported
- */
 export const allStaffSanitizer = (
-  staffList: IStaff[] | HydratedDocument<IStaff>[],
+  docs: IStaff[] | HydratedDocument<IStaff>[],
   fields?: (keyof SanitizedStaff)[]
 ) => ({
-  staff: listSanitizer(staffList, staffSanitizer, fields),
+  staffs: listSanitizer(docs, staffSanitizer, fields), // <--- FIXED: Key is now 'staffs'
 });
-
-export type SanitizedStaffs = ReturnType<typeof allStaffSanitizer>;

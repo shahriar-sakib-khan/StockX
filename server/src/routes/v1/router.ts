@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
-import { requireAuth } from '@/middlewares/index.js';
-
-import { default as AuthRouter } from './auth-router/auth.router.js';
 import { default as AdminRouter } from './admin-router/admin.router.js';
-import { default as UserRouter } from './user-router/user.router.js';
+import { default as AuthRouter } from './auth-router/auth.router.js';
 import { default as StoreRouter } from './store-router/store.router.js';
+import { default as UserRouter } from './user-router/user.router.js';
+
+import { requireAuth } from '@/middlewares/index.js';
 
 const router = Router();
 

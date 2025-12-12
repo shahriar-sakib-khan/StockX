@@ -1,47 +1,60 @@
 import { Router } from 'express';
 
+import { staffController, staffValidator, staffMiddleware } from './staff/index.js';
+
 import { validateRequest } from '@/middlewares/index.js';
-import { staffController, staffValidator } from '@/feats/staffModule/staff/index.js';
 
 const router = Router({ mergeParams: true });
 
 /**
  * @swagger
  * tags:
- *   name: Staff
- *   description: Manage staff members within divisions
+ * name: Staff
+ * description: Store staff management
  */
 
-/**
- * ----------------- Staff CRUD -----------------
- */
+// --- Mounted under /stores/:storeId/staffs ---
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/staffs
- * @desc    Get all staff members in a division
- * @access  Authenticated
+ * @route   GET /stores/:storeId/staffs
+ * @desc    Get all staff members in a store
  */
-router.get('/staffs', staffController.getAllStaff);
+router.get(
+  '/staffs',
+  staffMiddleware.staffScope(['owner', 'admin', 'manager']),
+  staffController.getAllStaffs
+);
 
 /**
- * @route   GET /:workspaceId/divisions/:divisionId/staffs/:staffId
- * @desc    Get details of a single staff member
- * @access  Authenticated
+ * @route   POST /stores/:storeId/staffs
+ * @desc    Create a new staff member
  */
-router.get('/staffs/:staffId', staffController.getSingleStaff);
+router.post(
+  '/staffs',
+  staffMiddleware.staffScope(['owner', 'admin', 'manager']),
+  validateRequest(staffValidator.createStaffSchema),
+  staffController.createStaff
+);
 
 /**
- * @route   PUT /:workspaceId/divisions/:divisionId/staffs/:staffId
- * @desc    Update staff member details
- * @access  Admin (division)
+ * @route   PATCH /stores/:storeId/staffs/:staffId
+ * @desc    Update a staff member
  */
-router.patch('/staffs/:staffId', staffController.updateStaff);
+router.patch(
+  '/staffs/:staffId',
+  staffMiddleware.staffScope(['owner', 'admin', 'manager']),
+  validateRequest(staffValidator.updateStaffSchema),
+  staffController.updateStaff
+);
 
 /**
- * @route   DELETE /:workspaceId/divisions/:divisionId/staffs/:staffId
- * @desc    Remove a staff member
- * @access  Admin (division)
+ * @route   DELETE /stores/:storeId/staffs/:staffId
+ * @desc    Delete a staff member
  */
-router.delete('/staffs/:staffId', staffController.deleteStaff);
+router.delete(
+  '/staffs/:staffId',
+  staffMiddleware.staffScope(['owner', 'admin']),
+  staffController.deleteStaff
+);
 
 export default router;

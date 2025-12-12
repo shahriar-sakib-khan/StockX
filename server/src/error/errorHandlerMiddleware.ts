@@ -1,32 +1,30 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
 import { StatusCodes } from 'http-status-codes';
+import { ZodError } from 'zod';
 
 import { Errors } from '@/error/index.js';
+import { logger } from '@/utils/index.js';
 
-/**
- * Global Express error handling middleware.
- * Handles:
- * - Validation errors (Zod)
- * - Custom application errors (BaseError)
- * - Unknown/unexpected errors
- *
- * @param {unknown} err - Error thrown in request pipeline
- * @param {Request} req - Express Request object
- * @param {Response} res - Express Response object
- * @param {NextFunction} next - Express NextFunction
- * @returns {Response} JSON error response
- */
 const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction): Response => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  if (!isProduction) console.error('🔥 Error:', err);
+  // 1. Log the error using Winston
+  // We log before checking the error type so we capture EVERYTHING.
+  // We pass the error object directly so the 'format.errors({ stack: true })' can do its job.
 
-  // Handle validation errors from Zod
+  if (err instanceof Error) {
+    logger.error(err);
+  } else {
+    logger.error(`Unknown Error: ${String(err)}`);
+  }
+
+  // 2. Handle Zod Errors (Validation)
   if (err instanceof ZodError) {
     const errors = err.issues.map(issue => ({
       field: issue.path.join('.'),
       message: issue.message,
     }));
+
+    // Optional: Log validation failures as 'warn' instead of 'error' to reduce noise?
+    // logger.warn(`Validation failed for ${req.path}`);
 
     return res.status(StatusCodes.BAD_REQUEST).json({
       success: false,
@@ -36,8 +34,12 @@ const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunct
     });
   }
 
-  // Handle custom application errors
+  // 3. Handle Custom App Errors
   if (err instanceof Errors.BaseError) {
+    // These are known/expected errors (e.g. 404 Not Found), so we might want
+    // to log them as 'warn' to separate them from system crashes.
+    // logger.warn(err.message);
+
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
@@ -47,16 +49,18 @@ const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunct
     });
   }
 
-  // Handle unexpected unknown errors
-  const genericMessage = (err as Error)?.message || 'Something went wrong, please try again later.';
+  // 4. Handle Unexpected System Errors
+  const genericMessage = 'Something went wrong, please try again later.';
   const errorType = (err as Error)?.name || 'InternalServerError';
   const stack = (err as Error)?.stack;
 
+  // In production, we hide the stack trace from the client,
+  // BUT we have already logged it to 'logs/app.log' above!
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message: genericMessage,
+    message: process.env.NODE_ENV === 'production' ? genericMessage : (err as Error)?.message,
     errorType,
-    stack: isProduction ? undefined : stack,
+    stack: process.env.NODE_ENV === 'production' ? undefined : stack,
   });
 };
 

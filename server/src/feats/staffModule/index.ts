@@ -1,5 +1,5 @@
 /**
- * ----------------- Export from Staff -----------------
+ * ----------------- Exports from Staff (Identity + Profile) -----------------
  */
 export {
   Staff,
@@ -11,11 +11,9 @@ export {
 } from './staff/index.js';
 
 /**
- * ----------------- Export from Salary -----------------
+ * ----------------- Exports from Salary (Logic) -----------------
  */
 export {
-  Salary,
-  type ISalary,
   salaryValidator,
   salaryController,
   salaryService,
@@ -23,6 +21,8 @@ export {
 } from './salary/index.js';
 
 /**
- * ----------------- Routers -----------------
+ * ----------------- Router Exports -----------------
  */
-export {default as staffRouter} from './staff.routes.js';
+export { default as staffAuthRouter } from './staff.auth.routes.js';
+export { default as staffRouter } from './staff.routes.js';
+export { default as salaryRouter } from './salary.routes.js';

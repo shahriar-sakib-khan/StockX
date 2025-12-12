@@ -1,43 +1,27 @@
 import { HydratedDocument } from 'mongoose';
 
-/**
- * @module UserSanitizer
- *
- * @description Provides sanitizers for User model to shape responses
- */
+import { IUser } from './index.js';
 
 import { listSanitizer } from '@/sanitizers/index.js';
 
-import { IUser } from './index.js';
-
-/**
- * ----------------- Single User -----------------
- * Sanitizes a single User document by removing sensitive fields.
- */
-export const userSanitizer = (user: IUser | HydratedDocument<IUser>) => ({
-  id: String(user._id),
-  firstName: user.firstName ?? null,
-  lastName: user.lastName ?? null,
-  username: user.username,
-  email: user.email,
-  address: user.address ?? null,
-  image: user.image ?? null,
-  role: user.role,
-  createdAt: user.createdAt,
-  updatedAt: user.updatedAt,
+export const userSanitizer = (doc: IUser | HydratedDocument<IUser>) => ({
+  id: String(doc._id),
+  firstName: doc.firstName || null,
+  lastName: doc.lastName || null,
+  username: doc.username,
+  email: doc.email,
+  role: doc.role,
+  address: doc.address || null,
+  image: doc.image || null,
+  createdAt: doc.createdAt,
+  updatedAt: doc.updatedAt,
 });
 
 export type SanitizedUser = ReturnType<typeof userSanitizer>;
 
-/**
- * ----------------- User List -----------------
- * Optionally selects only specified fields.
- */
 export const allUserSanitizer = (
-  users: IUser[] | HydratedDocument<IUser>[],
+  docs: IUser[] | HydratedDocument<IUser>[],
   fields?: (keyof SanitizedUser)[]
 ) => ({
-  users: listSanitizer(users, userSanitizer, fields),
+  users: listSanitizer(docs, userSanitizer, fields),
 });
-
-export type SanitizedUsers = ReturnType<typeof allUserSanitizer>;

@@ -1,9 +1,9 @@
 import { Errors } from '@/error/index.js';
+import { transactionService } from '@/feats/transactionModule/index.js';
 
 import { Regulator, regulatorSanitizers } from '../index.js';
-import { regulatorTxConstants } from './index.js';
 
-import { transactionService } from '@/feats/transactionModule/index.js';
+import { regulatorTxConstants } from './index.js';
 
 /**
  * @function handleRegulatorTransaction

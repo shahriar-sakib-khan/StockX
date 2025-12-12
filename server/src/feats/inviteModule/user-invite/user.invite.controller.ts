@@ -1,20 +1,13 @@
-/**
- * @module UserInviteController
- *
- * @description Controller for user invite related operations.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions.js';
-
 import { userInviteService } from './index.js';
 
-/**
- * ----------------- User Invite Controllers -----------------
- */
+import { assertAuth, withTransaction } from '@/common/index.js';
 
+/**
+ * ----------------- Read Operations -----------------
+ */
 export const myInvites = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
@@ -24,30 +17,47 @@ export const myInvites = async (req: Request, res: Response) => {
 
   const { invites, total } = await userInviteService.getUserInvites(userId, page, limit);
 
-  res.status(StatusCodes.OK).json({ total, page, limit, invites });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'User invites fetched successfully',
+    meta: { page, limit, total },
+    data: { invites },
+  });
 };
 
+/**
+ * ----------------- Write Operations -----------------
+ */
 export const acceptInvite = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
   const { token } = req.params;
 
-  const invite = await userInviteService.acceptInvite(userId, token);
+  const invite = await withTransaction(async session => {
+    return await userInviteService.acceptInvite(userId, token, session);
+  });
 
-  res.status(StatusCodes.OK).json({ message: 'Invite accepted successfully', invite });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Invite accepted successfully',
+    data: { invite },
+  });
 };
 
 export const declineInvite = async (req: Request, res: Response) => {
   const { token } = req.params;
 
-  const invite = await userInviteService.declineInvite(token);
+  const invite = await withTransaction(async session => {
+    return await userInviteService.declineInvite(token, session);
+  });
 
-  res.status(StatusCodes.OK).json({ message: 'Invite declined successfully', invite });
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Invite declined successfully',
+    data: { invite },
+  });
 };
 
-/**
- * ----------------- Default Exports (userInviteController) -----------------
- */
 export default {
   myInvites,
   acceptInvite,

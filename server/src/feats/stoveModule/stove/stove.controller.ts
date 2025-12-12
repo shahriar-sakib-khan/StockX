@@ -7,8 +7,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { stoveService } from './index.js';
 import { assertAuth } from '@/common/assertions.js';
+
+import { stoveService } from './index.js';
 
 /**
  * ----------------- Stove Inventory Controllers -----------------

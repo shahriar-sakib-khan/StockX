@@ -1,6 +1,7 @@
 import { HydratedDocument } from 'mongoose';
 
 import { IUser } from '@/models/index.js';
+
 import listSanitizer from './listSanitizer.js';
 
 /**

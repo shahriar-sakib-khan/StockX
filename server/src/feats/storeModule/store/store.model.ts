@@ -1,35 +1,40 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
-import { Membership } from '../index.js';
+export interface IStoreRole {
+  name: string;
+  permissions: string[];
+}
 
 export interface IStore extends Document {
   name: string;
+  storeCode: string; // e.g., "BK-8821"
   description?: string;
   image?: string;
   location: string;
   phone: string;
   createdBy: Types.ObjectId;
-  storeRoles: { name: string; permissions: string[]; _id?: Types.ObjectId }[];
-
+  storeRoles: IStoreRole[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const storeSchema: Schema<IStore> = new Schema(
+const storeSchema = new Schema<IStore>(
   {
-    name: {
+    name: { type: String, required: true, trim: true },
+
+    storeCode: {
       type: String,
-      required: [true, 'Store name is required'],
+      required: true,
+      unique: true,
       trim: true,
+      uppercase: true,
+      index: true,
     },
+
     description: { type: String, default: '' },
-    image: { type: String, default: 'storeImageUrl' },
-    location: { type: String, required: [true, 'Location is required'] },
-    phone: {
-      type: String,
-      required: [true, 'Phone number is required'],
-      match: [/^\+?\d{10,15}$/, 'Invalid phone number format'],
-    },
+    image: { type: String, default: '' },
+    location: { type: String, required: true },
+    phone: { type: String, required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     storeRoles: [
       {
@@ -38,38 +43,11 @@ const storeSchema: Schema<IStore> = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-// storeSchema.index({name: 1 }, { unique: true });
-
-/**
- * ----------------- Pre-save Hook -----------------
- * Seed with base roles if none provided
- */
-storeSchema.pre('save', function (next) {
-  if (!this.storeRoles || this.storeRoles.length === 0) {
-    this.storeRoles = [
-      { name: 'owner', permissions: ['*'] },
-      { name: 'admin', permissions: ['manage_store', 'assign_roles'] },
-      { name: 'manager', permissions: ['manage_store', 'assign_roles'] },
-      { name: 'staff', permissions: [] },
-      { name: 'driver', permissions: [] },
-    ];
-  }
-  next();
-});
-
-/**
- * ----------------- To JSON Hook -----------------
- * Remove __v
- */
-storeSchema.methods.toJSON = function (): Partial<IStore> {
-  const obj = this.toObject();
-  delete obj.__v;
-
-  return obj as Partial<IStore>;
-};
-
-const Store: Model<IStore> = mongoose.model<IStore>('Store', storeSchema);
+const Store = model<IStore>('Store', storeSchema);
 export default Store;

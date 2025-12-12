@@ -1,18 +1,16 @@
 import { Router } from 'express';
 
-import inviteRouter from '@/feats/inviteModule/invite.routes.js';
 import localBrandRouter from '@/feats/brandModule/local.brand.routes.js';
-
-import { vehicleRouter, vehicleTxRouter } from '@/feats/vehicleModule/index.js';
-import { shopRouter, shopTxRouter } from '@/feats/shopModule/index.js';
-import {staffRouter} from '@/feats/staffModule/index.js';
-
-import { transactionRouter } from '@/feats/transactionModule/index.js';
-
 import { cylinderRouter, cylinderTxRouter } from '@/feats/cylinderModule/index.js';
-import { regulatorRouter, regulatorTxRouter } from '@/feats/regulatorModule/index.js';
-import { stoveRouter, stoveTxRouter } from '@/feats/stoveModule/index.js';
 import { exchangeRouter } from '@/feats/exchangeModule/index.js';
+import inviteRouter from '@/feats/inviteModule/invite.routes.js';
+import { regulatorRouter, regulatorTxRouter } from '@/feats/regulatorModule/index.js';
+import { shopRouter, shopTxRouter } from '@/feats/shopModule/index.js';
+import { staffRouter } from '@/feats/staffModule/index.js';
+import { membershipRouter } from '@/feats/storeModule/index.js';
+import { stoveRouter, stoveTxRouter } from '@/feats/stoveModule/index.js';
+import { transactionRouter } from '@/feats/transactionModule/index.js';
+import { vehicleRouter, vehicleTxRouter } from '@/feats/vehicleModule/index.js';
 
 /**
  * @swagger
@@ -24,6 +22,9 @@ const router = Router({ mergeParams: true });
 
 /** ----------------- Invite routes ----------------- */
 router.use('/', inviteRouter);
+
+/** ----------------- Membership routes ----------------- */
+router.use('/', membershipRouter);
 
 /** ----------------- Local brand routes ----------------- */
 router.use('/', localBrandRouter);

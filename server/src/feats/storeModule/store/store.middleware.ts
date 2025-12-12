@@ -1,90 +1,99 @@
 import { Request, Response, NextFunction } from 'express';
-import { StatusCodes } from 'http-status-codes';
-
-import { assertAuth } from '@/common/assertions.js';
 
 import { Membership } from '../index.js';
+
 import { Store } from './index.js';
+
+import { assertAuth } from '@/common/index.js';
+import { Errors } from '@/error/index.js';
 
 /**
  * @function storeScope
- * @description
- * Middleware for store-level access control.
- *
- * - Ensures user is authenticated
- * - Validates that the store exists
- * - Validates that the user is an active member of the store
- * - Optionally enforces role-based access
- * - Attaches store membership to the request object
- *
- * @param {string[]} allowedRoles - Optional array of roles required to access the route
+ * @description Ensures the actor has access to the store.
+ * Supports both Global Users (via Membership) and Local Staff (via Token).
+ * * @param allowedRoles - List of roles permitted (e.g. ['owner', 'admin'])
  */
 export const storeScope = (allowedRoles: string[] = []) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    // Ensure user is authenticated
+    // 1. Ensure Authenticated
     assertAuth(req);
-    const { userId, role } = req.user;
+    const { userId, role: userRole, type, storeId: tokenStoreId } = req.user;
+    const { storeId: paramStoreId } = req.params;
 
-    if (!req.user) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
-        message: 'Authentication required.',
-      });
+    // 2. Resolve Store Context
+    // Staff tokens have storeId embedded. Global users rely on URL params.
+    const targetStoreId = paramStoreId || tokenStoreId;
+
+    if (!targetStoreId) {
+      throw new Errors.BadRequestError('Store context (ID) is missing');
     }
 
-    // Validate that the store exists
-    const { storeId } = req.params;
-
-    const store = await Store.findById(storeId).select('name').lean();
-    if (!store) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        message: 'Store not found.',
-      });
-    }
-
-    // Super admin (ostad) overrides role checks
-    if (role === 'ostad') {
+    // 3. Super Admin Override (Global 'ostad')
+    if (userRole === 'ostad') {
       req.membership = {
         userId,
-        storeId,
-        storeRoles: store.storeRoles.map(role => role.name), // Give all store roles
+        storeId: targetStoreId,
+        storeRole: 'ostad',
       };
       return next();
     }
 
-    // Validate that the user is an active member of the store
+    // ---------------------------------------------------------
+    // SCENARIO A: Local Staff (Token-based Access)
+    // ---------------------------------------------------------
+    if (type === 'staff') {
+      // Security: Staff can only access the store encoded in their token
+      if (paramStoreId && paramStoreId !== tokenStoreId) {
+        throw new Errors.ForbiddenError('Token is not valid for this store');
+      }
+
+      // Role Check
+      if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+        throw new Errors.ForbiddenError('Access denied: Insufficient staff privileges');
+      }
+
+      // Attach Context (Normalize to match Membership structure)
+      req.membership = {
+        userId,
+        storeId: tokenStoreId!,
+        storeRole: userRole,
+      };
+      return next();
+    }
+
+    // ---------------------------------------------------------
+    // SCENARIO B: Global User (DB Membership Access)
+    // ---------------------------------------------------------
+
+    // 4. Verify Store Exists (Optional, but good for 404s)
+    const storeExists = await Store.exists({ _id: targetStoreId });
+    if (!storeExists) {
+      throw new Errors.NotFoundError('Store not found');
+    }
+
+    // 5. Fetch Membership
     const membership = await Membership.findOne({
-      store: storeId,
+      store: targetStoreId,
       user: userId,
-    })
-      .select('storeRoles status')
-      .lean();
+    }).select('storeRole status');
+    console.log(membership);
 
     if (!membership || membership.status !== 'active') {
-      return res.status(StatusCodes.FORBIDDEN).json({
-        message: 'Access denied: Not an active store member.',
-      });
+      throw new Errors.ForbiddenError('Access denied: You are not an active member of this store');
     }
 
-    // Enforce role-based access if any roles are specified
-    if (allowedRoles.length > 0) {
-      const hasRequiredRole = membership.storeRoles.some(userRole =>
-        allowedRoles.includes(userRole)
-      );
-
-      if (!hasRequiredRole) {
-        return res.status(StatusCodes.FORBIDDEN).json({
-          message: 'Access denied: Insufficient role privileges.',
-        });
-      }
+    // 6. Role Check (Single String Comparison)
+    if (allowedRoles.length > 0 && !allowedRoles.includes(membership.storeRole)) {
+      throw new Errors.ForbiddenError('Access denied: Insufficient store privileges');
     }
 
-    // Attach store membership to the request
+    // 7. Attach Context
     req.membership = {
       userId,
-      storeId,
-      storeRoles: membership.storeRoles,
+      storeId: targetStoreId,
+      storeRole: membership.storeRole,
     };
-    
-    return next();
+
+    next();
   };
 };

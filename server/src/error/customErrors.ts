@@ -20,40 +20,42 @@ export class BaseError extends Error {
   }
 }
 
-// If routes don't exist
-
+// 404 - If routes or resources don't exist
 export class NotFoundError extends BaseError {
   constructor(message = 'Not Found') {
     super(message, StatusCodes.NOT_FOUND);
   }
 }
 
-// If something broke inside a valid route
-
+// 400 - If validation fails or bad input
 export class BadRequestError extends BaseError {
   constructor(message = 'Bad Request', payload?: CustomErrorPayload) {
     super(message, StatusCodes.BAD_REQUEST, payload);
   }
 }
 
+// 401 - Identity Missing (Not Logged In)
 export class UnauthenticatedError extends BaseError {
-  constructor(message = 'Unauthenticated') {
+  constructor(message = 'Authentication required') {
     super(message, StatusCodes.UNAUTHORIZED);
   }
 }
 
-export class UnauthorizedError extends BaseError {
-  constructor(message = 'Forbidden') {
+// 403 - Permission Missing (Logged In but Access Denied)
+export class ForbiddenError extends BaseError {
+  constructor(message = 'Access denied') {
     super(message, StatusCodes.FORBIDDEN);
   }
 }
 
+// 409 - Data Conflict (e.g. Duplicate Email)
 export class ConflictError extends BaseError {
   constructor(message = 'Conflict') {
     super(message, StatusCodes.CONFLICT);
   }
 }
 
+// 500 - System Crashes
 export class ServerError extends BaseError {
   constructor(message = 'Internal Server Error') {
     super(message, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -65,7 +67,7 @@ export default {
   NotFoundError,
   BadRequestError,
   UnauthenticatedError,
-  UnauthorizedError,
+  ForbiddenError,
   ConflictError,
   ServerError,
 };

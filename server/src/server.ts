@@ -4,23 +4,19 @@
 import './config/env.config.js';
 import 'express-async-errors'; // Catch async errors automatically without try/catch
 
-import express, { Application, Request, Response } from 'express';
-import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import multer from 'multer';
+import cors from 'cors';
+import express, { Application, Request, Response } from 'express';
 
 // ------------------------------
 // Internal Imports
 // ------------------------------
+// import runBootstrap from './bootstrap/index.js';
 import apiRouter from './routes/router.js';
+
 import { connectDB } from '@/config/index.js';
 import { errorHandler } from '@/error/index.js';
-
-// ------------------------------
-// Multer Configuration (for temporary file handling)
-// ------------------------------
-// We'll use memory storage for now (since Cloudinary can handle streams)
-const upload = multer({ storage: multer.memoryStorage() });
+import { logger } from '@/utils/index.js';
 
 // ------------------------------
 // Initialize Express App
@@ -46,16 +42,24 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // Allow Postman or internal requests
+      // Allow Postman (no origin) or whitelisted domains
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-
-      console.warn('❌ Blocked by CORS:', origin);
+      logger.warn(`❌ Blocked by CORS: ${origin}`);
       return callback(new Error('Not allowed by CORS'), false);
     },
     credentials: true,
   })
 );
+
+// ------------------------------
+// Pretty JSON Responses (Dev Only)
+// ------------------------------
+if (process.env.NODE_ENV === 'development') {
+  app.set('json spaces', 2);
+}
 
 // ------------------------------
 // Health Check Endpoint
@@ -79,24 +83,21 @@ app.use('/api', apiRouter);
 app.use(errorHandler);
 
 // ------------------------------
-// Graceful Shutdown (for production)
+// Graceful Shutdown
 // ------------------------------
-process.on('SIGINT', async () => {
-  console.log('🛑 Gracefully shutting down...');
+const shutdown = (signal: string) => {
+  logger.info(`🛑 ${signal} received. Shutting down...`);
   process.exit(0);
-});
+};
 
-process.on('SIGTERM', async () => {
-  console.log('🛑 Server terminated...');
-  process.exit(0);
-});
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 // ------------------------------
 // Start Server Function
 // ------------------------------
 const PORT = process.env.PORT || 5000;
 
-// import runBootstrap from './bootstrap/index.js';
 const startServer = async (): Promise<void> => {
   try {
     await connectDB();
@@ -104,13 +105,13 @@ const startServer = async (): Promise<void> => {
 
     app.listen(PORT, () => {
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-        console.log(`🌍 Health check: http://localhost:${PORT}/api/health`);
+        logger.info(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+        logger.info(`🌍 Health check: http://localhost:${PORT}/api/health`);
       }
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('❌ Failed to start server:', errorMessage);
+    logger.error(`❌ Failed to start server: ${errorMessage}`);
     process.exit(1);
   }
 };

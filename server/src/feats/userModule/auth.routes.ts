@@ -1,26 +1,21 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
+import { authController, authValidator } from './auth/index.js';
 
-import { authController, authValidator } from './index.js';
+import { validateRequest } from '@/middlewares/index.js';
 
 const router = Router();
 
 /**
  * @swagger
  * tags:
- *   name: Auth
- *   description: Authentication and authorization management
- */
-
-/**
- * ----------------- Authentication Routes -----------------
+ * name: Auth
+ * description: Authentication management
  */
 
 /**
  * @route   POST /auth/register
  * @desc    Register a new user
- * @access  Public
  */
 router.post(
   '/auth/register',
@@ -30,22 +25,19 @@ router.post(
 
 /**
  * @route   POST /auth/login
- * @desc    Log in a user using email/username and password
- * @access  Public
+ * @desc    Login user
  */
 router.post('/auth/login', validateRequest(authValidator.loginSchema), authController.login);
 
 /**
  * @route   POST /auth/logout
- * @desc    Log out the currently authenticated user
- * @access  Private
+ * @desc    Logout user
  */
 router.post('/auth/logout', authController.logout);
 
 /**
  * @route   POST /auth/refresh
- * @desc    Refresh access token using a valid refresh token
- * @access  Public
+ * @desc    Get new access token
  */
 router.post('/auth/refresh', authController.refreshAccessToken);
 

@@ -1,0 +1,385 @@
+.
+├── .dockerignore
+├── .env
+├── .eslintrc.cjs
+├── .husky
+│   └── pre-commit
+├── .prettierrc
+├── Dockerfile
+├── docker-compose.yml
+├── jest.config.ts
+├── logs
+│   └── app.log
+├── package-lock.json
+├── package.json
+├── src
+│   ├── bootstrap
+│   │   ├── assets
+│   │   │   ├── brands
+│   │   │   │   ├── aygaz.webp
+│   │   │   │   ├── bashundhara.webp
+│   │   │   │   ├── bengal.webp
+│   │   │   │   ├── beximco.webp
+│   │   │   │   ├── bm.webp
+│   │   │   │   ├── delta.webp
+│   │   │   │   ├── eurogaz.webp
+│   │   │   │   ├── fresh.webp
+│   │   │   │   ├── ggas.webp
+│   │   │   │   ├── green.webp
+│   │   │   │   ├── hg.webp
+│   │   │   │   ├── jamuna.webp
+│   │   │   │   ├── jmi.webp
+│   │   │   │   ├── laugfs.webp
+│   │   │   │   ├── navana.webp
+│   │   │   │   ├── omera.webp
+│   │   │   │   ├── orion.webp
+│   │   │   │   ├── petromax.webp
+│   │   │   │   ├── promita.webp
+│   │   │   │   ├── shena.webp
+│   │   │   │   ├── super.webp
+│   │   │   │   ├── total.webp
+│   │   │   │   ├── unigas.webp
+│   │   │   │   └── universal.webp
+│   │   │   └── cylinders
+│   │   │       ├── aygaz.webp
+│   │   │       ├── bashundhara.png
+│   │   │       ├── bengal.webp
+│   │   │       ├── beximco.webp
+│   │   │       ├── bm.webp
+│   │   │       ├── delta.webp
+│   │   │       ├── eurogaz.webp
+│   │   │       ├── fresh.webp
+│   │   │       ├── ggas.webp
+│   │   │       ├── green.webp
+│   │   │       ├── hg.webp
+│   │   │       ├── jamuna.webp
+│   │   │       ├── jmi.webp
+│   │   │       ├── laugfs.webp
+│   │   │       ├── navana.webp
+│   │   │       ├── omera.webp
+│   │   │       ├── orion.webp
+│   │   │       ├── petromax.webp
+│   │   │       ├── promita.webp
+│   │   │       ├── shena.webp
+│   │   │       ├── super.webp
+│   │   │       ├── total.webp
+│   │   │       ├── unigas.webp
+│   │   │       └── universal.webp
+│   │   ├── index.ts
+│   │   ├── seedBaseAccounts.ts
+│   │   ├── seedBaseTxCategories.ts
+│   │   ├── seedGlobalBrands.ts
+│   │   ├── seedLocalBrands.ts
+│   │   ├── seedLocalCylinders.ts
+│   │   ├── seedLocalRegulators.ts
+│   │   └── seedLocalStoves.ts
+│   ├── common
+│   │   ├── assertions.ts
+│   │   ├── database.ts
+│   │   ├── index.ts
+│   │   └── skuGenerator.ts
+│   ├── config
+│   │   ├── cloudinary.config.ts
+│   │   ├── db.config.ts
+│   │   ├── env.config.ts
+│   │   ├── index.ts
+│   │   └── payment.config.js
+│   ├── constants
+│   │   ├── index.ts
+│   │   ├── other.constants.ts
+│   │   ├── role.constants.ts
+│   │   ├── transaction.constants.ts
+│   │   └── transactionCategories.constants.ts
+│   ├── controllers
+│   │   └── v1
+│   │       └── index.ts
+│   ├── error
+│   │   ├── customErrors.ts
+│   │   ├── errorHandlerMiddleware.ts
+│   │   └── index.ts
+│   ├── feats
+│   │   ├── brandModule
+│   │   │   ├── global-brand
+│   │   │   │   ├── global.brand.controller.ts
+│   │   │   │   ├── global.brand.model.ts
+│   │   │   │   ├── global.brand.sanitizer.ts
+│   │   │   │   ├── global.brand.service.ts
+│   │   │   │   ├── global.brand.validator.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── global.brand.routes.ts
+│   │   │   ├── index.ts
+│   │   │   ├── local-brand
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── local.brand.controller.ts
+│   │   │   │   ├── local.brand.model.ts
+│   │   │   │   ├── local.brand.sanitizer.ts
+│   │   │   │   ├── local.brand.service.ts
+│   │   │   │   └── local.brand.validator.ts
+│   │   │   └── local.brand.routes.ts
+│   │   ├── communityModule
+│   │   │   ├── index.js
+│   │   │   ├── post
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── post.controller.ts
+│   │   │   │   ├── post.model.ts
+│   │   │   │   ├── post.sanitizer.ts
+│   │   │   │   ├── post.service.ts
+│   │   │   │   └── post.validator.ts
+│   │   │   └── post.routes.ts
+│   │   ├── cycle
+│   │   │   ├── cycle.controller.ts
+│   │   │   ├── cycle.middleware.ts
+│   │   │   ├── cycle.model.ts
+│   │   │   ├── cycle.sanitizer.ts
+│   │   │   ├── cycle.service.ts
+│   │   │   ├── cycle.validator.ts
+│   │   │   └── index.ts
+│   │   ├── cylinderModule
+│   │   │   ├── cylinder
+│   │   │   │   ├── cylinder.controller.ts
+│   │   │   │   ├── cylinder.model.ts
+│   │   │   │   ├── cylinder.sanitizer.ts
+│   │   │   │   ├── cylinder.service.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── cylinder-tx
+│   │   │   │   ├── cylinder.tx.constants.ts
+│   │   │   │   ├── cylinder.tx.controller.ts
+│   │   │   │   ├── cylinder.tx.sanitizer.ts
+│   │   │   │   ├── cylinder.tx.service.ts
+│   │   │   │   ├── cylinder.tx.validator.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── cylinder.routes.ts
+│   │   │   ├── cylinder.tx.routes.ts
+│   │   │   └── index.ts
+│   │   ├── exchangeModule
+│   │   │   ├── exchange
+│   │   │   │   ├── exchange.controller.ts
+│   │   │   │   ├── exchange.sanitizer.ts
+│   │   │   │   ├── exchange.service.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── exchange.routes.ts
+│   │   │   ├── index.ts
+│   │   │   └── load
+│   │   │       ├── index.ts
+│   │   │       ├── load.controller.ts
+│   │   │       └── load.service.ts
+│   │   ├── inviteModule
+│   │   │   ├── index.ts
+│   │   │   ├── invite
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── invite.constants.ts
+│   │   │   │   ├── invite.controller.ts
+│   │   │   │   ├── invite.model.ts
+│   │   │   │   ├── invite.sanitizer.ts
+│   │   │   │   ├── invite.service.ts
+│   │   │   │   └── invite.validator.ts
+│   │   │   ├── invite.routes.ts
+│   │   │   ├── user-invite
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── user.invite.controller.ts
+│   │   │   │   └── user.invite.service.ts
+│   │   │   └── user.invite.routes.ts
+│   │   ├── regulatorModule
+│   │   │   ├── index.ts
+│   │   │   ├── regulator
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── regulator.controller.ts
+│   │   │   │   ├── regulator.model.ts
+│   │   │   │   ├── regulator.sanitizer.ts
+│   │   │   │   └── regulator.service.ts
+│   │   │   ├── regulator-tx
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── regulator.tx.constants.ts
+│   │   │   │   ├── regulator.tx.controller.ts
+│   │   │   │   └── regulator.tx.service.ts
+│   │   │   ├── regulator.routes.ts
+│   │   │   └── regulator.tx.routes.ts
+│   │   ├── routers
+│   │   │   ├── cycle.routes.ts
+│   │   │   └── index.ts
+│   │   ├── shopModule
+│   │   │   ├── index.ts
+│   │   │   ├── shop
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── shop.controller.ts
+│   │   │   │   ├── shop.model.ts
+│   │   │   │   ├── shop.sanitizer.ts
+│   │   │   │   ├── shop.service.ts
+│   │   │   │   └── shop.validator.ts
+│   │   │   ├── shop-tx
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── shop.tx.constants.ts
+│   │   │   │   ├── shop.tx.controller.ts
+│   │   │   │   ├── shop.tx.service.ts
+│   │   │   │   └── shop.tx.validator.ts
+│   │   │   ├── shop.routes.ts
+│   │   │   └── shop.tx.routes.ts
+│   │   ├── staffModule
+│   │   │   ├── index.ts
+│   │   │   ├── salary
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── salary.controller.ts
+│   │   │   │   ├── salary.model.ts
+│   │   │   │   ├── salary.sanitizer.ts
+│   │   │   │   ├── salary.service.ts
+│   │   │   │   └── salary.validator.ts
+│   │   │   ├── salary.routes.ts
+│   │   │   ├── staff
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── staff.controller.ts
+│   │   │   │   ├── staff.model.ts
+│   │   │   │   ├── staff.sanitizer.ts
+│   │   │   │   ├── staff.service.ts
+│   │   │   │   └── staff.validator.ts
+│   │   │   └── staff.routes.ts
+│   │   ├── storeModule
+│   │   │   ├── index.ts
+│   │   │   ├── membership
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── membership.constants.ts
+│   │   │   │   ├── membership.model.ts
+│   │   │   │   └── membership.sanitizer.ts
+│   │   │   ├── store
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── store.constants.ts
+│   │   │   │   ├── store.controller.ts
+│   │   │   │   ├── store.middleware.ts
+│   │   │   │   ├── store.model.ts
+│   │   │   │   ├── store.sanitizer.ts
+│   │   │   │   ├── store.service.ts
+│   │   │   │   └── store.validator.ts
+│   │   │   └── store.routes.ts
+│   │   ├── stoveModule
+│   │   │   ├── index.ts
+│   │   │   ├── stove
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── stove.constants.ts
+│   │   │   │   ├── stove.controller.ts
+│   │   │   │   ├── stove.model.ts
+│   │   │   │   ├── stove.sanitizer.ts
+│   │   │   │   └── stove.service.ts
+│   │   │   ├── stove-tx
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── stove.tx.constants.ts
+│   │   │   │   ├── stove.tx.controller.ts
+│   │   │   │   └── stove.tx.service.ts
+│   │   │   ├── stove.routes.ts
+│   │   │   └── stove.tx.routes.ts
+│   │   ├── transactionModule
+│   │   │   ├── index.ts
+│   │   │   ├── transaction
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── transaction.constants.ts
+│   │   │   │   ├── transaction.controller.ts
+│   │   │   │   ├── transaction.middleware.ts
+│   │   │   │   ├── transaction.model.ts
+│   │   │   │   ├── transaction.sanitizer.ts
+│   │   │   │   ├── transaction.service.ts
+│   │   │   │   └── transaction.validator.ts
+│   │   │   └── transaction.routes.ts
+│   │   ├── userModule
+│   │   │   ├── auth
+│   │   │   │   ├── auth.controller.ts
+│   │   │   │   ├── auth.middleware.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── auth.validator.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── auth.routes.ts
+│   │   │   ├── index.ts
+│   │   │   ├── user
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── user.constants.ts
+│   │   │   │   ├── user.controller.ts
+│   │   │   │   ├── user.model.ts
+│   │   │   │   ├── user.sanitizer.ts
+│   │   │   │   ├── user.service.ts
+│   │   │   │   └── user.validator.ts
+│   │   │   └── user.routes.ts
+│   │   └── vehicleModule
+│   │       ├── index.ts
+│   │       ├── vehicle
+│   │       │   ├── index.ts
+│   │       │   ├── vehicle.controller.ts
+│   │       │   ├── vehicle.model.ts
+│   │       │   ├── vehicle.sanitizer.ts
+│   │       │   ├── vehicle.service.ts
+│   │       │   └── vehicle.validator.ts
+│   │       ├── vehicle-tx
+│   │       │   ├── index.ts
+│   │       │   ├── vehicle.tx.constants.ts
+│   │       │   ├── vehicle.tx.controller.ts
+│   │       │   ├── vehicle.tx.service.ts
+│   │       │   └── vehicle.tx.validator.ts
+│   │       ├── vehicle.routes.ts
+│   │       └── vehicle.tx.routes.ts
+│   ├── middlewares
+│   │   ├── index.ts
+│   │   └── validateRequest.ts
+│   ├── models
+│   │   ├── account.model.ts
+│   │   ├── index.ts
+│   │   └── txCategory.model.ts
+│   ├── routes
+│   │   ├── router.ts
+│   │   └── v1
+│   │       ├── admin-router
+│   │       │   └── admin.router.ts
+│   │       ├── auth-router
+│   │       │   └── auth.router.ts
+│   │       ├── router.ts
+│   │       ├── store-router
+│   │       │   ├── store.router.ts
+│   │       │   └── store.sub.router.ts
+│   │       └── user-router
+│   │           └── user.router.ts
+│   ├── sanitizers
+│   │   ├── index.ts
+│   │   ├── listSanitizer.ts
+│   │   ├── resolveRef.ts
+│   │   └── userSanitizers.ts
+│   ├── server.ts
+│   ├── services
+│   │   └── v1
+│   │       └── index.ts
+│   ├── types
+│   │   └── express
+│   │       └── index.d.ts
+│   ├── uploads
+│   │   ├── .keep
+│   │   └── _readme.txt
+│   ├── utils
+│   │   ├── index.ts
+│   │   ├── logger.util.ts
+│   │   ├── password.util.js
+│   │   └── token.util.ts
+│   └── validations
+│       └── index.ts
+├── structure.txt
+├── tsconfig.json
+└── uploads
+    ├── 0ae4d52ebc9f1d99b2e2ec6d1bdb2339
+    ├── 1067d2172e8c183055ebfd0804c87f15
+    ├── 246939e62eba0e4e5638dcf605a4fef0
+    ├── 25a9931126c0ca89e70945a7d3af6c66
+    ├── 3e876b4a20896de153cb4327b11f295f
+    ├── 41484c1432b79ed5564accfe37cad5e5
+    ├── 63ad8cfec62572c7bf15909371383d83
+    ├── 6746ddb74a3522e19681e9a5edaf9401
+    ├── 72c9785b6da7b61c839e8cf0c0d34de0
+    ├── 75d431ff8264a240b5359b2376e3351b
+    ├── 877002e2088bf7906b65c454547cd97f
+    ├── a3678125079a8b78274955980ec2f330
+    ├── ac392fd50696595c5fd87fc4344cb350
+    ├── bb9fd4e27a47767f4347c18083ea3e0c
+    ├── c0b6920981459da82df2e1b07895d5c6
+    ├── c2358994ba76bf18f847c48eab58d5ff
+    ├── c32128c5c1d923af6259f11e1dd4e900
+    ├── d5237362b1685fa8d1f58b6b10c455a5
+    ├── dccb47ddbdf1ab6cdf0ff39bc5801522
+    ├── ed474ebda181a6b02970f6ae611f4856
+    ├── ed65d904ed3924c39dccadf334d25132
+    ├── f95de2c0704517de1a69bc57d5d8894b
+    ├── f9e01db4ed5fa70578b96a79d7defd38
+    └── fd619e5fa4eb884a112001a6229f6696
+
+71 directories, 312 files

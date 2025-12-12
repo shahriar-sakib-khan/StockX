@@ -1,40 +1,58 @@
-/**
- * @module staff.validation
- *
- * @description Validation schemas for staff management, including
- * staff creation, updates, salary plan updates, attendance logging,
- * and payment recording within workspace divisions.
- */
-
 import { z } from 'zod';
 
 /**
- * ----------------- Create Staff -----------------
- * @property {string} name - Required. Staff name.
- * @property {string} [phone] - Required. Valid phone number (7-15 digits, may start with +).
- * @property {string} [role] - Required. Staff role (e.g., Driver, Manager).
- * @property {string} [image] - Optional. Must be a valid URL.
- * @property {number} [salary] - Required. Staff salary plan.
+ * ----------------- Schemas -----------------
  */
+
+// Manager creating a staff account
 export const createStaffSchema = z
   .object({
-    name: z.string().min(1, { message: 'Staff name is required' }),
-    phone: z.string().regex(/^\+?[0-9]{11,15}$/, {
-      message: 'Phone number must be 11-15 digits and may include a leading +',
-    }),
+    // Identity
+    username: z
+      .string()
+      .min(3, { message: 'Username must be at least 3 characters' })
+      .regex(/^[a-z0-9_]+$/, { message: 'Username must be lowercase alphanumeric' })
+      .trim(),
+    password: z.string().min(4, { message: 'Password must be at least 4 characters' }),
 
-    role: z.string().optional(),
-    image: z.string().optional(),
+    // Profile
+    name: z.string().min(1, { message: 'Name is required' }).trim(),
+    phone: z.string().min(10, { message: 'Valid phone number required' }).trim(),
+    role: z.enum(['manager', 'cashier', 'driver', 'staff']).default('staff'),
+    address: z.string().trim().optional(),
+    image: z.string().trim().optional(),
 
-    salary: z.number().positive({ message: 'Salary amount must be greater than 0' }),
+    // Config
+    baseSalary: z.number().min(0).optional(),
   })
   .strict();
 
-export type CreateStaffInput = z.infer<typeof createStaffSchema>;
+// Manager updating a staff profile
+export const updateStaffSchema = z
+  .object({
+    name: z.string().trim().optional(),
+    phone: z.string().trim().optional(),
+    role: z.enum(['manager', 'cashier', 'driver', 'staff']).optional(),
+    address: z.string().trim().optional(),
+    image: z.string().trim().optional(),
+    isActive: z.boolean().optional(),
+    baseSalary: z.number().min(0).optional(),
+    password: z.string().min(4).optional(), // Manager resetting password
+  })
+  .strict();
 
-/**UpdateDivision
- * @description All fields are optional to support partial updates.
+// Staff logging in themselves
+export const staffLoginSchema = z
+  .object({
+    storeCode: z.string().min(1, { message: 'Store Code/ID is required' }),
+    username: z.string().min(1, { message: 'Username is required' }),
+    password: z.string().min(1, { message: 'Password is required' }),
+  })
+  .strict();
+
+/**
+ * ----------------- Types -----------------
  */
-export const updateStaffSchema = createStaffSchema.partial();
-
+export type CreateStaffInput = z.infer<typeof createStaffSchema>;
 export type UpdateStaffInput = z.infer<typeof updateStaffSchema>;
+export type StaffLoginInput = z.infer<typeof staffLoginSchema>;

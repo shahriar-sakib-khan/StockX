@@ -1,26 +1,27 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
+import { storeController, storeValidator, storeScope } from './store/index.js';
 
-import { storeValidator, storeScope, storeController } from './index.js';
+import { validateRequest } from '@/middlewares/index.js';
 
 const router = Router({ mergeParams: true });
 
 /**
  * @swagger
  * tags:
- *   name: Store
- *   description: User store management
+ * name: Store
+ * description: Store management
  */
 
 /**
- * ----------------- Store CRUD -----------------
+ * @route   GET /stores
+ * @desc    Get all stores for current user
  */
+router.get('/stores', storeController.allStores);
 
 /**
  * @route   POST /stores
- * @desc    Create a new store for the authenticated user
- * @access  Authenticated
+ * @desc    Create a new store
  */
 router.post(
   '/stores',
@@ -29,27 +30,18 @@ router.post(
 );
 
 /**
- * @route   GET /stores
- * @desc    Get all stores belonging to the authenticated user
- * @access  Authenticated
- */
-router.get('/stores', storeController.allStores);
-
-/**
  * @route   GET /stores/:storeId
- * @desc    Get a single store by ID (owned by the user)
- * @access  Authenticated
+ * @desc    Get a single store
  */
-router.get('/stores/:storeId', storeScope(), storeController.singleStore);
+router.get('/stores/:storeId', storeScope([]), storeController.singleStore);
 
 /**
- * @route   PUT /stores/:storeId
- * @desc    Update store details
- * @access  Authenticated (store admin)
+ * @route   PATCH /stores/:storeId
+ * @desc    Update a store
  */
-router.put(
+router.patch(
   '/stores/:storeId',
-  storeScope(['admin']),
+  storeScope(['owner', 'admin']),
   validateRequest(storeValidator.updateStoreSchema),
   storeController.updateStore
 );
@@ -57,19 +49,7 @@ router.put(
 /**
  * @route   DELETE /stores/:storeId
  * @desc    Delete a store
- * @access  Authenticated (store admin)
  */
-router.delete('/stores/:storeId', storeScope(['admin']), storeController.deleteStore);
-
-/**
- * ----------------- Store Profile -----------------
- */
-
-/**
- * @route   GET /stores/:storeId/profile
- * @desc    Get current user’s profile within a specific store
- * @access  Authenticated
- */
-router.get('/stores/:storeId/profile', storeScope(), storeController.myStoreProfile);
+router.delete('/stores/:storeId', storeScope(['owner']), storeController.deleteStore);
 
 export default router;

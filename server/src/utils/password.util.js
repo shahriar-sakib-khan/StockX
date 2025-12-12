@@ -1,4 +1,4 @@
-import bcryptjs from "bcryptjs";
+import bcryptjs from 'bcryptjs';
 
 /**
  * Compare a hashed passwords
@@ -11,7 +11,7 @@ export const compareHashedPassword = async (password, hashedPassword) => {
 /**
  * Hash a plain password
  */
-export const hashPassword = async (plainPassword) => {
+export const hashPassword = async plainPassword => {
   const salt = await bcryptjs.genSalt(10);
   const hashedPassword = await bcryptjs.hash(plainPassword, salt);
   return hashedPassword;
