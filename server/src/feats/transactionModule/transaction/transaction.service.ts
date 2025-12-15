@@ -6,84 +6,65 @@
 
 import { Types } from 'mongoose';
 
+import { TRANSACTION_CONFIG, TxCategoryType } from './transaction.constants.js';
+
+import { Transaction, ITransaction, transactionSanitizers } from './index.js';
+
 import { Errors } from '@/error/index.js';
-import { TxCategory, Account } from '@/models/index.js';
 
-import { Transaction, transactionSanitizers } from './index.js';
-
-/** ----------------- Universal Record Transaction Function ----------------- */
 /**
  * @function recordTransaction
- * @description Records a transaction with transactions.
- *
- * @param {any} txData - The data for the transaction.
- * @param {string} transactorId - The ID of the transactor.
- * @param {string} storeId - The ID of the store.
- * @returns {Promise<transactionSanitizers.SanitizedTransaction>} The recorded transaction.
+ * @description Records a transaction using the Master Configuration.
+ * Does NOT require database lookups for account codes.
  */
 export const recordTransaction = async (
-  txData: any,
-  transactorId: string,
+  txData: {
+    category: TxCategoryType;
+    amount: number;
+    paymentMethod?: string;
+    quantity?: number;
+    // Optional Context Fields
+    vehicleId?: string;
+    staffId?: string;
+    shopId?: string;
+    customerId?: string;
+    cylinderId?: string;
+    ref?: string;
+    details?: Record<string, any>;
+  },
+  userId: string,
   storeId: string
 ): Promise<transactionSanitizers.SanitizedTransaction> => {
-  const {
-    category, // must exist, used to figure out debit/credit
-    price,
-    quantity,
-    totalAmount,
-    paymentMethod,
+  const { category, amount, paymentMethod, details, ...rest } = txData;
 
-    counterpartyType,
-    cylinderId,
-    staffId,
-    vehicleId,
-    customerId,
+  // 1. Validate Category against Code
+  const config = TRANSACTION_CONFIG[category];
+  if (!config) {
+    throw new Errors.BadRequestError(`Invalid transaction category: '${category}'`);
+  }
 
-    ref,
-    ...otherDetails // transaction-specific fields from domain service
-  } = txData;
-
-  // Fetch category config
-  const config = await TxCategory.findOne({ store: storeId, code: category });
-  if (!config) throw new Errors.NotFoundError(`Transaction category '${category}' not found`);
-
-  // Resolve accounts
-  const debitAccount = await Account.findOne({ code: config.debitAccountCode, store: storeId });
-  const creditAccount = await Account.findOne({ code: config.creditAccountCode, store: storeId });
-  if (!debitAccount || !creditAccount)
-    throw new Errors.NotFoundError(`Debit or Credit account missing for '${config}'`);
-
-  // Build transaction description
-  const description = config.descriptionTemplate?.replace(
+  // 2. Generate Description
+  const description = config.descriptionTemplate.replace(
     /\{\{(\w+)\}\}/g,
-    (_, key: string) => (txData as any)[key] ?? ''
+    (_, key: string) => (txData as any)[key] ?? (details as any)?.[key] ?? ''
   );
 
-  // Construct transaction object
-  const txObj: any = {
+  // 3. Construct Object
+  const txObj = {
+    ...rest,
     store: new Types.ObjectId(storeId),
-    debitAccountId: debitAccount._id,
-    creditAccountId: creditAccount._id,
-    price,
-    quantity,
-    totalAmount,
     category,
-    transactionType: config.categoryType,
-    paymentMethod: paymentMethod ?? 'cash',
-    counterpartyType,
-    cylinderId,
-    staffId,
-    vehicleId,
-    customerId,
-    ref,
-    details: { description, ...otherDetails },
-    transactedBy: new Types.ObjectId(transactorId),
+    type: config.type, // Derived from Config
+    amount,
+    paymentMethod: paymentMethod || 'cash',
+    performedBy: new Types.ObjectId(userId),
+    details: {
+      description,
+      ...details,
+    },
   };
 
-  // Remove undefined fields
-  Object.keys(txObj).forEach(k => txObj[k] === undefined && delete txObj[k]);
-
-  // Save transaction
+  // 4. Save
   const transaction = await Transaction.create(txObj);
 
   return transactionSanitizers.transactionSanitizer(transaction);
@@ -91,15 +72,14 @@ export const recordTransaction = async (
 
 /**
  * @function getAllTransactions
- * @description Retrieves all transactions for a store
- *
- * @param {string} storeId - The ID of the store
- * @returns {Promise<transactionSanitizers.SanitizedTransactions>} All transactions
+ * @description Retrieves all transactions for a store (Latest first).
  */
 export const getAllTransactions = async (storeId: string): Promise<any> => {
-  const transactions = await Transaction.find({ store: storeId }).lean();
+  const transactions = await Transaction.find({ store: storeId }).sort({ createdAt: -1 }).lean();
 
-  return transactionSanitizers.allTransactionSanitizer(transactions);
+  // [FIX] Cast 'transactions' to satisfy TypeScript.
+  // We know the data shape matches, even if the Mongoose methods are missing.
+  return transactionSanitizers.allTransactionSanitizer(transactions as unknown as ITransaction[]);
 };
 
 export default { recordTransaction, getAllTransactions };

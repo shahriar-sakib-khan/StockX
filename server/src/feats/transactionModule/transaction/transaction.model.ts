@@ -1,79 +1,78 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-import * as transactionConstants from './transaction.constants.js';
+import {
+  TransactionType,
+  PaymentMethod,
+  TransactionTypeType,
+  PaymentMethodType,
+} from './transaction.constants.js';
 
 export interface ITransaction extends Document {
   store: Types.ObjectId;
 
-  debitAccountId: Types.ObjectId;
-  creditAccountId: Types.ObjectId;
+  category: string; // matches a key in TRANSACTION_CONFIG
+  type: TransactionTypeType; // 'income', 'expense', etc. (Derived from config)
 
-  price?: number;
-  quantity?: number;
-  totalAmount: number;
+  amount: number;
+  quantity?: number; // Optional unit count
+  paymentMethod: PaymentMethodType;
 
-  category: transactionConstants.TxCategoryType;
-  transactionType: transactionConstants.CategoryTypeType;
-  paymentMethod?: transactionConstants.PaymentMethodType;
-
-  counterpartyType: transactionConstants.CounterpartyKindType;
-  staffId?: Types.ObjectId;
   vehicleId?: Types.ObjectId;
+  staffId?: Types.ObjectId;
   customerId?: Types.ObjectId;
-  shopId?: Types.ObjectId; // alias to counterparty
-  cylinderId?: Types.ObjectId; // optional for cylinder movements
+  shopId?: Types.ObjectId;
+  cylinderId?: Types.ObjectId;
 
-  transactedBy: Types.ObjectId;
-  ref?: string;
-  details?: Record<string, any>;
+  ref?: string; // External Invoice/Memo Reference
+  details?: Record<string, any>; // Flexible object for extra data
+
+  performedBy: Types.ObjectId; // User/Staff who executed the action
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-const transactionSchema: Schema<ITransaction> = new Schema(
+const transactionSchema = new Schema<ITransaction>(
   {
     store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
 
-    debitAccountId: { type: Schema.Types.ObjectId, ref: 'Account', required: true, index: true },
-    creditAccountId: { type: Schema.Types.ObjectId, ref: 'Account', required: true, index: true },
-
-    price: { type: Number, min: 0 },
-    quantity: { type: Number, min: 1 },
-    totalAmount: { type: Number, required: true, min: 0 },
-    category: {
+    category: { type: String, required: true, index: true },
+    type: {
       type: String,
-      enum: transactionConstants.TransactionCategory,
+      enum: Object.values(TransactionType),
       required: true,
       index: true,
     },
-    transactionType: {
+
+    amount: { type: Number, required: true, min: 0 },
+    quantity: { type: Number },
+    paymentMethod: {
       type: String,
-      enum: transactionConstants.CategoryType,
+      enum: PaymentMethod,
+      default: 'cash',
       required: true,
-      index: true,
     },
-    paymentMethod: { type: String, enum: transactionConstants.PaymentMethod, default: 'cash' },
 
-    counterpartyType: { type: String, enum: transactionConstants.CounterpartyKind, required: true },
-    staffId: { type: Schema.Types.ObjectId, ref: 'Staff' },
-    vehicleId: { type: Schema.Types.ObjectId, ref: 'Vehicle' },
-    shopId: { type: Schema.Types.ObjectId, ref: 'Shop' },
-    customerId: { type: Schema.Types.ObjectId, ref: 'Customer' },
-    cylinderId: { type: Schema.Types.ObjectId, ref: 'Cylinder' },
+    vehicleId: { type: Schema.Types.ObjectId, ref: 'Vehicle', index: true },
+    staffId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+    customerId: { type: Schema.Types.ObjectId, ref: 'Customer', index: true },
+    shopId: { type: Schema.Types.ObjectId, ref: 'Shop', index: true },
+    cylinderId: { type: Schema.Types.ObjectId, ref: 'Cylinder', index: true },
 
-    transactedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    ref: String,
-    details: { type: Schema.Types.Map, of: Schema.Types.Mixed },
+    ref: { type: String, trim: true },
+    details: { type: Schema.Types.Mixed, default: {} },
+
+    performedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-transactionSchema.methods.toJSON = function (): Partial<ITransaction> {
-  const obj = this.toObject();
-  delete obj.__v;
-  return obj;
-};
+// Analytics Indexes
+transactionSchema.index({ store: 1, type: 1, createdAt: -1 }); // Financial Stats
+transactionSchema.index({ store: 1, category: 1, createdAt: -1 }); // Category Stats
 
 const Transaction: Model<ITransaction> = mongoose.model<ITransaction>(
   'Transaction',

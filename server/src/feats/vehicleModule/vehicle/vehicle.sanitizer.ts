@@ -1,14 +1,16 @@
 import { HydratedDocument } from 'mongoose';
 
-import { resolveRef, listSanitizer, storeSanitizer, userSanitizer } from '@/sanitizers/index.js';
-
 import { IVehicle } from './index.js';
+
+import { resolveRef, listSanitizer, storeSanitizer, userSanitizer } from '@/sanitizers/index.js';
 
 /**
  * ----------------- Vehicle -----------------
  * Sanitizes a single vehicle document
  */
-export const vehicleSanitizer = (vehicle: IVehicle | HydratedDocument<IVehicle>) => ({
+export const vehicleSanitizer = (
+  vehicle: IVehicle | HydratedDocument<IVehicle> | Partial<IVehicle>
+) => ({
   id: String(vehicle._id),
   store: resolveRef(vehicle.store ?? null, storeSanitizer),
 
