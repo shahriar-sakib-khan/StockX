@@ -1,60 +1,41 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
+import { vehicleTxController, vehicleTxValidator } from './vehicle-tx/index.js';
 
-import { vehicleTxController, vehicleTxValidator } from './index.js';
+import { storeScope } from '@/feats/storeModule/index.js';
+import { validateRequest } from '@/middlewares/index.js';
 
 const router = Router({ mergeParams: true });
 
 /**
  * @swagger
  * tags:
- *   name: Vehicle
- *   description: Vehicle repair, fuel, and transaction routes
+ * name: Vehicle Transactions
+ * description: Fuel and Repair logging
  */
-
-/**
- * ----------------- All Vehicle Transactions -----------------
- */
-
-/**
- * @route   GET /stores/:storeId/vehicles-txs
- * @desc    Get all transactions for all vehicles in a store
- * @access  Authenticated
- */
-router.get('/vehicle-txs', vehicleTxController.allVehicleTransactions);
-
-/**
- * ----------------- Vehicle Transaction Routes -----------------
- */
-
-/**
- * @route   POST /stores/:storeId/vehicles/:vehicleId/repair
- * @desc    Add a repair record for a vehicle
- * @access  Authenticated
- */
-router.post(
-  '/vehicles/:vehicleId/repair',
-  validateRequest(vehicleTxValidator.repairSchema),
-  vehicleTxController.addRepair
-);
 
 /**
  * @route   POST /stores/:storeId/vehicles/:vehicleId/fuel
- * @desc    Add a fuel expense for a vehicle
- * @access  Authenticated
+ * @desc    Log a fuel expense
+ * @access  Private (Owner, Admin, Manager, Driver)
  */
 router.post(
   '/vehicles/:vehicleId/fuel',
-  validateRequest(vehicleTxValidator.fuelSchema),
+  storeScope(['owner', 'admin', 'manager', 'driver']),
+  validateRequest(vehicleTxValidator.vehicleTxSchema),
   vehicleTxController.addFuel
 );
 
 /**
- * @route   GET /stores/:storeId/vehicles/:vehicleId/txs
- * @desc    Get all transactions for a vehicle
- * @access  Authenticated
+ * @route   POST /stores/:storeId/vehicles/:vehicleId/repair
+ * @desc    Log a repair expense
+ * @access  Private (Owner, Admin, Manager)
  */
-router.get('/vehicles/:vehicleId/txs', vehicleTxController.singleVehicleTransactions);
+router.post(
+  '/vehicles/:vehicleId/repair',
+  storeScope(['owner', 'admin', 'manager']),
+  validateRequest(vehicleTxValidator.vehicleTxSchema),
+  vehicleTxController.addRepair
+);
 
 export default router;

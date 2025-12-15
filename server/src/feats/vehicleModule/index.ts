@@ -1,5 +1,5 @@
 /**
- * ----------------- Vehicle Exports -----------------
+ * ----------------- Vehicle Logic -----------------
  */
 export {
   Vehicle,
@@ -11,14 +11,14 @@ export {
 } from './vehicle/index.js';
 
 /**
- * ----------------- Transaction Exports -----------------
+ * ----------------- Cargo Logic -----------------
  */
-export {
-  vehicleTxConstants,
-  vehicleTxController,
-  vehicleTxService,
-  vehicleTxValidator,
-} from './vehicle-tx/index.js';
+export { cargoController, cargoService, cargoValidator } from './cargo/index.js';
+
+/**
+ * ----------------- Vehicle TX Logic -----------------
+ */
+export { vehicleTxController, vehicleTxService, vehicleTxValidator } from './vehicle-tx/index.js';
 
 /**
  * ----------------- Router Exports -----------------

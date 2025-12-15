@@ -1,6 +1,7 @@
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 
-import { Regulator } from '@/feats/regulatorModule/index.js';
+import { Regulator } from '@/feats/productModule/index.js';
+import { logger } from '@/utils';
 
 /**
  * ----------------- Default Brands List -----------------
@@ -20,18 +21,15 @@ const defaultRegulators = [
   },
 ];
 
-/**
- * @function seedLocalRegulators
- * @description
- * Seeds the Regulator collection with default regulators.
- * @param {string} userId - The ID of the user who created the store.
- * @param {string} storeId - The ID of the store to seed the regulators for.
- * @returns {Promise<void>} A promise that resolves when the regulators are seeded.
- */
-const seedLocalRegulators = async (userId: string, storeId: string): Promise<void> => {
-  const count = await Regulator.countDocuments({ store: storeId });
+const seedLocalRegulators = async (
+  userId: string,
+  storeId: string,
+  session?: ClientSession
+): Promise<void> => {
+  const count = await Regulator.countDocuments({ store: storeId }).session(session || null);
+
   if (count === defaultRegulators.length) {
-    console.log('[Seed] Regulator collection already seeded.');
+    logger.info('[Seed] Regulators already seeded. Skipping regulator seeding.');
     return;
   }
 
@@ -43,10 +41,10 @@ const seedLocalRegulators = async (userId: string, storeId: string): Promise<voi
     store: new Types.ObjectId(storeId),
   }));
 
-  await Regulator.deleteMany({ store: storeId });
-  await Regulator.insertMany(regulatorsToInsert);
+  await Regulator.deleteMany({ store: storeId }, { session });
+  await Regulator.insertMany(regulatorsToInsert, { session });
 
-  console.log('[Seed] Inserted default Regulators.');
+  logger.info(`[Seed] ✅ Seeded ${regulatorsToInsert.length} regulators for store ${storeId}.`);
 };
 
 export default seedLocalRegulators;

@@ -1,25 +1,14 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 
-import { Cylinder } from '@/models/index.js';
+import { LocalBrand, ILocalBrand, localBrandSanitizers, localBrandValidator } from './index.js';
 
-import { LocalBrand, localBrandSanitizers, localBrandValidator } from './index.js';
+import { Errors } from '@/error/index.js';
+import { Cylinder } from '@/feats/cylinderModule/index.js';
+import { logger } from '@/utils/index.js';
 
 /**
- * ----------------- Unified Local Brand Fetch Service -----------------
- *
  * @function getAllLocalBrands
- * @description Fetches local brands for a store with pagination and mode-based detail level.
- *
- * Modes:
- * - 'active'   → Only active brands.
- * - 'all'      → All brands (active + inactive).
- * - 'detailed' → All brands with full detailed data.
- *
- * @param {string} storeId - Store ID.
- * @param {number} page - Page number.
- * @param {number} limit - Items per page.
- * @param {'active' | 'all' | 'detailed'} mode - Mode of retrieval.
- * @returns {Promise<localBrandSanitizers.SanitizedLocalBrands & { total: number }>}
+ * @description Fetches all local brands for a specific store with pagination and filtering.
  */
 export const getAllLocalBrands = async (
   storeId: string,
@@ -53,32 +42,23 @@ export const getAllLocalBrands = async (
   }
 
   return {
-    localBrands: localBrandSanitizers.allLocalBrandSanitizer(localBrands, selectedFields)
-      .localBrands,
+    localBrands: localBrandSanitizers.allLocalBrandSanitizer(
+      localBrands as unknown as ILocalBrand[],
+      selectedFields
+    ).localBrands,
     total,
   };
 };
 
 /**
- * ----------------- Local Brand Selection Service -----------------
- *
  * @function selectLocalBrands
  * @description Updates selected brands and cascades the isActive status to their cylinders.
- *
- * Rules:
- * - Frontend sends only changed brands (optimized).
- * - Bulk updates both brands and cylinders.
- * - Uses lean + bulkWrite for performance.
- *
- * @param {localBrandValidator.LocalBrandSelectionInput} selectedBrands - Array of updated brand objects.
- * @param {string} userId - ID of the user performing the action.
- * @param {string} storeId - ID of the store.
- * @returns {Promise<{ brandUpdatedCount: number; cylinderUpdatedCount: number }>}
  */
 export const selectLocalBrands = async (
   selectedBrands: localBrandValidator.LocalBrandSelectionInput,
   userId: string,
-  storeId: string
+  storeId: string,
+  session?: ClientSession
 ): Promise<{ brandUpdatedCount: number; cylinderUpdatedCount: number }> => {
   if (!selectedBrands?.length) return { brandUpdatedCount: 0, cylinderUpdatedCount: 0 };
 
@@ -96,7 +76,7 @@ export const selectLocalBrands = async (
     },
   }));
 
-  const brandResult = await LocalBrand.bulkWrite(brandBulkOps);
+  const brandResult = await LocalBrand.bulkWrite(brandBulkOps, { session });
 
   // Cascade updates to cylinders for same brand
   const cylinderBulkOps = selectedBrands.map(({ id, isActive }) => ({
@@ -112,7 +92,7 @@ export const selectLocalBrands = async (
     },
   }));
 
-  const cylinderResult = await Cylinder.bulkWrite(cylinderBulkOps);
+  const cylinderResult = await Cylinder.bulkWrite(cylinderBulkOps, { session });
 
   return {
     brandUpdatedCount: brandResult.modifiedCount,
@@ -121,9 +101,62 @@ export const selectLocalBrands = async (
 };
 
 /**
- * ----------------- Default Exports (localBrandService) -----------------
+ * @function updateLocalBrand
+ * @description Allows Store Owner to edit alias name or images of their local brand copy.
  */
+export const updateLocalBrand = async (
+  brandId: string,
+  data: { name?: string; brandImage?: string; cylinderImage?: string },
+  storeId: string,
+  userId: string,
+  session?: ClientSession
+) => {
+  const brand = await LocalBrand.findOneAndUpdate(
+    { _id: brandId, store: storeId },
+    {
+      $set: {
+        ...data,
+        updatedBy: new Types.ObjectId(userId),
+        updatedAt: new Date(),
+      },
+    },
+    { new: true, session }
+  ).lean();
+
+  if (!brand) throw new Errors.NotFoundError('Local Brand not found');
+
+  // Cascade update to Cylinder snapshot data if name/image changed
+  if (data.name || data.cylinderImage) {
+    const updateData: any = {};
+    if (data.name) updateData.brandName = data.name;
+    if (data.cylinderImage) updateData.cylinderImage = data.cylinderImage;
+
+    await Cylinder.updateMany(
+      { brand: brand._id, store: storeId },
+      { $set: updateData },
+      { session }
+    );
+  }
+
+  logger.info(`Local Brand updated: ${brand.name} (${brand._id}) by ${userId}`);
+  return localBrandSanitizers.localBrandSanitizer(brand as unknown as ILocalBrand);
+};
+
+/**
+ * @function removeAllLocalBrands
+ * @description Deletes all local brands for a specific store (Cascading Delete).
+ */
+export const removeAllLocalBrands = async (
+  storeId: string,
+  session?: ClientSession
+): Promise<void> => {
+  const result = await LocalBrand.deleteMany({ store: storeId }, { session });
+  logger.info(`[Cleanup] Deleted ${result.deletedCount} local brands for store ${storeId}`);
+};
+
 export default {
-  getAllLocalBrands, // Get all local brands
-  selectLocalBrands, // Select local brands
+  getAllLocalBrands,
+  selectLocalBrands,
+  updateLocalBrand,
+  removeAllLocalBrands,
 };

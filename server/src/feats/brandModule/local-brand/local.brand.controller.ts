@@ -1,34 +1,12 @@
-/**
- * @module LocalBrandController
- *
- * @description Controller for managing Local Brands and their relationships with Cylinders.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions.js';
-
 import { localBrandService } from './index.js';
+
+import { assertAuth, assertMembership, withTransaction } from '@/common/index.js';
 
 /**
  * ----------------- General Local Brand Controllers -----------------
- *
- * Uses unified service: getAllLocalBrands()
- *
- * Modes:
- * - 'active'   → Only active brands
- * - 'all'      → All brands (active + inactive)
- * - 'detailed' → All brands with full detailed data
- *
- * @swagger
- * parameters:
- *   - in: query
- *     name: mode
- *     schema:
- *       type: string
- *       enum: [active, all, detailed]
- *     description: Filter mode for brands
  */
 export const getAllLocalBrands = async (req: Request, res: Response) => {
   const { storeId } = req.params;
@@ -39,7 +17,7 @@ export const getAllLocalBrands = async (req: Request, res: Response) => {
   const mode =
     req.query.mode === 'active' || req.query.mode === 'detailed' || req.query.mode === 'all'
       ? (req.query.mode as 'active' | 'all' | 'detailed')
-      : 'all'; // fallback to 'all' if invalid mode is given
+      : 'all';
 
   const { localBrands, total } = await localBrandService.getAllLocalBrands(
     storeId,
@@ -56,15 +34,6 @@ export const getAllLocalBrands = async (req: Request, res: Response) => {
   });
 };
 
-/**
- * ----------------- Local Brand Selection Controller -----------------
- *
- * @description
- * Updates the active status of local brands and synchronizes their related cylinders.
- *
- * @route PATCH /stores/:storeId/local-brands/select
- * @body  [{ id: string, isActive: boolean }]
- */
 export const selectLocalBrands = async (req: Request, res: Response) => {
   assertAuth(req);
   const { userId } = req.user;
@@ -86,10 +55,24 @@ export const selectLocalBrands = async (req: Request, res: Response) => {
   });
 };
 
-/**
- * ----------------- Default Exports : localBrandController -----------------
- */
+export const updateLocalBrand = async (req: Request, res: Response) => {
+  assertMembership(req);
+  const { userId } = req.user;
+  const { storeId, brandId } = req.params;
+
+  const brand = await withTransaction(async session => {
+    return await localBrandService.updateLocalBrand(brandId, req.body, storeId, userId, session);
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Local brand updated successfully',
+    data: { brand },
+  });
+};
+
 export default {
   getAllLocalBrands,
   selectLocalBrands,
+  updateLocalBrand,
 };

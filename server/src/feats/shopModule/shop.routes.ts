@@ -1,59 +1,35 @@
 import { Router } from 'express';
 
-import { validateRequest } from '@/middlewares/index.js';
-
 import { shopValidator, shopController } from './shop/index.js';
+
+import { storeScope } from '@/feats/storeModule/index.js';
+import { validateRequest } from '@/middlewares/index.js';
 
 const router = Router({ mergeParams: true });
 
 /**
  * @swagger
  * tags:
- *   name: Shop
- *   description: Client shop management routes
+ * name: Shop
  */
 
-/**
- * ----------------- Shop CRUD Routes -----------------
- */
+router.post(
+  '/shops',
+  storeScope(['owner', 'admin', 'manager']),
+  validateRequest(shopValidator.createShopSchema),
+  shopController.createShop
+);
 
-/**
- * @route   POST /stores/:storeId/shops
- * @desc    Create a new shop under a store
- * @access  Private
- */
-router.post('/shops', validateRequest(shopValidator.createShopSchema), shopController.createShop);
+router.get('/shops', storeScope([]), shopController.getAllShops);
+router.get('/shops/:shopId', storeScope([]), shopController.getSingleShop);
 
-/**
- * @route   GET /stores/:storeId/shops
- * @desc    Get all shops for a store
- * @access  Private
- */
-router.get('/shops', shopController.getAllShops);
-
-/**
- * @route   GET /stores/:storeId/shops/:shopId
- * @desc    Get a single shop by ID
- * @access  Private
- */
-router.get('/shops/:shopId', shopController.getSingleShop);
-
-/**
- * @route   PATCH /stores/:storeId/shops/:shopId
- * @desc    Update a shop's information
- * @access  Private
- */
 router.patch(
   '/shops/:shopId',
+  storeScope(['owner', 'admin', 'manager']),
   validateRequest(shopValidator.updateShopSchema),
   shopController.updateShop
 );
 
-/**
- * @route   DELETE /stores/:storeId/shops/:shopId
- * @desc    Delete a shop
- * @access  Private
- */
-router.delete('/shops/:shopId', shopController.deleteShop);
+router.delete('/shops/:shopId', storeScope(['owner', 'admin']), shopController.deleteShop);
 
 export default router;

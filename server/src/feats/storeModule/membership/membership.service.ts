@@ -7,10 +7,6 @@ import { Errors } from '@/error/index.js';
 /**
  * @function getMyStoreProfile
  * @description Retrieve the current user's membership profile for a specific store.
- *
- * @param {string} userId - The ID of the user.
- * @param {string} storeId - The ID of the store.
- * @returns {Promise<membershipSanitizers.SanitizedMembership>}
  */
 export const getMyStoreProfile = async (
   userId: string,

@@ -2,10 +2,18 @@ import { Types, ClientSession } from 'mongoose';
 
 import { Membership } from '../index.js';
 
+import { DefaultStoreRoles } from './store.constants.js';
+
 import { Store, IStore, storeValidator, storeSanitizers } from './index.js';
 
 import { generateStoreCode } from '@/common/index.js';
 import { Errors } from '@/error/index.js';
+import { localBrandService } from '@/feats/brandModule/index.js';
+import { cylinderService } from '@/feats/cylinderModule/index.js';
+import { regulatorService, stoveService } from '@/feats/productModule/index.js';
+import { staffService } from '@/feats/staffModule/index.js';
+import { transactionService } from '@/feats/transactionModule/index.js';
+import { vehicleService } from '@/feats/vehicleModule/index.js';
 import { logger } from '@/utils/index.js';
 
 /**
@@ -24,21 +32,13 @@ export const createStore = async (
 
   const storeCode = generateStoreCode();
 
-  const defaultRoles = [
-    { name: 'owner', permissions: ['*'] },
-    { name: 'admin', permissions: ['manage_store', 'assign_roles'] },
-    { name: 'manager', permissions: ['manage_store', 'assign_roles'] },
-    { name: 'staff', permissions: [] },
-    { name: 'driver', permissions: [] },
-  ];
-
   const [store] = await Store.create(
     [
       {
         ...otherProps,
         name,
         storeCode,
-        storeRoles: defaultRoles,
+        storeRoles: DefaultStoreRoles,
         createdBy: new Types.ObjectId(userId),
       },
     ],
@@ -116,20 +116,18 @@ export const getAllStores = async (
   const skip = (page - 1) * limit;
   const userObjectId = new Types.ObjectId(userId);
 
-  // 1. Fetch Owned Stores
-  const ownedStoresDocs = await Store.find({ createdBy: userObjectId }).lean();
+  // OPTIMIZATION: Run independent queries in parallel
+  const [ownedStoresDocs, memberships] = await Promise.all([
+    // 1. Fetch Owned Stores
+    Store.find({ createdBy: userObjectId }).lean(),
+    // 2. Fetch Memberships (Joined)
+    Membership.find({ user: userObjectId, status: 'active' }).select('store storeRole').lean(),
+  ]);
+
   const ownedStores = ownedStoresDocs.map(doc => ({
     doc: doc as unknown as IStore,
     role: 'owner',
   }));
-
-  // 2. Fetch Memberships (Joined)
-  const memberships = await Membership.find({
-    user: userObjectId,
-    status: 'active',
-  })
-    .select('store storeRole')
-    .lean();
 
   const joinedStoreIds = memberships.map(m => m.store);
 
@@ -240,10 +238,23 @@ export const deleteStore = async (
   storeId: string,
   session?: ClientSession
 ): Promise<storeSanitizers.SanitizedStore & { myRole: string }> => {
+  // 1. Delete the Store Document
   const store = await Store.findByIdAndDelete(storeId, { session }).lean();
   if (!store) throw new Errors.NotFoundError('Store not found');
 
+  // 2. Delete Memberships
   await Membership.deleteMany({ store: storeId }, { session });
+
+  // 3. Cascading Delete (Call other services)
+  await vehicleService.removeAllVehicles(storeId, session);
+  await transactionService.removeAllTransactions(storeId, session);
+  await localBrandService.removeAllLocalBrands(storeId, session);
+
+  // Future Implementations:
+  await cylinderService.removeAllCylinders(storeId, session);
+  await stoveService.removeAllStoves(storeId, session);
+  await regulatorService.removeAllRegulators(storeId, session);
+  await staffService.removeAllStaff(storeId, session);
 
   logger.info(`Store deleted: ${store.name} (${storeId})`);
 

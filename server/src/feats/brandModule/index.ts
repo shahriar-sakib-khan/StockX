@@ -5,9 +5,8 @@ export {
   LocalBrand,
   type ILocalBrand,
   localBrandValidator,
-  //   localBrandMiddleware,
   localBrandController,
-  //   localBrandService,
+  localBrandService,
   localBrandSanitizers,
 } from './local-brand/index.js';
 
@@ -18,7 +17,6 @@ export {
   GlobalBrand,
   type IGlobalBrand,
   globalBrandValidator,
-  //   globalBrandMiddleware,
   globalBrandController,
   globalBrandService,
   globalBrandSanitizers,

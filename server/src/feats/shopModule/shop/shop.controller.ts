@@ -1,37 +1,59 @@
-/**
- * @module ShopController
- *
- * @description Controller for managing client shops under a store.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions.js';
-
 import { shopService } from './index.js';
 
-/**
- * ----------------- Create -----------------
- */
+import { assertMembership, withTransaction } from '@/common/index.js';
+
 export const createShop = async (req: Request, res: Response) => {
-  assertAuth(req);
+  assertMembership(req);
   const { userId } = req.user;
   const { storeId } = req.params;
 
-  const shop = await shopService.createShop(req.body, userId, storeId);
+  const shop = await withTransaction(async session => {
+    return await shopService.createShop(req.body, userId, storeId, session);
+  });
 
   res.status(StatusCodes.CREATED).json({
     success: true,
     message: 'Shop created successfully',
-    data: shop,
+    data: { shop },
   });
 };
 
-/**
- * ----------------- Get All -----------------
- */
+export const updateShop = async (req: Request, res: Response) => {
+  assertMembership(req);
+  const { userId } = req.user;
+  const { storeId, shopId } = req.params;
+
+  const shop = await withTransaction(async session => {
+    return await shopService.updateShop(shopId, storeId, userId, req.body, session);
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Shop updated successfully',
+    data: { shop },
+  });
+};
+
+export const deleteShop = async (req: Request, res: Response) => {
+  assertMembership(req);
+  const { storeId, shopId } = req.params;
+
+  const shop = await withTransaction(async session => {
+    return await shopService.deleteShop(shopId, storeId, session);
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Shop deleted successfully',
+    data: { shop },
+  });
+};
+
 export const getAllShops = async (req: Request, res: Response) => {
+  assertMembership(req);
   const { storeId } = req.params;
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Number(req.query.limit) || 20, 100);
@@ -40,54 +62,29 @@ export const getAllShops = async (req: Request, res: Response) => {
 
   res.status(StatusCodes.OK).json({
     success: true,
-    message: `Shops fetched successfully ${shops.length === 0 ? ': No shops found' : ''}`,
-    pagination: { total, page, limit },
-    data: shops,
+    message: 'Shops fetched successfully',
+    meta: { page, limit, total },
+    data: { shops },
   });
 };
 
-/**
- * ----------------- Get Single -----------------
- */
 export const getSingleShop = async (req: Request, res: Response) => {
+  assertMembership(req);
   const { storeId, shopId } = req.params;
-  const shop = await shopService.getShopById(storeId, shopId);
+
+  const shop = await shopService.getShopById(shopId, storeId);
 
   res.status(StatusCodes.OK).json({
     success: true,
     message: 'Shop fetched successfully',
-    data: shop,
+    data: { shop },
   });
 };
 
-/**
- * ----------------- Update -----------------
- */
-export const updateShop = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-  const { storeId, shopId } = req.params;
-  const updated = await shopService.updateShop(req.body, userId, storeId, shopId);
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: 'Shop updated successfully',
-    data: updated,
-  });
+export default {
+  createShop,
+  updateShop,
+  deleteShop,
+  getAllShops,
+  getSingleShop,
 };
-
-/**
- * ----------------- Delete -----------------
- */
-export const deleteShop = async (req: Request, res: Response) => {
-  const { storeId, shopId } = req.params;
-  const deleted = await shopService.deleteShop(storeId, shopId);
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: 'Shop deleted successfully',
-    data: deleted,
-  });
-};
-
-export default { createShop, getAllShops, getSingleShop, updateShop, deleteShop };

@@ -1,156 +1,139 @@
-/**
- * @module vehicle.service
- *
- * @description Services for vehicle management within a store.
- */
+import { Types, ClientSession } from 'mongoose';
 
-import { Types } from 'mongoose';
-
-import { Vehicle, vehicleSanitizers, vehicleValidator } from './index.js';
+import { Vehicle, IVehicle, vehicleSanitizers, vehicleValidator } from './index.js';
 
 import { Errors } from '@/error/index.js';
+import { logger } from '@/utils/index.js';
 
 /**
  * @function createVehicle
- * @description Creates a new vehicle for a store.
- *
- * @param {vehicleValidator.CreateVehicleInput} payload - Vehicle creation data.
- * @param {string} userId - ID of the user creating the vehicle.
- * @param {string} storeId - ID of the store.
- * @returns {Promise<vehicleSanitizers.SanitizedVehicle>} The created vehicle.
+ * @description Create a new vehicle under a specific store.
  */
 export const createVehicle = async (
-  payload: vehicleValidator.CreateVehicleInput,
+  data: vehicleValidator.CreateVehicleInput,
   userId: string,
-  storeId: string
+  storeId: string,
+  session?: ClientSession
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
-  const { regNumber, vehicleBrand, vehicleModel, image } = payload;
-
-  // Ensure unique registration number per store
-  const existingVehicle = await Vehicle.exists({ store: storeId, regNumber });
-  if (existingVehicle) {
-    throw new Errors.BadRequestError(
-      'Vehicle with this registration number already exists in this store'
-    );
+  const existing = await Vehicle.exists({ store: storeId, regNumber: data.regNumber }).session(
+    session || null
+  );
+  if (existing) {
+    throw new Errors.BadRequestError(`Vehicle '${data.regNumber}' already exists in this store`);
   }
 
-  const vehicle = await Vehicle.create({
-    store: new Types.ObjectId(storeId),
-    regNumber,
-    vehicleBrand,
-    vehicleModel,
-    image,
-    totalFuelCost: 0,
-    totalRepairCost: 0,
-    createdBy: new Types.ObjectId(userId),
-  });
+  const [vehicle] = await Vehicle.create(
+    [
+      {
+        ...data,
+        store: new Types.ObjectId(storeId),
+        createdBy: new Types.ObjectId(userId),
+      },
+    ],
+    { session }
+  );
+
+  logger.info(`Vehicle created: ${vehicle.regNumber} (${vehicle._id})`);
 
   return vehicleSanitizers.vehicleSanitizer(vehicle);
 };
 
 /**
  * @function getAllVehicles
- * @description Retrieves all vehicles for a store with pagination.
- *
- * @param {string} storeId - Store ID.
- * @param {number} page - Page number.
- * @param {number} limit - Items per page.
- * @returns {Promise<vehicleSanitizers.SanitizedVehicles & { total: number }>}
+ * @description Get all vehicles for a specific store with pagination.
  */
 export const getAllVehicles = async (
   storeId: string,
   page: number,
   limit: number
-): Promise<vehicleSanitizers.SanitizedVehicles & { total: number }> => {
+): Promise<{ vehicles: Partial<vehicleSanitizers.SanitizedVehicle>[]; total: number }> => {
   const total = await Vehicle.countDocuments({ store: storeId });
-  if (total === 0) return { vehicles: [], total };
-
-  const skip = (page - 1) * limit;
-  const vehicles = await Vehicle.find({ store: storeId }).skip(skip).limit(limit).lean();
+  const vehicles = await Vehicle.find({ store: storeId })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
   return {
-    vehicles: vehicleSanitizers.allVehicleSanitizer(vehicles, [
-      'id',
-      'regNumber',
-      'vehicleBrand',
-      'totalFuelCost',
-      'totalRepairCost',
-    ]).vehicles,
+    vehicles: vehicleSanitizers.allVehicleSanitizer(vehicles as unknown as IVehicle[]).vehicles,
     total,
   };
 };
 
 /**
  * @function getVehicleById
- * @description Retrieves a single vehicle by ID within a store.
- *
- * @param {string} storeId - Store ID.
- * @param {string} vehicleId - Vehicle ID.
- * @returns {Promise<vehicleSanitizers.SanitizedVehicle>} The requested vehicle.
- * @throws {Errors.NotFoundError} If vehicle is not found.
+ * @description Get a vehicle by its ID.
  */
 export const getVehicleById = async (
-  storeId: string,
-  vehicleId: string
+  vehicleId: string,
+  storeId: string
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
   const vehicle = await Vehicle.findOne({ _id: vehicleId, store: storeId }).lean();
   if (!vehicle) throw new Errors.NotFoundError('Vehicle not found');
 
-  return vehicleSanitizers.vehicleSanitizer(vehicle);
+  return vehicleSanitizers.vehicleSanitizer(vehicle as unknown as IVehicle);
 };
 
 /**
  * @function updateVehicle
- * @description Updates a vehicle's details.
- *
- * @param {vehicleValidator.UpdateVehicleInput} payload - Updated vehicle data.
- * @param {string} storeId - Store ID.
- * @param {string} vehicleId - Vehicle ID.
- * @returns {Promise<vehicleSanitizers.SanitizedVehicle>} Updated vehicle.
- * @throws {Errors.NotFoundError} If vehicle is not found.
+ * @description Update a vehicle by its ID.
  */
 export const updateVehicle = async (
-  payload: vehicleValidator.UpdateVehicleInput,
+  vehicleId: string,
   storeId: string,
-  vehicleId: string
+  data: vehicleValidator.UpdateVehicleInput,
+  session?: ClientSession
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
-  const updatedVehicle = await Vehicle.findOneAndUpdate(
+  const vehicle = await Vehicle.findOneAndUpdate(
     { _id: vehicleId, store: storeId },
-    { ...payload, updatedAt: new Date() },
-    { new: true, runValidators: true }
+    { $set: data },
+    { new: true, session, runValidators: true }
   ).lean();
 
-  if (!updatedVehicle) throw new Errors.NotFoundError('Vehicle not found');
+  if (!vehicle) throw new Errors.NotFoundError('Vehicle not found');
 
-  return vehicleSanitizers.vehicleSanitizer(updatedVehicle);
+  logger.info(`Vehicle updated: ${vehicle.regNumber} (${vehicle._id})`);
+
+  return vehicleSanitizers.vehicleSanitizer(vehicle as unknown as IVehicle);
 };
 
 /**
  * @function deleteVehicle
- * @description Deletes a vehicle from a store.
- *
- * @param {string} storeId - Store ID.
- * @param {string} vehicleId - Vehicle ID.
- * @returns {Promise<vehicleSanitizers.SanitizedVehicle>} Deleted vehicle.
- * @throws {Errors.NotFoundError} If vehicle is not found.
+ * @description Delete a vehicle by its ID.
  */
 export const deleteVehicle = async (
+  vehicleId: string,
   storeId: string,
-  vehicleId: string
+  session?: ClientSession
 ): Promise<vehicleSanitizers.SanitizedVehicle> => {
-  const vehicle = await Vehicle.findOneAndDelete({ _id: vehicleId, store: storeId }).lean();
+  const vehicle = await Vehicle.findOneAndDelete(
+    { _id: vehicleId, store: storeId },
+    { session }
+  ).lean();
+
   if (!vehicle) throw new Errors.NotFoundError('Vehicle not found');
 
-  return vehicleSanitizers.vehicleSanitizer(vehicle);
+  logger.info(`Vehicle deleted: ${vehicle.regNumber} (${vehicle._id})`);
+
+  return vehicleSanitizers.vehicleSanitizer(vehicle as unknown as IVehicle);
 };
 
 /**
- * ----------------- Default Exports (vehicleService) -----------------
+ * @function removeAllVehicles
+ * @description Deletes all vehicles for a specific store (Cascading Delete).
  */
+export const removeAllVehicles = async (
+  storeId: string,
+  session?: ClientSession
+): Promise<void> => {
+  const result = await Vehicle.deleteMany({ store: storeId }, { session });
+  logger.info(`[Cleanup] Deleted ${result.deletedCount} vehicles for store ${storeId}`);
+};
+
 export default {
-  createVehicle, // Create a new vehicle
-  getAllVehicles, // Get all vehicles for a store
-  getVehicleById, // Get a single vehicle by ID
-  updateVehicle, // Update vehicle details
-  deleteVehicle, // Delete a vehicle
+  createVehicle,
+  getAllVehicles,
+  getVehicleById,
+  updateVehicle,
+  deleteVehicle,
+  removeAllVehicles,
 };

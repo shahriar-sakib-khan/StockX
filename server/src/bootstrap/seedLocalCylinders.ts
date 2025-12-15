@@ -1,6 +1,7 @@
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 
 import { LocalBrand, Cylinder } from '@/models/index.js';
+import { logger } from '@/utils';
 
 /**
  * @function seedLocalCylinders
@@ -9,24 +10,35 @@ import { LocalBrand, Cylinder } from '@/models/index.js';
  * Deletes existing cylinders first if any exist.
  * Creates one cylinder per (size × regulatorType) combination.
  */
-const seedLocalCylinders = async (userId: string, storeId: string): Promise<void> => {
+const seedLocalCylinders = async (
+  userId: string,
+  storeId: string,
+  session?: ClientSession
+): Promise<void> => {
   const storeObjectId = new Types.ObjectId(storeId);
   const userObjectId = new Types.ObjectId(userId);
 
   try {
+    // Must use session to see brands created in the previous step of this transaction
     const localBrands = await LocalBrand.find({ store: storeObjectId })
       .select('id name sizes regulatorTypes prices cylinderImage cylinderImagePublicId')
+      .session(session || null)
       .lean();
 
     if (!localBrands.length) {
-      console.log('[Seed:Cylinder] ⚠️ No local brands found. Skipping cylinder seeding.');
+      logger.info('[Seed:Cylinder] ⚠️ No local brands found. Skipping cylinder seeding.');
       return;
     }
 
-    const existingCylinderCount = await Cylinder.countDocuments({ store: storeObjectId });
+    const existingCylinderCount = await Cylinder.countDocuments({ store: storeObjectId }).session(
+      session || null
+    );
+
     if (existingCylinderCount > 0) {
-      await Cylinder.deleteMany({ store: storeObjectId });
-      console.log(`[Seed:Cylinder] 🧹 Deleted ${existingCylinderCount} existing cylinders.`);
+      await Cylinder.deleteMany({ store: storeObjectId }, { session });
+      logger.info(
+        `[Seed:Cylinder] 🗑️ Deleted ${existingCylinderCount} existing cylinders for store ${storeId}.`
+      );
     }
 
     const cylindersToInsert: any[] = [];
@@ -64,14 +76,17 @@ const seedLocalCylinders = async (userId: string, storeId: string): Promise<void
     }
 
     if (!cylindersToInsert.length) {
-      console.log('[Seed:Cylinder] ℹ️ No cylinder variants to insert.');
+      logger.info('[Seed:Cylinder] ⚠️ No cylinders to insert after processing brands. Skipping.');
       return;
     }
 
-    await Cylinder.insertMany(cylindersToInsert, { ordered: false });
-    console.log(`[Seed:Cylinder] ✅ Seeded ${cylindersToInsert.length} cylinders successfully.`);
+    await Cylinder.insertMany(cylindersToInsert, { session, ordered: false });
+    logger.info(
+      `[Seed:Cylinder] ✅ Seeded ${cylindersToInsert.length} cylinders for store ${storeId}.`
+    );
   } catch (err) {
-    console.error('[Seed Error:Cylinder] ❌ Cylinder seeding failed:', err);
+    logger.error(`[Seed:Cylinder] ❌ Error seeding local cylinders for store ${storeId}: ${err}`);
+    throw err;
   }
 };
 

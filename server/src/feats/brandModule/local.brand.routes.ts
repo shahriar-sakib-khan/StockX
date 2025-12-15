@@ -2,42 +2,43 @@ import { Router } from 'express';
 
 import { localBrandController } from './index.js';
 
-/**
- * @swagger
- * tags:
- *   name: LocalBrand
- *   description: Local brand management and brand-cylinder linkage
- */
+import { storeScope } from '@/feats/storeModule/index.js';
 
 const router = Router({ mergeParams: true });
 
 /**
- * ----------------- General Local Brand Routes -----------------
+ * @swagger
+ * tags:
+ * name: LocalBrand
  */
 
 /**
- * @route   GET /stores/:storeId/brands?page=1&limit=20&mode=active|all|detailed
- * @desc    Get all local brands in a store with optional mode.
- * @query   page (optional) - number (default: 1)
- * @query   limit (optional) - number (default: 20)
- * @query   mode - string ('active' | 'all' | 'detailed')
- * @access  Authenticated
+ * @route   GET /stores/:storeId/brands
+ * @desc    Get all local brands for a store (Active/All/Detailed modes)
+ * @access  Public
  */
 router.get('/brands', localBrandController.getAllLocalBrands);
 
 /**
- * ----------------- Local Brand Selection Routes -----------------
- */
-
-/**
  * @route   PATCH /stores/:storeId/brands/select
- * @desc    Update active/inactive status of local brands and sync with related cylinders.
- * @body    [{ id: string, isActive: boolean }]
- * @access  Authenticated
+ * @desc    Select/Deselect local brands for the store
+ * @access  Private (Owner, Manager)
  */
-router.patch('/brands/select', localBrandController.selectLocalBrands);
+router.patch(
+  '/brands/select',
+  storeScope(['owner', 'manager']),
+  localBrandController.selectLocalBrands
+);
 
 /**
- * ----------------- Default Export -----------------
+ * @route   PATCH /stores/:storeId/brands/:brandId
+ * @desc    Update local brand details
+ * @access  Private (Owner, Manager)
  */
+router.patch(
+  '/brands/:brandId',
+  storeScope(['owner', 'manager']),
+  localBrandController.updateLocalBrand
+);
+
 export default router;

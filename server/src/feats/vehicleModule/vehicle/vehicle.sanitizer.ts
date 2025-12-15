@@ -2,42 +2,29 @@ import { HydratedDocument } from 'mongoose';
 
 import { IVehicle } from './index.js';
 
-import { resolveRef, listSanitizer, storeSanitizer, userSanitizer } from '@/sanitizers/index.js';
+import { listSanitizer, resolveRef, userSanitizer, storeSanitizer } from '@/sanitizers/index.js';
 
-/**
- * ----------------- Vehicle -----------------
- * Sanitizes a single vehicle document
- */
-export const vehicleSanitizer = (
-  vehicle: IVehicle | HydratedDocument<IVehicle> | Partial<IVehicle>
-) => ({
-  id: String(vehicle._id),
-  store: resolveRef(vehicle.store ?? null, storeSanitizer),
+export const vehicleSanitizer = (doc: IVehicle | HydratedDocument<IVehicle>) => ({
+  id: String(doc._id),
+  store: resolveRef(doc.store, storeSanitizer),
+  regNumber: doc.regNumber,
+  vehicleBrand: doc.vehicleBrand || null,
+  vehicleModel: doc.vehicleModel || null,
+  image: doc.image || null,
 
-  regNumber: vehicle.regNumber,
-  vehicleBrand: vehicle.vehicleBrand ?? null,
-  vehicleModel: vehicle.vehicleModel ?? null,
-  image: vehicle.image ?? null,
+  totalFuelCost: doc.totalFuelCost,
+  totalRepairCost: doc.totalRepairCost,
 
-  totalFuelCost: vehicle.totalFuelCost,
-  totalRepairCost: vehicle.totalRepairCost,
-
-  createdBy: resolveRef(vehicle.createdBy, userSanitizer),
-  createdAt: vehicle.createdAt,
-  updatedAt: vehicle.updatedAt,
+  createdBy: resolveRef(doc.createdBy, userSanitizer),
+  createdAt: doc.createdAt,
+  updatedAt: doc.updatedAt,
 });
 
 export type SanitizedVehicle = ReturnType<typeof vehicleSanitizer>;
 
-/**
- * ----------------- Vehicle List -----------------
- * Sanitizes an array of vehicles with optional field selection
- */
 export const allVehicleSanitizer = (
-  vehicles: IVehicle[] | HydratedDocument<IVehicle>[],
+  docs: IVehicle[] | HydratedDocument<IVehicle>[],
   fields?: (keyof SanitizedVehicle)[]
 ) => ({
-  vehicles: listSanitizer(vehicles, vehicleSanitizer, fields),
+  vehicles: listSanitizer(docs, vehicleSanitizer, fields),
 });
-
-export type SanitizedVehicles = ReturnType<typeof allVehicleSanitizer>;

@@ -1,209 +1,126 @@
-import { Types } from 'mongoose';
+import { ClientSession, Types, AnyBulkWriteOperation } from 'mongoose';
+
+import { Cylinder, cylinderSanitizers, ICylinder } from './index.js';
 
 import { Errors } from '@/error/index.js';
 
-import { Cylinder, cylinderSanitizers } from './index.js';
-
-/** ----------------- Cylinder Inventory Service ----------------- */
-
 /**
- * ----------------- Unified Cylinder Inventory Fetch Service -----------------
- *
- * @function getCylinderInventory
- * @description Fetch cylinder inventory for a store with mode-based detail level.
- *
- * Modes:
- * - 'active'   → Only active cylinders.
- * - 'all'      → All cylinders (active + inactive).
- * - 'detailed' → All fields with no filtering.
- *
- * @param {string} storeId - Store ID.
- * @param {number} size - Cylinder size.
- * @param {number} regulatorType - Regulator type.
- * @param {'active' | 'all' | 'detailed'} mode - Detail mode.
- * @returns {Promise<cylinderSanitizers.SanitizedCylinders>}
+ * @function getCylindersByMode
+ * @description Flexible fetching for inventory screens with specific projections and criteria.
  */
-export const getCylinderInventory = async (
+export const getCylindersByMode = async (
   storeId: string,
-  size: number,
-  regulatorType: number,
-  mode: 'active' | 'all' | 'detailed' = 'active'
-): Promise<cylinderSanitizers.SanitizedCylinders> => {
-  if (!size) throw new Errors.BadRequestError('Size is required');
-  if (!regulatorType) throw new Errors.BadRequestError('Regulator type is required');
-
-  // Base filter
+  mode: 'all' | 'active' | 'all-detailed' | 'active-detailed' = 'active',
+  size: number = 12,
+  regulatorType: number = 22
+) => {
   const filter: any = {
     store: new Types.ObjectId(storeId),
-    size,
-    regulatorType,
+    size: size,
+    regulatorType: regulatorType,
   };
 
-  // Mode-based filter
-  if (mode === 'active') filter.isActive = true;
-
-  // Query
-  const cylinders = await Cylinder.find(filter).lean();
-
-  // Mode-based field selection
-  let selectedFields: (keyof cylinderSanitizers.SanitizedCylinder)[] | undefined = undefined;
-
-  switch (mode) {
-    case 'active':
-      selectedFields = [
-        'id',
-        'sku',
-        'brandName',
-        'cylinderImage',
-        'price',
-        'fullCount',
-        'emptyCount',
-        'defectedCount',
-      ];
-      break;
-
-    case 'all':
-      selectedFields = [
-        'id',
-        'sku',
-        'brandName',
-        'cylinderImage',
-        'price',
-        'fullCount',
-        'emptyCount',
-        'defectedCount',
-        'isActive',
-      ];
-      break;
-
-    case 'detailed':
-      // return full detailed object → no selection
-      selectedFields = undefined;
-      break;
+  // 1. Filter Logic
+  if (mode.startsWith('active')) {
+    filter.isActive = true;
   }
 
-  return {
-    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, selectedFields).cylinders,
-  };
-};
-
-/** ----------------- General Cylinder Services ----------------- */
-
-/**
- * @function getAllCylinders
- * @description Fetches cylinders for a store with pagination and mode-based detail level.
- *
- * Modes:
- * - 'active'   → Only active cylinders.
- * - 'all'      → All cylinders (active + inactive).
- * - 'detailed' → All cylinders with full detailed data.
- *
- * @param {string} storeId - Store ID.
- * @param {number} page - Page number.
- * @param {number} limit - Number of items per page.
- * @param {'active' | 'all' | 'detailed'} mode - Mode of retrieval.
- * @returns {Promise<cylinderSanitizers.SanitizedCylinders & { total: number }>} Paginated cylinder data.
- */
-export const getAllCylinders = async (
-  storeId: string,
-  page: number,
-  limit: number,
-  mode: 'active' | 'all' | 'detailed' = 'all'
-): Promise<cylinderSanitizers.SanitizedCylinders & { total: number }> => {
-  const filter: any = { store: new Types.ObjectId(storeId) };
-  if (mode === 'active') filter.isActive = true;
-
-  const total: number = await Cylinder.countDocuments(filter);
-  if (total === 0) return { cylinders: [], total };
-
-  const skip: number = (page - 1) * limit;
-
-  const cylinders = await Cylinder.find(filter).skip(skip).limit(limit).lean();
-
-  // Field selection based on mode
-  let selectedFields: (keyof cylinderSanitizers.SanitizedCylinder)[] | undefined;
-
-  switch (mode) {
-    case 'active':
-      selectedFields = [
-        'id',
-        'sku',
-        'brandName',
-        'price',
-        'fullCount',
-        'emptyCount',
-        'defectedCount',
-      ];
-      break;
-
-    case 'all':
-      selectedFields = [
-        'id',
-        'sku',
-        'brandName',
-        'cylinderImage',
-        'price',
-        'fullCount',
-        'emptyCount',
-        'defectedCount',
-        'isActive',
-      ];
-      break;
-
-    case 'detailed':
-      selectedFields = undefined; // return all fields
-      break;
+  // 2. Projection Logic
+  let projection = '';
+  if (!mode.includes('detailed')) {
+    projection = 'brandName size color price fullCount emptyCount defectedCount isActive';
   }
 
-  return {
-    cylinders: cylinderSanitizers.allCylinderSanitizer(cylinders, selectedFields).cylinders,
-    total,
-  };
+  const cylinders = await Cylinder.find(filter).select(projection).lean();
+
+  return cylinderSanitizers.allCylinderSanitizer(cylinders as unknown as ICylinder[]).cylinders;
 };
 
 /**
- * @function updateCylinderPrice
- * @description Bulk update price of cylinders in a store filtered by size and regulator type.
- *
- * @param {string} storeId - The ID of the store.
- * @param {number} size - Cylinder size to filter by.
- * @param {number} regulatorType - Regulator type to filter by.
- * @param {number} price - New price to set.
- * @returns {Promise<{ modifiedCount: number }>} Number of updated cylinders.
+ * @function bulkUpdatePrices
+ * @description Updates prices for multiple cylinder documents within a store.
  */
-export const updateCylinderPrice = async (
-  userData: any,
-  size: number,
-  regulatorType: number,
+export const bulkUpdatePrices = async (
   storeId: string,
-  userId: string
-): Promise<cylinderSanitizers.SanitizedCylinder> => {
-  const { id, price } = userData;
+  updates: { cylinderId: string; price: number }[],
+  session?: ClientSession
+) => {
+  if (updates.length === 0) return;
 
-  const cylinder = await Cylinder.findById(id).select('id sku size regulatorType store price');
+  const ops: AnyBulkWriteOperation<ICylinder>[] = updates.map(u => ({
+    updateOne: {
+      filter: {
+        _id: new Types.ObjectId(u.cylinderId),
+        store: new Types.ObjectId(storeId),
+      },
+      update: { $set: { price: u.price } },
+    },
+  }));
 
-  if (!cylinder) throw new Errors.NotFoundError('Cylinder not found.');
-  if (
-    cylinder.size !== size ||
-    cylinder.regulatorType !== regulatorType ||
-    cylinder.store.toString() !== storeId
-  )
-    throw new Errors.BadRequestError('Invalid cylinder.');
+  await Cylinder.bulkWrite(ops, { session });
 
-  cylinder.price = price;
-  cylinder.updatedBy = new Types.ObjectId(userId);
+  // Return updated active list for UI consistency (using defaults)
+  return getCylindersByMode(storeId, 'active');
+};
 
-  await cylinder.save();
+/**
+ * @function selectLocalBrands
+ * @description Bulk Select/Unselect brands (Local Copy) for the store.
+ */
+export const selectLocalBrands = async (
+  storeId: string,
+  selections: { cylinderId: string; isActive: boolean }[],
+  session?: ClientSession
+) => {
+  if (selections.length === 0) return;
 
+  const ops: AnyBulkWriteOperation<ICylinder>[] = selections.map(s => ({
+    updateOne: {
+      filter: {
+        _id: new Types.ObjectId(s.cylinderId),
+        store: new Types.ObjectId(storeId),
+      },
+      update: { $set: { isActive: s.isActive } },
+    },
+  }));
+
+  await Cylinder.bulkWrite(ops, { session });
+
+  // Return all to let user see what is enabled/disabled
+  return getCylindersByMode(storeId, 'all');
+};
+
+/**
+ * @function updatePrice
+ * @description Update the selling price of a single cylinder.
+ */
+export const updatePrice = async (
+  id: string,
+  price: number,
+  storeId: string,
+  session?: ClientSession
+) => {
+  const cylinder = await Cylinder.findOneAndUpdate(
+    { _id: id, store: storeId },
+    { $set: { price } },
+    { new: true, session }
+  );
+  if (!cylinder) throw new Errors.NotFoundError('Cylinder not found');
   return cylinderSanitizers.cylinderSanitizer(cylinder);
 };
 
 /**
- * ----------------- Default Exports (cylinderService) -----------------
+ * @function removeAllCylinders
+ * @description Deletes all cylinders for a specific store.
  */
-export default {
-  getCylinderInventory, // Get active cylinders in a store
+export const removeAllCylinders = async (storeId: string, session?: ClientSession) => {
+  await Cylinder.deleteMany({ store: storeId }, { session });
+};
 
-  getAllCylinders, // Get cylinders for a store
-  updateCylinderPrice, // Update price of cylinders
+export default {
+  getCylindersByMode,
+  bulkUpdatePrices,
+  selectLocalBrands,
+  updatePrice,
+  removeAllCylinders,
 };

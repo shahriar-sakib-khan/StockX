@@ -173,10 +173,20 @@ export const deleteStaff = async (
   return staffSanitizers.staffSanitizer(staff as unknown as IStaff);
 };
 
+/**
+ * @function removeAllStaff
+ * @description Deletes all staff for a specific store (Cascading Delete).
+ */
+export const removeAllStaff = async (storeId: string, session?: ClientSession): Promise<void> => {
+  const result = await Staff.deleteMany({ store: storeId }, { session });
+  logger.info(`[Cleanup] Deleted ${result.deletedCount} staff members for store ${storeId}`);
+};
+
 export default {
   createStaff,
   loginStaff,
   getAllStaffs,
   updateStaff,
   deleteStaff,
+  removeAllStaff,
 };

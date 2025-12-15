@@ -1,6 +1,7 @@
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 
 import { GlobalBrand, LocalBrand } from '@/models/index.js';
+import { logger } from '@/utils';
 
 /**
  * @function seedLocalBrands
@@ -8,22 +9,32 @@ import { GlobalBrand, LocalBrand } from '@/models/index.js';
  * Force re-seeds all local brands for a given store by cloning from global brands.
  * Deletes existing local brands first if any exist.
  */
-const seedLocalBrands = async (userId: string, storeId: string): Promise<void> => {
+const seedLocalBrands = async (
+  userId: string,
+  storeId: string,
+  session?: ClientSession
+): Promise<void> => {
   const storeObjectId = new Types.ObjectId(storeId);
   const userObjectId = new Types.ObjectId(userId);
 
   try {
+    // Read Global Brands
     const globalBrands = await GlobalBrand.find({}).lean();
 
     if (!globalBrands.length) {
-      console.log('[Seed:Brand] ⚠️ No global brands found. Please seed GlobalBrand first.');
+      logger.info('[Seed:Brand] ⚠️ No global brands found. Skipping local brand seeding.');
       return;
     }
 
-    const existingLocalCount = await LocalBrand.countDocuments({ store: storeObjectId });
+    const existingLocalCount = await LocalBrand.countDocuments({ store: storeObjectId }).session(
+      session || null
+    );
+
     if (existingLocalCount > 0) {
-      await LocalBrand.deleteMany({ store: storeObjectId });
-      console.log(`[Seed:Brand] 🧹 Deleted ${existingLocalCount} existing local brands.`);
+      await LocalBrand.deleteMany({ store: storeObjectId }, { session });
+      logger.info(
+        `[Seed:Brand] 🗑️ Deleted ${existingLocalCount} existing local brands for store ${storeId}.`
+      );
     }
 
     const localBrandsToInsert = globalBrands.map(gb => ({
@@ -48,12 +59,13 @@ const seedLocalBrands = async (userId: string, storeId: string): Promise<void> =
       selectedBy: userObjectId,
     }));
 
-    await LocalBrand.insertMany(localBrandsToInsert, { ordered: false });
-    console.log(
-      `[Seed:Brand] ✅ Seeded ${localBrandsToInsert.length} local brands for store: ${storeId}`
+    await LocalBrand.insertMany(localBrandsToInsert, { session, ordered: false });
+    logger.info(
+      `[Seed:Brand] ✅ Seeded ${localBrandsToInsert.length} local brands for store ${storeId}.`
     );
   } catch (err) {
-    console.error('[Seed Error:Brand] ❌ Local brand seeding failed:', err);
+    logger.error(`[Seed:Brand] ❌ Error seeding local brands for store ${storeId}: ${err}`);
+    throw err;
   }
 };
 

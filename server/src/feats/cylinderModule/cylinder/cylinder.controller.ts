@@ -1,115 +1,58 @@
-/**
- * @module CylinderController
- *
- * @description Controller for cylinder related operations.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions.js';
-
 import { cylinderService } from './index.js';
 
-/**
- * ----------------- Cylinder Inventory Controllers -----------------
- */
-export const getCylinderInventory = async (req: Request, res: Response) => {
-  const { storeId } = req.params;
+import { assertMembership, withTransaction } from '@/common/index.js';
 
-  // Defaulting to standard domestic 12kg and 22mm regulator
-  const size = Number(req.query.size) || 12;
-  const regulatorType = Number(req.query.regulatorType) || 22;
-  const mode =
-    req.query.mode === 'active' || req.query.mode === 'detailed' || req.query.mode === 'all'
-      ? (req.query.mode as 'active' | 'all' | 'detailed')
-      : 'all'; // fallback to 'all' if invalid mode is given
+export const getInventory = async (req: Request, res: Response) => {
+  assertMembership(req);
+  // Validated by Zod, safe to cast or access
+  const { mode, size, regulatorType } = req.query as any;
 
-  const { cylinders } = await cylinderService.getCylinderInventory(
-    storeId,
-    size,
-    regulatorType,
-    mode
+  const result = await cylinderService.getCylindersByMode(
+    req.params.storeId,
+    mode,
+    Number(size),
+    Number(regulatorType)
   );
 
   res.status(StatusCodes.OK).json({
     success: true,
-    message: `Cylinder inventory fetched successfully ${cylinders.length === 0 ? ': No Active cylinders' : ''}`,
-    data: cylinders,
+    data: result,
   });
 };
 
-/**
- * ----------------- General Cylinder Controllers -----------------
- *
- * Uses unified service: getAllCylinders()
- *
- * Modes:
- * - 'active'   → Only active cylinders.
- * - 'all'      → All cylinders (active + inactive).
- * - 'detailed' → All cylinders with full detailed data.
- *
- * @swagger
- * parameters:
- *   - in: query
- *     name: mode
- *     schema:
- *       type: string
- *       enum: [active, all, detailed]
- *     description: Filter mode for cylinders
- */
-export const getAllCylinders = async (req: Request, res: Response) => {
-  const { storeId } = req.params;
+export const bulkUpdatePrices = async (req: Request, res: Response) => {
+  assertMembership(req);
 
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const mode =
-    req.query.mode === 'active' || req.query.mode === 'detailed' || req.query.mode === 'all'
-      ? (req.query.mode as 'active' | 'all' | 'detailed')
-      : 'all'; // fallback to 'all' if invalid mode is given
-
-  const { cylinders, total } = await cylinderService.getAllCylinders(storeId, page, limit, mode);
-
-  res.status(StatusCodes.OK).json({
-    success: true,
-    message: `Cylinders fetched successfully in mode : ${mode.toUpperCase()}`,
-    meta: { page, limit, total },
-    data: cylinders,
-  });
-};
-
-/**
- * ----------------- Cylinder Inventory Controllers -----------------
- */
-export const updateCylinderPrice = async (req: Request, res: Response) => {
-  assertAuth(req);
-  const { userId } = req.user;
-  const { storeId } = req.params;
-
-  // Extract and sanitize inputs
-  const size = Number(req.query.size);
-  const regulatorType = Number(req.query.regulatorType);
-
-  const cylinder = await cylinderService.updateCylinderPrice(
-    req.body,
-    size,
-    regulatorType,
-    storeId,
-    userId
+  const result = await withTransaction(session =>
+    cylinderService.bulkUpdatePrices(req.params.storeId, req.body.updates, session)
   );
 
   res.status(StatusCodes.OK).json({
     success: true,
-    message: `Cylinder price updated successfully.`,
-    data: { cylinder },
+    message: 'Prices updated successfully',
+    data: result,
   });
 };
 
-/**
- * ----------------- Default exports : cylinderController -----------------
- */
+export const selectLocalBrands = async (req: Request, res: Response) => {
+  assertMembership(req);
+
+  const result = await withTransaction(session =>
+    cylinderService.selectLocalBrands(req.params.storeId, req.body.selections, session)
+  );
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Brand selections updated successfully',
+    data: result,
+  });
+};
+
 export default {
-  getCylinderInventory,
-  getAllCylinders,
-  updateCylinderPrice,
+  getInventory,
+  bulkUpdatePrices,
+  selectLocalBrands,
 };

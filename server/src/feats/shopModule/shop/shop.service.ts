@@ -1,59 +1,64 @@
-/**
- * @module shop.service
- *
- * @description Services for shop management within a store.
- */
+import { Types, ClientSession } from 'mongoose';
 
-import { Types } from 'mongoose';
+import { Shop, IShop, shopSanitizers, shopValidator } from './index.js';
 
 import { Errors } from '@/error/index.js';
-
-import { Shop, shopSanitizers, shopValidator } from './index.js';
+import { logger } from '@/utils/index.js';
 
 /**
- * ----------------- Create Shop -----------------
+ * @function createShop
+ * @description Creates a new shop under a store.
  */
 export const createShop = async (
-  payload: shopValidator.CreateShopInput,
+  data: shopValidator.CreateShopInput,
   userId: string,
-  storeId: string
+  storeId: string,
+  session?: ClientSession
 ): Promise<shopSanitizers.SanitizedShop> => {
-  const { shopName, ownerName, phoneNumber, location, image } = payload;
+  const existing = await Shop.exists({
+    store: storeId,
+    shopName: data.shopName,
+    location: data.location,
+  }).session(session || null);
 
-  const existing = await Shop.exists({ store: storeId, shopName, location });
-  if (existing)
-    throw new Errors.BadRequestError(`Shop with this name already exists at ${location}`);
+  if (existing) {
+    throw new Errors.BadRequestError(`Shop '${data.shopName}' already exists at this location`);
+  }
 
-  const shop = await Shop.create({
-    store: new Types.ObjectId(storeId),
-    shopName,
-    ownerName,
-    phoneNumber,
-    location,
-    image,
-    totalDue: 100,
-    createdBy: new Types.ObjectId(userId),
-  });
+  const [shop] = await Shop.create(
+    [
+      {
+        ...data,
+        store: new Types.ObjectId(storeId),
+        createdBy: new Types.ObjectId(userId),
+        totalDue: 0,
+      },
+    ],
+    { session }
+  );
+
+  logger.info(`Shop created: ${shop.shopName} (${shop._id})`);
 
   return shopSanitizers.shopSanitizer(shop);
 };
 
 /**
- * ----------------- Get All Shops -----------------
+ * @function getAllShops
+ * @description Retrieves all shops for a store with pagination.
  */
 export const getAllShops = async (
   storeId: string,
   page: number,
   limit: number
-): Promise<shopSanitizers.SanitizedShops & { total: number }> => {
+): Promise<{ shops: Partial<shopSanitizers.SanitizedShop>[]; total: number }> => {
   const total = await Shop.countDocuments({ store: storeId });
-  if (total === 0) return { shops: [], total };
-
-  const skip = (page - 1) * limit;
-  const shops = await Shop.find({ store: storeId }).skip(skip).limit(limit).lean();
+  const shops = await Shop.find({ store: storeId })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
   return {
-    shops: shopSanitizers.allShopSanitizer(shops, [
+    shops: shopSanitizers.allShopSanitizer(shops as unknown as IShop[], [
       'id',
       'shopName',
       'location',
@@ -65,59 +70,62 @@ export const getAllShops = async (
 };
 
 /**
- * ----------------- Get Single Shop -----------------
+ * @function getShopById
+ * @description Retrieves a single shop by ID.
  */
-export const getShopById = async (storeId: string, shopId: string) => {
+export const getShopById = async (
+  shopId: string,
+  storeId: string
+): Promise<shopSanitizers.SanitizedShop> => {
   const shop = await Shop.findOne({ _id: shopId, store: storeId }).lean();
+  if (!shop) throw new Errors.NotFoundError('Shop not found');
+
+  return shopSanitizers.shopSanitizer(shop as unknown as IShop);
+};
+
+/**
+ * @function updateShop
+ * @description Updates a shop's details.
+ */
+export const updateShop = async (
+  shopId: string,
+  storeId: string,
+  userId: string,
+  data: shopValidator.UpdateShopInput,
+  session?: ClientSession
+): Promise<shopSanitizers.SanitizedShop> => {
+  const shop = await Shop.findOneAndUpdate(
+    { _id: shopId, store: storeId },
+    {
+      $set: data,
+      updatedBy: new Types.ObjectId(userId),
+    },
+    { new: true, session, runValidators: true }
+  ).lean();
 
   if (!shop) throw new Errors.NotFoundError('Shop not found');
 
-  return shopSanitizers.shopSanitizer(shop);
+  logger.info(`Shop updated: ${shop.shopName} (${shop._id})`);
+
+  return shopSanitizers.shopSanitizer(shop as unknown as IShop);
 };
 
 /**
- * ----------------- Update Shop -----------------
+ * @function deleteShop
+ * @description Deletes a shop from a store.
  */
-export const updateShop = async (
-  payload: shopValidator.UpdateShopInput,
-  userId: string,
+export const deleteShop = async (
+  shopId: string,
   storeId: string,
-  shopId: string
-) => {
-  const { shopName, ownerName, phoneNumber, location, image } = payload;
+  session?: ClientSession
+): Promise<shopSanitizers.SanitizedShop> => {
+  const shop = await Shop.findOneAndDelete({ _id: shopId, store: storeId }, { session }).lean();
 
-  const existing = await Shop.exists({ store: storeId, shopName, location });
-  if (existing)
-    throw new Errors.BadRequestError(`Shop with this name already exists at ${location}`);
+  if (!shop) throw new Errors.NotFoundError('Shop not found');
 
-  const updatedShop = await Shop.findOneAndUpdate(
-    { _id: shopId, store: storeId },
-    {
-      shopName,
-      ownerName,
-      phoneNumber,
-      location,
-      image,
-      updatedBy: new Types.ObjectId(userId),
-      updatedAt: new Date(),
-    },
-    { new: true, runValidators: true }
-  ).lean();
+  logger.info(`Shop deleted: ${shop.shopName} (${shop._id})`);
 
-  if (!updatedShop) throw new Errors.NotFoundError('Shop not found');
-
-  return shopSanitizers.shopSanitizer(updatedShop);
-};
-
-/**
- * ----------------- Delete Shop -----------------
- */
-export const deleteShop = async (storeId: string, shopId: string) => {
-  const deleted = await Shop.findOneAndDelete({ _id: shopId, store: storeId }).lean();
-
-  if (!deleted) throw new Errors.NotFoundError('Shop not found');
-
-  return shopSanitizers.shopSanitizer(deleted);
+  return shopSanitizers.shopSanitizer(shop as unknown as IShop);
 };
 
 export default {

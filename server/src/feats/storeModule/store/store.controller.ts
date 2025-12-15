@@ -4,8 +4,8 @@ import { StatusCodes } from 'http-status-codes';
 import { storeService } from './index.js';
 
 import {
-  seedBaseAccounts,
-  seedBaseTxCategories,
+  // seedBaseAccounts,
+  // seedBaseTxCategories,
   seedLocalBrands,
   seedLocalCylinders,
   seedLocalRegulators,
@@ -21,16 +21,12 @@ export const createStore = async (req: Request, res: Response) => {
   const { userId } = req.user;
 
   const store = await withTransaction(async session => {
-    // 1. Create Store (Service returns store + myRole)
     const newStore = await storeService.createStore(req.body, userId, session);
 
-    // 2. Seed Data
-    await seedBaseAccounts(newStore.id);
-    await seedBaseTxCategories(newStore.id);
-    await seedLocalBrands(userId, newStore.id);
-    await seedLocalCylinders(userId, newStore.id);
-    await seedLocalRegulators(userId, newStore.id);
-    await seedLocalStoves(userId, newStore.id);
+    await seedLocalBrands(userId, newStore.id, session);
+    await seedLocalCylinders(userId, newStore.id, session);
+    await seedLocalRegulators(userId, newStore.id, session);
+    await seedLocalStoves(userId, newStore.id, session);
 
     return newStore;
   });

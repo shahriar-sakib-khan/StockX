@@ -1,42 +1,64 @@
-/**
- * @module VehicleController
- *
- * @description Controller for handling vehicle CRUD operations within a store.
- */
-
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { assertAuth } from '@/common/assertions.js';
-
 import { vehicleService } from './index.js';
 
-/**
- * ----------------- Vehicle Controllers -----------------
- */
+import { assertMembership, withTransaction } from '@/common/index.js';
 
 /**
- * @function createVehicle
- * @description Create a new vehicle for a store
+ * ----------------- Write Operations -----------------
  */
 export const createVehicle = async (req: Request, res: Response) => {
-  assertAuth(req);
+  assertMembership(req); // Security Fix
   const { userId } = req.user;
   const { storeId } = req.params;
 
-  const vehicle = await vehicleService.createVehicle(req.body, userId, storeId);
+  const vehicle = await withTransaction(async session => {
+    return await vehicleService.createVehicle(req.body, userId, storeId, session);
+  });
 
   res.status(StatusCodes.CREATED).json({
+    success: true,
     message: 'Vehicle created successfully',
-    vehicle,
+    data: { vehicle },
+  });
+};
+
+export const updateVehicle = async (req: Request, res: Response) => {
+  assertMembership(req);
+  const { storeId, vehicleId } = req.params;
+
+  const vehicle = await withTransaction(async session => {
+    return await vehicleService.updateVehicle(vehicleId, storeId, req.body, session);
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Vehicle updated successfully',
+    data: { vehicle },
+  });
+};
+
+export const deleteVehicle = async (req: Request, res: Response) => {
+  assertMembership(req);
+  const { storeId, vehicleId } = req.params;
+
+  const vehicle = await withTransaction(async session => {
+    return await vehicleService.deleteVehicle(vehicleId, storeId, session);
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Vehicle deleted successfully',
+    data: { vehicle },
   });
 };
 
 /**
- * @function getAllVehicles
- * @description Get all vehicles for a given store
+ * ----------------- Read Operations -----------------
  */
 export const getAllVehicles = async (req: Request, res: Response) => {
+  assertMembership(req);
   const { storeId } = req.params;
 
   const page = Math.max(Number(req.query.page) || 1, 1);
@@ -45,62 +67,30 @@ export const getAllVehicles = async (req: Request, res: Response) => {
   const { vehicles, total } = await vehicleService.getAllVehicles(storeId, page, limit);
 
   res.status(StatusCodes.OK).json({
-    total,
-    page,
-    limit,
-    vehicles,
+    success: true,
+    message: 'Vehicles fetched successfully',
+    meta: { page, limit, total },
+    data: { vehicles },
   });
 };
 
-/**
- * @function getSingleVehicle
- * @description Get a single vehicle by its ID
- */
 export const getSingleVehicle = async (req: Request, res: Response) => {
+  assertMembership(req);
   const { storeId, vehicleId } = req.params;
 
-  const vehicle = await vehicleService.getVehicleById(storeId, vehicleId);
-
-  res.status(StatusCodes.OK).json({ vehicle });
-};
-
-/**
- * @function updateVehicle
- * @description Update details of a vehicle
- */
-export const updateVehicle = async (req: Request, res: Response) => {
-  const { storeId, vehicleId } = req.params;
-
-  const updatedVehicle = await vehicleService.updateVehicle(req.body, storeId, vehicleId);
+  const vehicle = await vehicleService.getVehicleById(vehicleId, storeId);
 
   res.status(StatusCodes.OK).json({
-    message: 'Vehicle updated successfully',
-    updatedVehicle,
+    success: true,
+    message: 'Vehicle fetched successfully',
+    data: { vehicle },
   });
 };
 
-/**
- * @function deleteVehicle
- * @description Delete a vehicle from the store
- */
-export const deleteVehicle = async (req: Request, res: Response) => {
-  const { storeId, vehicleId } = req.params;
-
-  const deletedVehicle = await vehicleService.deleteVehicle(storeId, vehicleId);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Vehicle deleted successfully',
-    deletedVehicle,
-  });
-};
-
-/**
- * ----------------- Default Exports (vehicleController) -----------------
- */
 export default {
   createVehicle,
-  getAllVehicles,
-  getSingleVehicle,
   updateVehicle,
   deleteVehicle,
+  getAllVehicles,
+  getSingleVehicle,
 };

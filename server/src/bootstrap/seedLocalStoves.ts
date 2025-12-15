@@ -1,6 +1,7 @@
-import { Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 
-import { Stove } from '@/feats/stoveModule/index.js';
+import { Stove } from '@/feats/productModule/index.js';
+import { logger } from '@/utils';
 
 /**
  * ----------------- Default Stoves List -----------------
@@ -20,23 +21,17 @@ const defaultStoves = [
   },
 ];
 
-/**
- * @function seedLocalStoves
- * @description
- * Seeds the Stove collection with default stove entries for a given store.
- * Ensures that existing stove data for the store is replaced with clean defaults.
- *
- * @param {string} userId - The ID of the user creating the stoves.
- * @param {string} storeId - The ID of the store to seed stoves for.
- * @returns {Promise<void>} Resolves when seeding is complete.
- */
-const seedLocalStoves = async (userId: string, storeId: string): Promise<void> => {
-  // Count existing stoves in the store
-  const count = await Stove.countDocuments({ store: storeId });
+const seedLocalStoves = async (
+  userId: string,
+  storeId: string,
+  session?: ClientSession
+): Promise<void> => {
+  // Count existing stoves in the store (using session)
+  const count = await Stove.countDocuments({ store: storeId }).session(session || null);
 
   // If already seeded with the same count, skip re-seeding
   if (count === defaultStoves.length) {
-    console.log('[Seed] Stove collection already seeded.');
+    logger.info('[Seed] Stoves already seeded. Skipping stove seeding.');
     return;
   }
 
@@ -49,13 +44,13 @@ const seedLocalStoves = async (userId: string, storeId: string): Promise<void> =
     store: new Types.ObjectId(storeId),
   }));
 
-  // Remove old stove data for this store (keeps data clean)
-  await Stove.deleteMany({ store: storeId });
+  // Remove old stove data for this store (using session)
+  await Stove.deleteMany({ store: storeId }, { session });
 
-  // Insert new default stove data
-  await Stove.insertMany(stovesToInsert);
+  // Insert new default stove data (using session)
+  await Stove.insertMany(stovesToInsert, { session });
 
-  console.log('[Seed] Inserted default Stoves.');
+  logger.info(`[Seed] ✅ Seeded ${stovesToInsert.length} stoves for store ${storeId}.`);
 };
 
 export default seedLocalStoves;

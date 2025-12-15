@@ -1,79 +1,85 @@
-/**
- * @module Vehicle
- *
- * @description
- * Mongoose schema and model for vehicle management.
- * Tracks vehicle details, costs, and association with stores.
- */
+import { Schema, model, Document, Types } from 'mongoose';
 
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+// Sub-schemas for Mobile Inventory
+const vehicleCylinderSchema = new Schema(
+  {
+    cylinderId: { type: Schema.Types.ObjectId, ref: 'Cylinder', required: true }, // Links to the specific Brand/Size type
+    fullCount: { type: Number, default: 0 },
+    emptyCount: { type: Number, default: 0 },
+    defectedCount: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
 
-/**
- * ----------------- Vehicle Interface -----------------
- */
+const vehicleItemSchema = new Schema(
+  {
+    productId: { type: Schema.Types.ObjectId, required: true }, // Ref to Stove/Regulator
+    quantity: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
 export interface IVehicle extends Document {
   store: Types.ObjectId;
   regNumber: string;
   vehicleBrand?: string;
   vehicleModel?: string;
   image?: string;
+
+  // Mobile Inventory
+  inventory: {
+    cylinders: {
+      cylinderId: Types.ObjectId;
+      fullCount: number;
+      emptyCount: number;
+      defectedCount: number;
+    }[];
+    stoves: {
+      productId: Types.ObjectId;
+      quantity: number;
+    }[];
+    regulators: {
+      productId: Types.ObjectId;
+      quantity: number;
+    }[];
+  };
+
+  // Stats
   totalFuelCost: number;
   totalRepairCost: number;
+
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/**
- * ----------------- Vehicle Schema -----------------
- */
-const vehicleSchema: Schema<IVehicle> = new Schema(
+const vehicleSchema = new Schema<IVehicle>(
   {
-    store: {
-      type: Schema.Types.ObjectId,
-      ref: 'Store',
-      required: true,
-      index: true,
-    },
-    regNumber: {
-      type: String,
-      required: [true, 'Registration number is required'],
-      trim: true,
-    },
+    store: { type: Schema.Types.ObjectId, ref: 'Store', required: true, index: true },
+    regNumber: { type: String, required: true, trim: true },
     vehicleBrand: { type: String, trim: true },
     vehicleModel: { type: String, trim: true },
-    image: { type: String, default: 'vehicleImageUrl' },
+    image: { type: String, trim: true },
+
+    inventory: {
+      cylinders: [vehicleCylinderSchema],
+      stoves: [vehicleItemSchema],
+      regulators: [vehicleItemSchema],
+    },
 
     totalFuelCost: { type: Number, default: 0 },
     totalRepairCost: { type: Number, default: 0 },
 
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-/**
- * ----------------- Indexes -----------------
- * Ensures a vehicle's registration number is unique per store
- */
-// vehicleSchema.index({ store: 1, regNumber: 1 }, { unique: true });
+// Unique registration per store
+vehicleSchema.index({ store: 1, regNumber: 1 }, { unique: true });
 
-/**
- * ----------------- toJSON Method -----------------
- * Cleans up MongoDB internal fields for API responses
- */
-vehicleSchema.methods.toJSON = function (): Partial<IVehicle> {
-  const obj = this.toObject();
-  delete obj.__v;
-  return obj;
-};
-
-/**
- * ----------------- Vehicle Model -----------------
- */
-const Vehicle: Model<IVehicle> = mongoose.model<IVehicle>('Vehicle', vehicleSchema);
+const Vehicle = model<IVehicle>('Vehicle', vehicleSchema);
 export default Vehicle;

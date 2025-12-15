@@ -14,14 +14,12 @@ export const transactionSanitizer = (
   type: transaction.type, // 'income' | 'expense' ...
 
   amount: transaction.amount,
-  quantity: transaction.quantity ?? null,
   paymentMethod: transaction.paymentMethod,
 
   // Context
   vehicle: resolveRef(transaction.vehicleId, vehicleSanitizer),
   staff: resolveRef(transaction.staffId, userSanitizer),
   shopId: transaction.shopId ? String(transaction.shopId) : null,
-  customerId: transaction.customerId ? String(transaction.customerId) : null,
 
   // Metadata
   ref: transaction.ref ?? null,

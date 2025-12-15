@@ -89,6 +89,17 @@ export const TRANSACTION_CONFIG: Record<string, TxConfig> = {
     descriptionTemplate: 'Bulk exchange with shop {{shopName}}: {{quantity}} cyls',
   },
 
+  /* ========================= VEHICLES =========================== */
+  stock_transfer_out: {
+    label: 'Stock Transfer (Out)',
+    type: TransactionType.TRANSFER, // or ADJUSTMENT
+    descriptionTemplate: 'Loaded to Vehicle',
+  },
+  stock_transfer_in: {
+    label: 'Stock Transfer (In)',
+    type: TransactionType.TRANSFER,
+    descriptionTemplate: 'Unloaded from Vehicle',
+  },
   /* ========================== EXPENSES ========================== */
   salary_payment: {
     label: 'Salary Payment',
@@ -142,6 +153,59 @@ export const TRANSACTION_CONFIG: Record<string, TxConfig> = {
     type: TransactionType.INCOME,
     descriptionTemplate: 'Investment by owner {{ownerName}}',
   },
+  invoice_payment_cash: {
+    label: 'Invoice Payment (Cash)',
+    type: TransactionType.INCOME,
+    descriptionTemplate: 'Payment for Invoice #{{invoiceNo}} ({{customerName}})',
+    isSystem: true,
+  },
+  invoice_payment_due: {
+    label: 'Invoice Due Record',
+    type: TransactionType.RECEIVABLE,
+    descriptionTemplate: 'Credit recorded for Invoice #{{invoiceNo}}',
+    isSystem: true,
+  },
+  invoice_repayment: {
+    label: 'Due Collection',
+    type: TransactionType.INCOME,
+    descriptionTemplate: 'Due collection for Invoice #{{invoiceNo}}',
+  },
+  // ... add other expenses as needed
 } as const;
 
 export type TxCategoryType = keyof typeof TRANSACTION_CONFIG;
+
+// =============================================================================
+// Deprecated Account Codes - to be deleted later
+// =============================================================================
+export const AccountCodes = [
+  '1000-CASH',
+  '1100-AR',
+  '1200-INVENTORY-CYLINDERS',
+  '1300-INVENTORY-REGULATORS',
+  '1400-INVENTORY-STOVES',
+  '2000-LIABILITIES',
+  '2100-AP',
+  '3000-EQUITY',
+  '4000-REVENUE-GAS',
+  '4100-REVENUE-REGULATORS',
+  '4200-REVENUE-STOVES',
+  '5000-EXPENSE-SALARY',
+  '5100-EXPENSE-RENT',
+  '5200-EXPENSE-UTILITIES',
+  '5300-EXPENSE-TRANSPORT',
+  '5400-EXPENSE-ENTERTAINMENT',
+  '5500-EXPENSE-MISC',
+] as const;
+
+export type AccountCodeType = (typeof AccountCodes)[number];
+
+export const AccountType = {
+  ASSET: 'asset',
+  LIABILITY: 'liability',
+  EQUITY: 'equity',
+  INCOME: 'income',
+  EXPENSE: 'expense',
+} as const;
+
+export type AccountTypeType = (typeof AccountType)[keyof typeof AccountType];

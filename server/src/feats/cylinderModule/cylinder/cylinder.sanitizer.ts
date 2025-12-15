@@ -1,5 +1,7 @@
 import { HydratedDocument } from 'mongoose';
 
+import { ICylinder } from './index.js';
+
 import {
   resolveRef,
   listSanitizer,
@@ -7,8 +9,6 @@ import {
   localBrandSanitizer,
   userSanitizer,
 } from '@/sanitizers/index.js';
-
-import { ICylinder } from './index.js';
 
 /**
  * ----------------- Cylinder -----------------

@@ -1,19 +1,19 @@
 /**
- * ----------------- Shop Exports -----------------
+ * ----------------- Shop Logic -----------------
  */
 export {
   Shop,
   type IShop,
-  shopValidator,
   shopController,
   shopService,
   shopSanitizers,
+  shopValidator,
 } from './shop/index.js';
 
 /**
- * ----------------- Shop Transaction Exports -----------------
+ * ----------------- Shop Transaction Logic -----------------
  */
-export { shopTxController, shopTxService } from './shop-tx/index.js';
+export { shopTxController, shopTxService, shopTxValidator } from './shop-tx/index.js';
 
 /**
  * ----------------- Router Exports -----------------

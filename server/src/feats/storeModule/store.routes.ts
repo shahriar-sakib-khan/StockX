@@ -41,7 +41,7 @@ router.get('/stores/:storeId', storeScope([]), storeController.singleStore);
  */
 router.patch(
   '/stores/:storeId',
-  storeScope(['owner', 'admin']),
+  storeScope(['owner']),
   validateRequest(storeValidator.updateStoreSchema),
   storeController.updateStore
 );
